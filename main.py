@@ -25,33 +25,38 @@ from nltk.tree import Tree
 
 def syntactic_trigrams(text: str):
     parser = StanfordParser(model_path=os.path.join(jars_path, 'edu/stanford/nlp/models/lexparser/englishPCFG.ser.gz'))
+    tree: Tree = next(parser.raw_parse(text))
+    print('ORIGINAL TREE ------------------------------------------------------------------')
+    tree.pretty_print()
+    positions = tree.treepositions('leaves')
+
+    parent_nodes = {
+        (0,): Tree('ROOT', [])
+    }
+    word_node_positions = list()
+    for pos in positions:
+        leaf_node_pos = pos[:-1]
+        leaf_node = tree[leaf_node_pos]
+        if not leaf_node.label().isalpha(): continue
+        new_pos = leaf_node_pos
+        while len(tree[new_pos]) == 1 and len(new_pos) > 0:
+            new_pos = new_pos[:-1]
+        parent_nodes[new_pos] = leaf_node
+        word_node_positions.append((new_pos, leaf_node))
     
-    def _is_word_node(node: Tree) -> bool:
-        return len(node.leaves()) == 1 and node.height() == 2
+    for w in word_node_positions:
+        parent_pos = w[0][:-1]
+        while parent_pos not in parent_nodes and len(parent_pos) > 0:
+            parent_pos = parent_pos[:-1]
+        if parent_pos not in parent_nodes:
+            continue
+        parent_nodes[parent_pos].append(w[1])
 
-    def _first_word_node(tree: Tree) -> Tree | None:
-        for subtree in tree:
-            if type(subtree) is not Tree: continue
-            if _is_word_node(subtree): return subtree
-            else:
-                recursion = _first_word_node(subtree)
-                if recursion: return recursion
-        return None
-
-    #def _build_trigrams(tree: Tree, trigrams: dict[Tree, int]):
-    #    for subtree in tree:
-
-    filtered = [
-        line[:-1] for line in str(next(parser.raw_parse(text))).split('\n')
-     if len(line) > 0 and line[-1] == ')']
-    for f in filtered:
-        print(f)
+    print('ADJUSTED TREE ------------------------------------------------------------------')
+    parent_nodes[(0,)].pretty_print()
 
 sentence = 'Use StanfordParser to parse multiple sentences.'
-text = 'Takes multiple sentences as a list where each sentence is a list of words. Each sentence will be automatically tagged with this StanfordParser instance’s tagger. If whitespaces exists inside a token, then the token will be treated as separate tokens.'
-# x = char_trigrams()
-# 
-# print(x)
+text = 'Use StanfordParser to parse multiple sentences. The StandfordParser takes multiple sentences as a list where each sentence is a list of words. Each sentence will be automatically tagged with this StanfordParser instance’s tagger. If whitespaces exists inside a token, then the token will be treated as separate tokens.'
 
 syntactic_trigrams(sentence)
 
