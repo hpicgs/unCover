@@ -1,7 +1,6 @@
 from itertools import chain
-import os
 
-from nltk.parse.corenlp import CoreNLPDependencyParser, CoreNLPServer, DependencyGraph
+from nltk.parse.corenlp import DependencyGraph
 from nltk.tree.tree import Tree
 
 def dep_tree(graph: DependencyGraph):
@@ -56,22 +55,3 @@ def sem_trigrams(tree: Tree) -> dict[tuple, int]:
 
     depth_search(tree, _process_node)
     return trigrams
-
-if __name__ == '__main__':
-    stanford_dir = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        'models',
-        'stanford-corenlp-4.5.1'
-    )
-    jars = (
-       os.path.join(stanford_dir, 'stanford-corenlp-4.5.1.jar'),
-       os.path.join(stanford_dir, 'stanford-corenlp-4.5.1-models.jar'),
-    )
-
-    with CoreNLPServer(*jars):
-        parser = CoreNLPDependencyParser()
-        dep_graph: DependencyGraph = next(parser.raw_parse('Use StanfordParser to parse multiple sentences'))
-        tree = dep_tree(dep_graph)
-        if tree:
-            tree.pretty_print()
-            print(sem_trigrams(tree))
