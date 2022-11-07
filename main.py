@@ -2,7 +2,7 @@ import os
 
 from nltk.parse.corenlp import CoreNLPDependencyParser, CoreNLPServer, DependencyGraph
 
-from trigrams.semantic_trigrams import dep_tree, sem_trigrams
+from trigrams.showcase.dep_colors import print_dep_colors
 
 if __name__ == '__main__':
     from definitions import ROOT_DIR
@@ -15,7 +15,6 @@ if __name__ == '__main__':
     with CoreNLPServer(*jars):
         parser = CoreNLPDependencyParser()
         dep_graph: DependencyGraph = next(parser.raw_parse('Use StanfordParser to parse multiple sentences'))
-        tree = dep_tree(dep_graph)
-        if tree:
-            tree.pretty_print()
-            print(sem_trigrams(tree))
+
+        dep_graph.tree().pretty_print()
+        print_dep_colors(dep_graph)
