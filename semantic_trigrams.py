@@ -41,12 +41,11 @@ def sem_trigrams(tree: Tree) -> dict[tuple, int]:
 
     def _process_node(node):
         if type(node) is not Tree: return
-        for a in node:
+        for n, a in enumerate(node):
             a_label = _str_label(a)
             # horizontal (node, (a, b))
-            for b in node:
-                if b == a: continue
-                tree = (node.label(), (a_label, _str_label(b)))
+            if n < len(node) - 1:
+                tree = (node.label(), frozenset((a_label, _str_label(node[n+1]))))
                 _add_or_increment(tree)
             # vertical (node (a, (c)))
             if type(a) is not Tree: continue
