@@ -7,7 +7,7 @@ from nltk.tree.tree import Tree
 def index_tree(graph: DependencyGraph):
     def _tree(address: int):
         node = graph.get_by_address(address)
-        tag = str(address)
+        tag = str(node['address'])
         deps = sorted(chain.from_iterable(node['deps'].values()))
         if deps:
             return Tree(tag, [_tree(dep) for dep in deps])
@@ -18,7 +18,7 @@ def index_tree(graph: DependencyGraph):
     if not node: return None
 
     deps = sorted(chain.from_iterable(node['deps'].values()))
-    return Tree('0', [_tree(dep) for dep in deps])
+    return Tree(str(node['address']), [_tree(dep) for dep in deps])
 
 def color_string(text: str, hsv: tuple[float, float, float]):
     rgb = colorsys.hsv_to_rgb(*hsv)
@@ -33,7 +33,9 @@ def print_dep_colors(dep_graph: DependencyGraph):
     tree = index_tree(dep_graph)
     if not tree: return
 
-    colors: dict[int, tuple[float, float, float]] = { 1: (0, 0, 1) }
+    colors: dict[int, tuple[float, float, float]] = {
+        dep_graph.root['address']: (0, 0, 1)
+    }
 
     def _find_colors(tree: Tree, hue_range: tuple[float, float] = (0, 1), sat: float = 0.5, decline: float = 1):
         left, right = hue_range
@@ -46,7 +48,7 @@ def print_dep_colors(dep_graph: DependencyGraph):
             if type(c) is Tree:
                 _find_colors(c, (l, r), sat * decline)
 
-    _find_colors(tree)
+    _find_colors(tree, decline=0.7)
     print(' '.join([
         color_string(dep_graph.get_by_address(i)['word'], colors[i])
     for i in range(1, len(colors) + 1)]))
