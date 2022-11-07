@@ -1,0 +1,52 @@
+import colorsys
+from itertools import chain
+
+from nltk.parse.dependencygraph import DependencyGraph
+from nltk.tree.tree import Tree
+
+def index_tree(graph: DependencyGraph):
+    def _tree(address: int):
+        node = graph.get_by_address(address)
+        tag = str(address)
+        deps = sorted(chain.from_iterable(node['deps'].values()))
+        if deps:
+            return Tree(tag, [_tree(dep) for dep in deps])
+        else:
+            return tag
+
+    node = graph.root
+    if not node: return None
+
+    deps = sorted(chain.from_iterable(node['deps'].values()))
+    return Tree('0', [_tree(dep) for dep in deps])
+
+def color_string(text: str, hsv: tuple[float, float, float]):
+    rgb = colorsys.hsv_to_rgb(*hsv)
+    rgb = [int(c * 255) for c in rgb]
+    return ''.join([
+        f'\033[38;2;{rgb[0]};{rgb[1]};{rgb[2]}m',
+        text,
+        '\033[0m'
+    ])
+
+def print_dep_colors(dep_graph: DependencyGraph):
+    tree = index_tree(dep_graph)
+    if not tree: return
+
+    colors: dict[int, tuple[float, float, float]] = { 1: (0, 0, 1) }
+
+    def _find_colors(tree: Tree, hue_range: tuple[float, float] = (0, 1), sat: float = 0.5, decline: float = 1):
+        left, right = hue_range
+        interval = float(right - left) / len(tree)
+        for n, c in enumerate(tree):
+            idx = int(c.label() if type(c) is Tree else c)
+            l = left + interval * n
+            r = l + interval
+            colors[idx] = ((l + r) / 2, sat, 1)
+            if type(c) is Tree:
+                _find_colors(c, (l, r), sat * decline)
+
+    _find_colors(tree)
+    print(' '.join([
+        color_string(dep_graph.get_by_address(i)['word'], colors[i])
+    for i in range(1, len(colors) + 1)]))
