@@ -35,16 +35,16 @@ def print_dep_colors(dep_graph: DependencyGraph):
 
     colors: dict[int, tuple[float, float, float]] = { 1: (0, 0, 1) }
 
-    def _find_colors(tree: Tree, hue_range: tuple[float, float] = (0, 1)):
+    def _find_colors(tree: Tree, hue_range: tuple[float, float] = (0, 1), sat: float = 0.5, decline: float = 1):
         left, right = hue_range
         interval = float(right - left) / len(tree)
         for n, c in enumerate(tree):
             idx = int(c.label() if type(c) is Tree else c)
             l = left + interval * n
             r = l + interval
-            colors[idx] = ((l + r) / 2, 0.5, 1)
+            colors[idx] = ((l + r) / 2, sat, 1)
             if type(c) is Tree:
-                _find_colors(c, (l, r))
+                _find_colors(c, (l, r), sat * decline)
 
     _find_colors(tree)
     print(' '.join([
