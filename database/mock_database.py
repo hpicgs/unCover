@@ -5,7 +5,7 @@ import yaml
 class DatabaseAuthorship:
     @staticmethod
     def __write_data(data):
-        with open(DATABASE_AUTHORS_PATH, "w") as mock_db:
+        with open(DATABASE_AUTHORS_PATH, "a") as mock_db:
             yaml.dump(data, mock_db, default_flow_style=False)
     
 
@@ -21,7 +21,8 @@ class DatabaseAuthorship:
     @staticmethod
     def insert_article(text, source, author):
         data = DatabaseAuthorship.__get_data()
-        if data == []:
+        if data == [] or data is None:
+            data = []
             data.append({"source":source, "text":text, "author":author})
             DatabaseAuthorship.__write_data(data)
         elif not any([source == article["source"] for article in data]):
