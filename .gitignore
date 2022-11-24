@@ -3,3 +3,4 @@ models
 database/.mock-authors.yaml
 geckodriver.log
 __pycache__
+*.txt

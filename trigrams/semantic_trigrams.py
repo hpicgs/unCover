@@ -27,8 +27,7 @@ def depth_search(tree: Tree, fun, is_root: bool = True):
         if type(subtree) is not Tree: continue
         depth_search(subtree, fun, False)
 
-def sem_trigrams(tree: Tree) -> dict[tuple, int]:
-    trigrams = dict[tuple, int]()
+def add_sem_trigrams(tree: Tree, trigrams: dict[tuple, int]):
     def _add_or_increment(tree: tuple):
         if tree in trigrams:
             trigrams[tree] += 1
@@ -54,4 +53,3 @@ def sem_trigrams(tree: Tree) -> dict[tuple, int]:
                 _add_or_increment(tree)
 
     depth_search(tree, _process_node)
-    return trigrams
