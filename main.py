@@ -1,20 +1,26 @@
-import os
+import argparse
 
-from nltk.parse.corenlp import CoreNLPDependencyParser, CoreNLPServer, DependencyGraph
+from nltk.parse.corenlp import CoreNLPDependencyParser, CoreNLPServer
 
-from trigrams.showcase.dep_colors import print_dep_colors
+from definitions import STANFORD_JARS
+from trigrams.char_trigrams import char_trigrams
+from trigrams.logistic_regression import trigram_distribution
+from trigrams.semantic_trigrams import sem_trigrams
 
 if __name__ == '__main__':
-    from definitions import ROOT_DIR
-    stanford_dir = os.path.join(ROOT_DIR, 'models', 'stanford-corenlp-4.5.1')
-    jars = (
-       os.path.join(stanford_dir, 'stanford-corenlp-4.5.1.jar'),
-       os.path.join(stanford_dir, 'stanford-corenlp-4.5.1-models.jar'),
-    )
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('text_files', type=str, nargs='*')
+    args = argparser.parse_args()
 
-    with CoreNLPServer(*jars):
+    texts = list[str]()
+    for text_file in args.text_files:
+        with open(text_file, 'r') as fp:
+            texts.append(fp.read())
+
+    char_grams = [char_trigrams(text) for text in texts]
+    with CoreNLPServer(*STANFORD_JARS):
         parser = CoreNLPDependencyParser()
-        dep_graph: DependencyGraph = next(parser.raw_parse('Use StanfordParser to parse multiple sentences'))
+        sem_grams = [sem_trigrams(text, parser) for text in texts]
 
-        dep_graph.tree().pretty_print()
-        print_dep_colors(dep_graph)
+    print(trigram_distribution(sem_grams))
+    print(trigram_distribution(char_grams))
