@@ -3,9 +3,9 @@ import argparse
 from nltk.parse.corenlp import CoreNLPDependencyParser, CoreNLPServer
 
 from definitions import STANFORD_JARS
-from trigrams.char_trigrams import char_trigrams
-from trigrams.logistic_regression import trigram_distribution
-from trigrams.semantic_trigrams import sem_trigrams
+from stylometry.char_trigrams import char_trigrams
+from stylometry.logistic_regression import trigram_distribution
+from stylometry.semantic_trigrams import sem_trigrams
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
