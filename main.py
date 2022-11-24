@@ -1,40 +1,26 @@
-import os
-import sys
+import argparse
 
 from nltk.parse.corenlp import CoreNLPDependencyParser, CoreNLPServer
-from nltk.parse.dependencygraph import DependencyGraph
-from nltk.tokenize import sent_tokenize
 
-from nlp.helpers import normalize
+from definitions import STANFORD_JARS
 from trigrams.char_trigrams import char_trigrams
 from trigrams.logistic_regression import trigram_distribution
-from trigrams.semantic_trigrams import dep_tree, get_text, sem_trigrams
+from trigrams.semantic_trigrams import sem_trigrams
 
 if __name__ == '__main__':
-    from definitions import ROOT_DIR
-    stanford_dir = os.path.join(ROOT_DIR, 'models', 'stanford-corenlp-4.5.1')
-    jars = (
-       os.path.join(stanford_dir, 'stanford-corenlp-4.5.1.jar'),
-       os.path.join(stanford_dir, 'stanford-corenlp-4.5.1-models.jar'),
-    )
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('text_files', type=str, nargs='*')
+    args = argparser.parse_args()
 
-    text = ''.join(sys.stdin.readlines())
-    sentences = [normalize(sent) for sent in sent_tokenize(text)]
+    texts = list[str]()
+    for text_file in args.text_files:
+        with open(text_file, 'r') as fp:
+            texts.append(fp.read())
 
-    with CoreNLPServer(*jars):
-
+    char_grams = [char_trigrams(text) for text in texts]
+    with CoreNLPServer(*STANFORD_JARS):
         parser = CoreNLPDependencyParser()
-        parsed = parser.raw_parse_sents(sentences)
-        sem_grams = list[dict[tuple, int]]()
-        char_grams = list[dict[str, int]]()
+        sem_grams = [sem_trigrams(text, parser) for text in texts]
 
-        for sent in parsed:
-            graph: DependencyGraph = next(sent)
-            tree = dep_tree(graph)
-            if tree:
-                sem_grams.append(sem_trigrams(tree))
-                char_grams.append(char_trigrams(get_text(graph)))
-
-    sem_dist = trigram_distribution(sem_grams)
-    print(sem_dist)
+    print(trigram_distribution(sem_grams))
     print(trigram_distribution(char_grams))

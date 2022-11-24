@@ -1,9 +1,12 @@
 from itertools import chain
 
-from nltk.parse.corenlp import DependencyGraph
+from nltk.parse.corenlp import CoreNLPDependencyParser, DependencyGraph
 from nltk.tree.tree import Tree
+from nltk.tokenize import sent_tokenize
 
-def dep_tree(graph: DependencyGraph):
+from nlp.helpers import normalize
+
+def _dep_tree(graph: DependencyGraph):
     def _tree(address: int):
         node = graph.get_by_address(address)
         word = node['ctag']
@@ -20,20 +23,14 @@ def dep_tree(graph: DependencyGraph):
     deps = sorted(chain.from_iterable(node['deps'].values()))
     return Tree(tag, [_tree(dep) for dep in deps])
 
-def depth_search(tree: Tree, fun, is_root: bool = True):
+def _depth_search(tree: Tree, fun, is_root: bool = True):
     if is_root: fun(tree)
     for subtree in tree:
         fun(subtree)
         if type(subtree) is not Tree: continue
-        depth_search(subtree, fun, False)
+        _depth_search(subtree, fun, False)
 
-def get_text(graph: DependencyGraph) -> str:
-    return ' '.join([
-        graph.get_by_address(i)['word'] for i in range(1, len(graph.nodes))
-    ])
-
-def sem_trigrams(tree: Tree) -> dict[tuple, int]:
-    trigrams = dict[tuple, int]()
+def _add_sem_trigrams(tree: Tree, trigrams: dict[tuple, int]):
     def _add_or_increment(tree: tuple):
         if tree in trigrams:
             trigrams[tree] += 1
@@ -58,5 +55,17 @@ def sem_trigrams(tree: Tree) -> dict[tuple, int]:
                 tree = (node.label(), (a_label, (_str_label(c),)))
                 _add_or_increment(tree)
 
-    depth_search(tree, _process_node)
+    _depth_search(tree, _process_node)
+
+def sem_trigrams(text: str, parser: CoreNLPDependencyParser) -> dict[tuple, int]:
+    sentences = [normalize(sent) for sent in sent_tokenize(text)]
+    parsed = parser.raw_parse_sents(sentences)
+
+    trigrams = dict[tuple, int]()
+    for sentence in parsed:
+        graph: DependencyGraph = next(sentence)
+        tree = _dep_tree(graph)
+        if tree:
+            _add_sem_trigrams(tree, trigrams)
+
     return trigrams
