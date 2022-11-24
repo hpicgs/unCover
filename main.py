@@ -2,12 +2,13 @@ import os
 import sys
 
 from nltk.parse.corenlp import CoreNLPDependencyParser, CoreNLPServer
+from nltk.parse.dependencygraph import DependencyGraph
 from nltk.tokenize import sent_tokenize
 
 from nlp.helpers import normalize
-from trigrams.char_trigrams import add_char_trigrams
-from trigrams.extraction import trigram_distribution
-from trigrams.semantic_trigrams import add_sem_trigrams, dep_tree
+from trigrams.char_trigrams import char_trigrams
+from trigrams.logistic_regression import trigram_distribution
+from trigrams.semantic_trigrams import dep_tree, get_text, sem_trigrams
 
 if __name__ == '__main__':
     from definitions import ROOT_DIR
@@ -20,20 +21,20 @@ if __name__ == '__main__':
     text = ''.join(sys.stdin.readlines())
     sentences = [normalize(sent) for sent in sent_tokenize(text)]
 
-    char_grams = dict[str, int]()
-    add_char_trigrams(''.join(sentences), char_grams)
-
     with CoreNLPServer(*jars):
 
         parser = CoreNLPDependencyParser()
         parsed = parser.raw_parse_sents(sentences)
-
-        sem_grams = dict[tuple, int]()
+        sem_grams = list[dict[tuple, int]]()
+        char_grams = list[dict[str, int]]()
 
         for sent in parsed:
-            tree = dep_tree(next(sent))
+            graph: DependencyGraph = next(sent)
+            tree = dep_tree(graph)
             if tree:
-                add_sem_trigrams(tree, sem_grams)
+                sem_grams.append(sem_trigrams(tree))
+                char_grams.append(char_trigrams(get_text(graph)))
 
-    print(trigram_distribution(sem_grams))
+    sem_dist = trigram_distribution(sem_grams)
+    print(sem_dist)
     print(trigram_distribution(char_grams))

@@ -27,7 +27,13 @@ def depth_search(tree: Tree, fun, is_root: bool = True):
         if type(subtree) is not Tree: continue
         depth_search(subtree, fun, False)
 
-def add_sem_trigrams(tree: Tree, trigrams: dict[tuple, int]):
+def get_text(graph: DependencyGraph) -> str:
+    return ' '.join([
+        graph.get_by_address(i)['word'] for i in range(1, len(graph.nodes))
+    ])
+
+def sem_trigrams(tree: Tree) -> dict[tuple, int]:
+    trigrams = dict[tuple, int]()
     def _add_or_increment(tree: tuple):
         if tree in trigrams:
             trigrams[tree] += 1
@@ -53,3 +59,4 @@ def add_sem_trigrams(tree: Tree, trigrams: dict[tuple, int]):
                 _add_or_increment(tree)
 
     depth_search(tree, _process_node)
+    return trigrams
