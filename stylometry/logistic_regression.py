@@ -25,7 +25,7 @@ def trigram_distribution(trigram_lists: list[dict], max_features: int = 10):
     return pd.DataFrame(values, columns=features)
 
 def logistic_regression(trigram_dataframe: pd.DataFrame, truth_labels: list()):
-    if len(trigram_dataframe.loc) <= 1:
+    if len(trigram_dataframe) <= 1:
         return
     regression = LogisticRegression(random_state=42)
     return regression.fit(trigram_dataframe, truth_labels)
