@@ -27,5 +27,5 @@ if __name__ == '__main__':
     print(semantic_distribution)
     print(character_distribution)
 
-    print(logistic_regression(semantic_distribution, [1, 1]))
-    print(logistic_regression(character_distribution, [1, 1]))
+    print(logistic_regression(semantic_distribution, [1, 0]))
+    print(logistic_regression(character_distribution, [1, 0]))
