@@ -7,6 +7,8 @@ from stylometry.logistic_regression import trigram_distribution, logistic_regres
 
 from database.mock_database import DatabaseAuthorship
 
+import sys
+
 if __name__ == "__main__":
     #https://www.theguardian.com/profile/martin-chulov
     #https://www.theguardian.com/profile/leyland-cecco
@@ -21,6 +23,8 @@ if __name__ == "__main__":
         full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author(author)]
         training_data += full_article_list[:int(len(full_article_list)*0.6)]
 
+    print(len(training_data))
+
     char_grams = [char_trigrams(article_tuple[0]) for article_tuple in training_data]
     with CoreNLPServer(*STANFORD_JARS):
         parser = CoreNLPDependencyParser()
@@ -28,6 +32,8 @@ if __name__ == "__main__":
     
     character_distribution = trigram_distribution(char_grams)
     semantic_distribution = trigram_distribution(sem_grams)
+    print(character_distribution)
+    print(semantic_distribution)
 
     for author in authors:
         truth_table = [1 if article_tuple[1] == author else 0 for article_tuple in training_data]
