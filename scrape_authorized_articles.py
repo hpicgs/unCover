@@ -4,7 +4,7 @@ from database.mock_database import DatabaseAuthorship
 from definitions import QUERIES
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
-import re, requests, argparse
+import re, requests, argparse, time
 
 
 
@@ -29,14 +29,16 @@ def generate_author_dataset(site, author, narticles=10):
             return [article_link.get("href") for article_link in article_links if article_link.get("data-link-name") == "article"][::2]
         pagenum = 1
         while len(article_urls) < narticles:
+            time.sleep(0.2)
             url = author + "?page=" + str(pagenum)
             urls = get_listed_articles(url)
-            if urls:
+            if urls and not any([link in article_urls for link in urls]):
                 article_urls += urls
             else:
                 break
             pagenum += 1
     for article_url in article_urls[:narticles]:
+        time.sleep(0.2)
         print(article_url)
         page = requests.get(article_url).text
         processor = PageProcessor(page)
