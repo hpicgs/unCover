@@ -44,7 +44,7 @@ def generate_author_dataset(site, author, narticles=10):
         processor = PageProcessor(page)
         processed_page = preprocess_article(processor.get_fulltext())
         author = processor.get_author()
-        DatabaseAuthorship.insert_article(processed_page, url, author)
+        DatabaseAuthorship.insert_article(processed_page, article_url, author)
 
 
 

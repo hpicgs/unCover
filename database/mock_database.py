@@ -17,7 +17,23 @@ class DatabaseAuthorship:
         except:
             return list()
     
-    
+
+    @staticmethod
+    def get_authors():
+        articles = DatabaseAuthorship.__get_data()
+        authors = list()
+        for article in articles:
+            for author in article["author"].split(","):
+                if author not in authors:
+                    authors.append(author)
+        return authors
+
+    @staticmethod
+    def get_articles_by_author(author):
+        articles = DatabaseAuthorship.__get_data()
+        return [article for article in articles if author in article["author"].split(",")]
+
+
     @staticmethod
     def insert_article(text, source, author):
         data = DatabaseAuthorship.__get_data()
