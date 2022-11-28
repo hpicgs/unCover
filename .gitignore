@@ -1,7 +1,7 @@
 models
 .env
 .idea
-.yaml
+database/files
 geckodriver.log
 __pycache__
 *.txt
