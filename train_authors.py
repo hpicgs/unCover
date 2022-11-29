@@ -1,3 +1,5 @@
+from pathlib import Path
+import pickle
 from nltk.parse.corenlp import CoreNLPDependencyParser, CoreNLPServer
 
 from definitions import STANFORD_JARS
@@ -19,6 +21,8 @@ if __name__ == "__main__":
         "https://www.theguardian.com/profile/hannah-ellis-petersen"
         ]
     training_data = []
+    Path("models/stylometrie").mkdir(parents=True, exist_ok=True)
+
     for author in authors:
         full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author(author)]
         training_data += full_article_list[:int(len(full_article_list)*0.6)]
@@ -36,5 +40,8 @@ if __name__ == "__main__":
 
     for author in authors:
         truth_table = [1 if article_tuple[1] == author else 0 for article_tuple in training_data]
-        print(logistic_regression(character_distribution, truth_table))
-        print(logistic_regression(semantic_distribution, truth_table))
+        with open('models/stylometrie/'+author.replace('/', '_')+'_char.pickle', 'wb') as f:
+            pickle.dump(logistic_regression(character_distribution, truth_table), f)
+        with open('models/stylometrie/'+author.replace('/', '_') + '_char.pickle', 'wb') as f:
+            pickle.dump(logistic_regression(semantic_distribution, truth_table), f)
+    print('TRAINING DONE!')
