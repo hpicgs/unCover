@@ -26,9 +26,8 @@ if __name__ == "__main__":
     print(len(training_data))
 
     char_grams = [char_trigrams(article_tuple[0]) for article_tuple in training_data]
-    with CoreNLPServer(*STANFORD_JARS):
-        parser = CoreNLPDependencyParser()
-        sem_grams = [sem_trigrams(article_tuple[0], parser) for article_tuple in training_data]
+    parser = CoreNLPDependencyParser(url='http://localhost:9000')
+    sem_grams = [sem_trigrams(article_tuple[0], parser) for article_tuple in training_data]
     
     character_distribution = trigram_distribution(char_grams)
     semantic_distribution = trigram_distribution(sem_grams)
