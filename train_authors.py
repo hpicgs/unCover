@@ -1,15 +1,12 @@
-from pathlib import Path
 import pickle
-from nltk.parse.corenlp import CoreNLPDependencyParser, CoreNLPServer
+from nltk.parse.corenlp import CoreNLPDependencyParser
 
-from definitions import STANFORD_JARS
+from definitions import STYLOMETRY_DIR
 from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams
 from stylometry.logistic_regression import trigram_distribution, logistic_regression
-
 from database.mock_database import DatabaseAuthorship
-
-import sys
+import os
 
 if __name__ == "__main__":
     #https://www.theguardian.com/profile/martin-chulov
@@ -21,7 +18,7 @@ if __name__ == "__main__":
         "https://www.theguardian.com/profile/hannah-ellis-petersen"
         ]
     training_data = []
-    Path("models/stylometrie").mkdir(parents=True, exist_ok=True)
+    os.makedirs(STYLOMETRY_DIR, exist_ok=True)
 
     for author in authors:
         full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author(author)]
@@ -40,8 +37,8 @@ if __name__ == "__main__":
 
     for author in authors:
         truth_table = [1 if article_tuple[1] == author else 0 for article_tuple in training_data]
-        with open('models/stylometrie/'+author.replace('/', '_')+'_char.pickle', 'wb') as f:
+        with open(os.path.join(STYLOMETRY_DIR, author.replace('/', '_') + '_char.pickle'), 'wb') as f:
             pickle.dump(logistic_regression(character_distribution, truth_table), f)
-        with open('models/stylometrie/'+author.replace('/', '_') + '_char.pickle', 'wb') as f:
+        with open(os.path.join(STYLOMETRY_DIR, author.replace('/', '_') + '_char.pickle'), 'wb') as f:
             pickle.dump(logistic_regression(semantic_distribution, truth_table), f)
     print('TRAINING DONE!')
