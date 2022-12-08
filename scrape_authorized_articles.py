@@ -32,7 +32,7 @@ def generate_author_dataset(site, author, narticles=10):
             time.sleep(0.2)
             url = author + "?page=" + str(pagenum)
             urls = get_listed_articles(url)
-            if urls and not any([link in article_urls for link in urls]):
+            if urls and not any(link in article_urls for link in urls):
                 article_urls += urls
             else:
                 break
