@@ -5,3 +5,6 @@ Download [Stanford's CoreNLP
 into the `models` directory.
 
 Download nltk punkt (nltk.download("punkt"))
+
+To be able to start processing a text please first run run_CoreNLP_Server.sh and then run the desired scripts in another terminal.
+The server can be stopped through ^C in the original terminal.
