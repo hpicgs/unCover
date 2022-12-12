@@ -95,9 +95,11 @@ class GoogleScraper:
             if a_tag.is_displayed()
         ][:n_articles]
 
-        results = list()
-        while not results:
-            results = fetch_results()
+        time.sleep(10)
+        results = fetch_results()
+        if not results:
+            self.__log("search query seems to have no results - test your search query on news.google.com")
+            return list()
         results_prev = list()
         while len(results_prev) < len(results):
             results_prev = results
@@ -112,7 +114,7 @@ class GoogleScraper:
                 self.__driver.current_url == url
                 or self.__driver.current_url == "about:blank"
             ):
-                time.sleep(0.1)
+                time.sleep(0.2)
             urls.append(self.__driver.current_url)
         self.__log(f"{len(urls)} news urls extracted", last=True)
         return urls

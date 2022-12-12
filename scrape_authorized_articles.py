@@ -4,21 +4,19 @@ from database.mock_database import DatabaseAuthorship
 from definitions import QUERIES
 from dotenv import load_dotenv
 from bs4 import BeautifulSoup
-import re, requests, argparse, time
+import re, requests, argparse, time, sys
 
 
 
 def preprocess_article(doc):
     paragraph = re.sub("\s+", " ", doc)
-    if any(c in paragraph.lower() for c in ["'", '"', "/", "\n","_","|", "\\", "@", "copyright"]) or len(paragraph) < 10:
-        return None
     return paragraph
 
 
 def generate_author_dataset(site, author, narticles=10):
     #writes the narticles most recent articles into the mock database
     article_urls = []
-    if site == "https://www.theguardian.com":
+    if "heguardian.com" in site:
         def get_listed_articles(url):
             try:
                 page = requests.get(url).text
@@ -50,22 +48,26 @@ def generate_author_dataset(site, author, narticles=10):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", action="store_true")
-    parser.add_argument("--author", action="store", type=str)
-    parser.add_argument("--publication", action="store", type=str)
-    parser.add_argument("--narticles", action="store", type=int)
+    parser.add_argument("--dataset", action="store_true", required=False, help="scrape articles in dataset creation mode, without google news")
+    parser.add_argument("--publication", action="store", type=str, required=False, help="url to the news publication used in dataset mode")
+    parser.add_argument("--author", action="store", type=str, required=False, help="url to the chosen author's page on the publication")
+    parser.add_argument("--narticles", action="store", type=int, default=10, required=False, help="maximum number of articles to scrape")
+    parser.add_argument("--query", action="store", type=str, required=False, help="scrape articles in query mode, using the parameter from this argument")
 
     args = parser.parse_args()
     if args.dataset:
+        if (not args.publication) or (not args.author):
+            parser.error("--dataset requires that both --author and --publication are set")
         generate_author_dataset(args.publication, args.author, args.narticles)
     else:
+        if not args.query:
+            parser.error("please provide a --query to search news.google.com")
         scraper = GoogleScraper(verbose=True)
-        for query in QUERIES:
-            urls = scraper.find_news_urls_for_query(query, 5)
-            for url in urls:
-                page = requests.get(url).text
-                processor = PageProcessor(page)
-                processed_page = preprocess_article(processor.get_fulltext())
-                author = processor.get_author()
-                DatabaseAuthorship.insert_article(processed_page, url, author)
+        urls = scraper.find_news_urls_for_query(args.query, args.narticles)
+        for url in urls:
+            page = requests.get(url).text
+            processor = PageProcessor(page)
+            processed_page = preprocess_article(processor.get_fulltext())
+            author = processor.get_author()
+            DatabaseAuthorship.insert_article(processed_page, url, author)
 

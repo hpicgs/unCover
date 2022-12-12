@@ -1,10 +1,12 @@
-from definitions import DATABASE_AUTHORS_PATH
-import yaml
+from definitions import DATABASE_AUTHORS_PATH, DATABASE_FILES_PATH
+import yaml, os
 
 
 class DatabaseAuthorship:
     @staticmethod
     def __write_data(data):
+        if not os.path.isdir(DATABASE_FILES_PATH):
+            os.mkdir(DATABASE_FILES_PATH)
         with open(DATABASE_AUTHORS_PATH, "w") as mock_db:
             yaml.dump(data, mock_db, default_flow_style=False)
     
