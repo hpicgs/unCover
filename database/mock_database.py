@@ -5,8 +5,7 @@ import yaml, os
 class DatabaseAuthorship:
     @staticmethod
     def __write_data(data):
-        if not os.path.isdir(DATABASE_FILES_PATH):
-            os.mkdir(DATABASE_FILES_PATH)
+        os.makedirs(DATABASE_FILES_PATH, exist_ok=True)
         with open(DATABASE_AUTHORS_PATH, "w") as mock_db:
             yaml.dump(data, mock_db, default_flow_style=False)
     

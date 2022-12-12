@@ -24,7 +24,7 @@ if __name__ == "__main__":
         full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author(author)]
         training_data += full_article_list[:int(len(full_article_list)*0.6)]
 
-    print(len(training_data))
+    print('number of training articles:', len(training_data))
 
     char_grams = [char_trigrams(article_tuple[0]) for article_tuple in training_data]
     parser = CoreNLPDependencyParser(url='http://localhost:9000')

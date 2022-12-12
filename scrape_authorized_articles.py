@@ -16,7 +16,7 @@ def preprocess_article(doc):
 def generate_author_dataset(site, author, narticles=10):
     #writes the narticles most recent articles into the mock database
     article_urls = []
-    if "heguardian.com" in site:
+    if "theguardian.com" in site:
         def get_listed_articles(url):
             try:
                 page = requests.get(url).text

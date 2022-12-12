@@ -98,7 +98,7 @@ class GoogleScraper:
         time.sleep(10)
         results = fetch_results()
         if not results:
-            self.__log("search query seems to have no results - test your search query on news.google.com")
+            self.__log("search query seems to have no results - test your search query on news.google.com", last=True)
             return list()
         results_prev = list()
         while len(results_prev) < len(results):
