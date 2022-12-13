@@ -24,8 +24,8 @@ class DatabaseAuthorship:
         articles = DatabaseAuthorship.__get_data()
         authors = list()
         for article in articles:
-            for author in article["author"].split(",") and article["text"] is not None:
-                if author not in authors:
+            for author in article["author"].split(","):
+                if author not in authors and article["text"] is not None:
                     authors.append(author)
         return authors
 
