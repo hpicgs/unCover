@@ -1,13 +1,16 @@
 from stanza.server import CoreNLPClient
 from stanza.server.client import StartServer
+from pandas import DataFrame
+import pandas_bokeh
+pandas_bokeh.output_file("plot.html")
 
 from stylometry.showcase.dep_colors import color_string
 
-def coreference():
-    text = "Chris Manning is a nice person. Chris wrote a simple sentence. He also gives oranges to people. The people love him for giving them oranges."
+def coreference(text: str):
     with CoreNLPClient(start_server=StartServer.DONT_START, annotators=['tokenize','pos','lemma', 'ner', 'coref'], timeout=30000) as client:
         annotation = client.annotate(text)
         print(coref_colored(annotation))
+        coref_diagram(annotation)
 
 def coref_colored(annotation):
     coref_chains = [
@@ -25,3 +28,33 @@ def coref_colored(annotation):
             pretty_tokens.append(color_string(token.originalText, (coref_colors[color_index], 0.8, 1)))
 
     return ' '.join(pretty_tokens).replace(' .', '.')
+
+def coref_diagram(annotation):
+    def text_for_mention_chain(chain):
+        def text_for_mention(mention):
+            sentence = annotation.sentence[mention.sentenceIndex]
+            tokens = sentence.token[mention.beginIndex:mention.endIndex]
+            return ' '.join([token.originalText for token in tokens])
+        mentions = [text_for_mention(mention) for mention in chain.mention]
+        mentions.sort(key=lambda m: len(m))
+        return mentions[-1]
+
+    rolling_sentences = [
+        [i, i+1, i+2] for i in range(max(0, len(annotation.sentence) - 2))
+    ]
+    entity_occurences = {
+        text_for_mention_chain(chain): [
+            len([
+                1 for mention in chain.mention if mention.sentenceIndex in rs and mention.animacy == 'ANIMATE'
+            ])
+        for rs in rolling_sentences]
+    for chain in annotation.corefChain}
+    
+    df = DataFrame({ name: occurences for name, occurences in entity_occurences.items() if any(occurences) })
+    print(df)
+    df.plot_bokeh.line(
+        figsize=(2000, 1200),
+        title='Entity Occurences in sentence rolling window',
+        xlabel='Sentence window',
+        ylabel='Occurences',
+    )
