@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from sklearn.linear_model import LogisticRegression
 
 def _most_common_trigrams(trigram_lists: list[dict], max_features: int):
     features = set((feature for trigrams in trigram_lists for feature in trigrams.keys()))
@@ -22,3 +23,9 @@ def trigram_distribution(trigram_lists: list[dict], max_features: int = 10):
         for feature in features])))
 
     return pd.DataFrame(values, columns=features)
+
+def logistic_regression(trigram_dataframe: pd.DataFrame, truth_labels: list()):
+    if len(trigram_dataframe) <= 1:
+        return
+    regression = LogisticRegression(random_state=42)
+    return regression.fit(trigram_dataframe, truth_labels)

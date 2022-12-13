@@ -1,6 +1,7 @@
 models
 .env
-database/.mock-authors.yaml
+.idea
+database/files
 geckodriver.log
 __pycache__
 *.txt
