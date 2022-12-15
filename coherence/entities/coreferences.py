@@ -52,9 +52,10 @@ def coref_diagram(annotation):
     
     df = DataFrame({ name: occurences for name, occurences in entity_occurences.items() if any(occurences) })
     print(df)
-    df.plot_bokeh.line(
+    df.plot_bokeh.bar(
         figsize=(2000, 1200),
         title='Entity Occurences in sentence rolling window',
         xlabel='Sentence window',
         ylabel='Occurences',
+        stacked=True,
     )
