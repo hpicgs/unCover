@@ -65,8 +65,10 @@ def coref_diagram(annotation):
      }, index=sentence_labels)
 
     df.plot_bokeh.barh(
-        figsize=(2000, 1200),
-        title='Entity Occurences in sentence rolling window',
-        xlabel='Occurences',
         stacked=True,
+        xlabel='Number of entity occurences in given sentence and its neighbors',
+        fontsize_ticks=15,
+        fontsize_label=15,
+        figsize=(2000, 1200),
+        toolbar_location=None
     )
