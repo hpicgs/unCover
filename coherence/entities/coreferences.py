@@ -39,23 +39,34 @@ def coref_diagram(annotation):
         mentions.sort(key=lambda m: len(m))
         return mentions[-1]
 
-    rolling_sentences = [
-        [i, i+1, i+2] for i in range(max(0, len(annotation.sentence) - 2))
+    def text_for_sentence(i):
+        sentence = annotation.sentence[i]
+        return annotation.text[sentence.characterOffsetBegin:sentence.characterOffsetEnd]
+
+    def limit_line_length(text, max_length=160):
+        return '\n'.join([text[i:i+max_length] for i in range(0, len(text), max_length)])
+
+    sentence_range = range(len(annotation.sentence))
+    sentence_windows = [
+        [i for i in [n-1, n, n+1] if i in sentence_range] for n in sentence_range
     ]
+
     entity_occurences = {
         text_for_mention_chain(chain): [
             len([
                 1 for mention in chain.mention if mention.sentenceIndex in rs and mention.animacy == 'ANIMATE'
             ])
-        for rs in rolling_sentences]
+        for rs in sentence_windows]
     for chain in annotation.corefChain}
     
-    df = DataFrame({ name: occurences for name, occurences in entity_occurences.items() if any(occurences) })
-    print(df)
-    df.plot_bokeh.bar(
+    sentence_labels = [limit_line_length(text_for_sentence(i)) for i in reversed(sentence_range)]
+    df = DataFrame(
+            { name: occurences for name, occurences in reversed(entity_occurences.items()) if any(occurences)
+     }, index=sentence_labels)
+
+    df.plot_bokeh.barh(
         figsize=(2000, 1200),
         title='Entity Occurences in sentence rolling window',
-        xlabel='Sentence window',
-        ylabel='Occurences',
+        xlabel='Occurences',
         stacked=True,
     )
