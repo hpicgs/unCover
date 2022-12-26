@@ -1,4 +1,4 @@
-from definitions import DATABASE_AUTHORS_PATH, DATABASE_FILES_PATH
+from definitions import DATABASE_AUTHORS_PATH, DATABASE_FILES_PATH, DATABASE_GEN_PATH
 import yaml, os
 
 
@@ -45,3 +45,46 @@ class DatabaseAuthorship:
         elif not any([source == article["source"] for article in data]):
             data.append({"source":source, "text":text, "author":author})
             DatabaseAuthorship.__write_data(data)
+
+
+class DatabaseGenArticles:
+    @staticmethod
+    def __write_data(data):
+        os.makedirs(DATABASE_FILES_PATH, exist_ok=True)
+        with open(DATABASE_GEN_PATH, "w") as mock_db:
+            yaml.dump(data, mock_db, default_flow_style=False)
+
+    @staticmethod
+    def __get_data():
+        try:
+            with open(DATABASE_GEN_PATH, "r") as mock_db:
+                return yaml.safe_load(mock_db.read())
+        except:
+            return list()
+
+    @staticmethod
+    def get_method():
+        articles = DatabaseGenArticles.__get_data()
+        methods = list()
+        for article in articles:
+            for method in article["method"].split(","):
+                if method not in methods and article["text"] is not None:
+                    methods.append(method)
+        return methods
+
+    @staticmethod
+    def get_articles_by_method(method):
+        articles = DatabaseGenArticles.__get_data()
+        return [article for article in articles if
+                method in article["method"].split(",") and article["text"] is not None]
+
+    @staticmethod
+    def insert_article(text, source, method):
+        data = DatabaseGenArticles.__get_data()
+        if data == [] or data is None:
+            data = []
+            data.append({"source": source, "text": text, "method": method})
+            DatabaseGenArticles.__write_data(data)
+        elif not any([source == article["source"] for article in data]):
+            data.append({"source": source, "text": text, "method": method})
+            DatabaseGenArticles.__write_data(data)
