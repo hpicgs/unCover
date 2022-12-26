@@ -1,10 +1,8 @@
 from scraper.article_scraper import GoogleScraper
 from scraper.page_processor import PageProcessor
 from database.mock_database import DatabaseAuthorship
-from definitions import QUERIES
-from dotenv import load_dotenv
 from bs4 import BeautifulSoup
-import re, requests, argparse, time, sys
+import re, requests, argparse, time
 
 
 
