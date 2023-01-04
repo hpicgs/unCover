@@ -95,5 +95,6 @@ def generate_grover_news_from_original(doc, model):
             # these were in there for whatever reason...
             article.pop('input_ids_conditional', None)
             article.pop('input_ids_unconditional', None)
-            print(json.dumps(article) + '\n')
-            print("Written {}/{} articles".format(i, len(articles)), flush=True)
+            print("Written {}/{} articles".format(i+1, len(articles)), flush=True)
+            print(article["gens_article"][0])
+            return article["gens_article"][0]
