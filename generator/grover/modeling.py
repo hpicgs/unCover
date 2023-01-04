@@ -387,7 +387,6 @@ def _top_p_sample(logits, ignore_ids=None, num_samples=1, p=0.9):
 
         # OPTION B - unsort first - Indices need to go back to 0 -> N-1 -- then sample
         # unperm_indices = tf.argsort(indices, direction='ASCENDING')
-        # include_mask_unperm = tf.batch_gather(include_mask, unperm_indices)
         # logits_to_use = logits - (1 - tf.cast(include_mask_unperm, tf.float32)) * 1e10
         # sample = tf.random.categorical(logits=logits_to_use, num_samples=num_samples, dtype=tf.int32)
 
@@ -800,7 +799,7 @@ def sample(news_config: GroverConfig, initial_context, eos_token, ignore_ids=Non
             is_eos = tf.equal(ctx, eos_token)
             return tf.math.logical_not(tf.reduce_all(tf.reduce_any(is_eos, axis=1)))
 
-        tokens, cache, probs = tf.while_loop(
+        tokens, cache, probs = tf.nest.map_structure(tf.stop_gradient, tf.while_loop(
             cond=cond, body=body, maximum_iterations=1025 - get_shape_list(ctx)[1],
             loop_vars=[ctx, cache, probs],
             shape_invariants=[tf.TensorShape([batch_size, None]),
@@ -810,8 +809,7 @@ def sample(news_config: GroverConfig, initial_context, eos_token, ignore_ids=Non
                                    None, news_config.hidden_size // news_config.num_attention_heads]),
                               tf.TensorShape([batch_size, None]),
                               ],
-            back_prop=False,
-        )
+        ))
     return tokens, probs
 
 
