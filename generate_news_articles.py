@@ -1,3 +1,5 @@
+import json
+
 from scraper.article_scraper import GoogleScraper
 from scraper.page_processor import PageProcessor
 from generator.gpt3_generator import generate_gpt3_news_from_original
@@ -26,4 +28,7 @@ if __name__ == '__main__':
             if args.gpt3:
                 DatabaseGenArticles.insert_article(generate_gpt3_news_from_original(processed_page), url, "gpt3")
             if args.grover:
-                DatabaseGenArticles.insert_article(generate_grover_news_from_original(processed_page, "base"), url, "grover")
+                input = json.dumps({"url": url, "url_used": url, "title": "Title", "text": processed_page,
+                                    "summary": "", "authors": [], "publish_date": "04-19-2023", "domain": "www.com",
+                                    "warc_date":"20190424064330", "status": "success", "split": "gen", "inst_index": 0})
+                DatabaseGenArticles.insert_article(generate_grover_news_from_original(input, "base"), url, "grover")

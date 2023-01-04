@@ -28,7 +28,7 @@ def generate_grover_news_from_original(doc, model):
     # This controls the top p for each generation.
     top_p = np.ones((num_chunks, batch_size_per_chunk), dtype=np.float32) * 0.95
 
-    articles = [doc]
+    articles = [json.loads(doc)]
 
     tf_config = tf.compat.v1.ConfigProto(allow_soft_placement=True)
 
@@ -63,7 +63,7 @@ def generate_grover_news_from_original(doc, model):
 
             # Indices we definitely DONT WANT TO PREDICT
             ignore_ids_np = np.array(encoder.special_tokens_onehot)
-            ignore_ids_np[encoder.__dict__['end_{}'.format('target')]] = 0
+            #ignore_ids_np[encoder.__dict__['end_{}'.format('target')]] = 0
 
             gens = []
             gens_raw = []
