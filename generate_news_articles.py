@@ -9,7 +9,7 @@ import re, requests, argparse
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--narticles", action="store", type=int, default=1, required=False, help="maximum number of articles to scrape")
+    parser.add_argument("--narticles", action="store", type=int, default=3, required=False, help="maximum number of articles to scrape")
     parser.add_argument("--queries", action="store", type=str, required=False, help="scrape articles for a given query, insert multiple values comma separated")
     parser.add_argument("--gpt3", action="store_true", required=False, help="use gpt3 for text generation")
     parser.add_argument("--grover", action="store_true", required=False, help="use gpt3 for text generation")
