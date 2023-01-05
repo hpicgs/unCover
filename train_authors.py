@@ -1,7 +1,7 @@
 import pickle
 from nltk.parse.corenlp import CoreNLPDependencyParser
 
-from definitions import STYLOMETRY_DIR
+from definitions import STYLOMETRY_DIR, DATABASE_AUTHORS_PATH
 from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams
 from stylometry.logistic_regression import trigram_distribution, logistic_regression
@@ -35,6 +35,8 @@ if __name__ == "__main__":
     semantic_distribution = trigram_distribution(sem_grams)
     print(character_distribution)
     print(semantic_distribution)
+    character_distribution.to_csv("char_distribution.csv")
+    semantic_distribution.to_csv("sem_distribution.csv")
 
     for author in authors:
         truth_table = [1 if article_tuple[1] == author else 0 for article_tuple in training_data]
