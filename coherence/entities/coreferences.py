@@ -1,16 +1,13 @@
 from stanza.server import CoreNLPClient
 from stanza.server.client import StartServer
 from pandas import DataFrame
-import pandas_bokeh
-pandas_bokeh.output_file("plot.html")
+from nlp.helpers import normalize_quotes
 
 from stylometry.showcase.dep_colors import color_string
 
-def coreference(text: str):
+def coref_annotation(text: str):
     with CoreNLPClient(start_server=StartServer.DONT_START, annotators=['tokenize','pos','lemma', 'ner', 'coref'], timeout=30000) as client:
-        annotation = client.annotate(text)
-        print(coref_colored(annotation))
-        coref_diagram(annotation)
+        return client.annotate(normalize_quotes(text))
 
 def coref_colored(annotation):
     coref_chains = [
@@ -43,7 +40,7 @@ def coref_diagram(annotation):
         sentence = annotation.sentence[i]
         return annotation.text[sentence.characterOffsetBegin:sentence.characterOffsetEnd]
 
-    def limit_line_length(text, max_length=160):
+    def limit_line_length(text, max_length=80):
         words = text.split(' ')
         lines = ['']
         for word in words:
@@ -61,21 +58,23 @@ def coref_diagram(annotation):
     entity_occurences = {
         text_for_mention_chain(chain): [
             len([
-                1 for mention in chain.mention if mention.sentenceIndex in rs and mention.animacy == 'ANIMATE'
+                1 for mention in chain.mention if mention.sentenceIndex in rs# and mention.animacy == 'ANIMATE'
             ])
         for rs in sentence_windows]
     for chain in annotation.corefChain}
+    print(entity_occurences.keys())
     
     sentence_labels = [limit_line_length(text_for_sentence(i)) for i in reversed(sentence_range)]
     df = DataFrame(
             { name: occurences for name, occurences in reversed(entity_occurences.items()) if any(occurences)
      }, index=sentence_labels)
 
-    df.plot_bokeh.barh(
+    return df.plot_bokeh.barh(
         stacked=True,
         xlabel='Number of entity occurences in given sentence and its neighbors',
         fontsize_ticks=15,
         fontsize_label=15,
-        figsize=(2000, 1200),
-        hovertool=False
+        figsize=(500, 1250),
+        legend=False,
+        show_figure=False
     )
