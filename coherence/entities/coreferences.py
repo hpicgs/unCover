@@ -44,7 +44,14 @@ def coref_diagram(annotation):
         return annotation.text[sentence.characterOffsetBegin:sentence.characterOffsetEnd]
 
     def limit_line_length(text, max_length=160):
-        return '\n'.join([text[i:i+max_length] for i in range(0, len(text), max_length)])
+        words = text.split(' ')
+        lines = ['']
+        for word in words:
+            if len(lines[-1]) + len(word) < max_length:
+                lines[-1] += f' {word}'
+            else:
+                lines.append(word)
+        return '\n'.join(lines)
 
     sentence_range = range(len(annotation.sentence))
     sentence_windows = [
@@ -70,5 +77,5 @@ def coref_diagram(annotation):
         fontsize_ticks=15,
         fontsize_label=15,
         figsize=(2000, 1200),
-        toolbar_location=None
+        hovertool=False
     )
