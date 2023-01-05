@@ -4,7 +4,7 @@ from nltk.parse.corenlp import CoreNLPDependencyParser, DependencyGraph
 from nltk.tree.tree import Tree
 from nltk.tokenize import sent_tokenize
 
-from nlp.helpers import normalize
+from nlp.helpers import lower_alnum
 
 def _dep_tree(graph: DependencyGraph):
     def _tree(address: int):
@@ -58,7 +58,7 @@ def _add_sem_trigrams(tree: Tree, trigrams: dict[tuple, int]):
     _depth_search(tree, _process_node)
 
 def sem_trigrams(text: str, parser: CoreNLPDependencyParser) -> dict[tuple, int]:
-    sentences = [normalize(sent) for sent in sent_tokenize(text)]
+    sentences = [lower_alnum(sent) for sent in sent_tokenize(text)]
     parsed = parser.raw_parse_sents(sentences)
 
     trigrams = dict[tuple, int]()
