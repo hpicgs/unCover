@@ -1,6 +1,9 @@
 # pyright: reportWildcardImportFromLibrary=false
 from dominate.tags import *
 
+# data: [(sentence/paragraph, [values])]
+# colors: CSS compatible color-strings; same length as [values]
+# labels: for [values], has to have same length
 def stacked_bar(data: list[tuple[str, list[float]]], colors: list[str], labels: list[str]) -> tuple[div, div]:
     stack_height = max(sum(values) for _, values in data)
 
