@@ -18,14 +18,18 @@ def stacked_bar(
             with div(style='display: flex'):
                 p(sentence, style='flex: 70%; padding-right: 1rem')
                 with div(style='flex: 30%; display: flex; padding: 0.25rem 0'):
+                    has_left_border = False
                     for n, v in enumerate(values):
-                        span(style=f'flex: 0 1 auto; width: {100 * v / stack_height}%; background-color: {colors[n]}')
+                        width = 100 * v / stack_height
+                        if width > 0:
+                            span(style=f'flex: 0 1 auto; width: {width}%; box-sizing: border-box; background-color: {colors[n]}; border: 1px solid black; {"border-left: 0" if has_left_border else ""}')
+                            has_left_border = True
 
     legend = div()
     for label, color in zip(labels, colors):
         with legend:
             with p():
-                span(style=f'display: inline-block; width: 1em; height: 1em; background-color: {color}; margin-right: 0.25rem; border-radius: 9999px')
+                span(style=f'display: inline-block; width: 1em; height: 1em; background-color: {color}; border: 1px solid black; margin-right: 0.25rem; border-radius: 9999px')
                 span(label)
 
     return chart, legend
