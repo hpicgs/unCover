@@ -1,31 +1,20 @@
 import argparse
 
-from nltk.parse.corenlp import CoreNLPDependencyParser, CoreNLPServer
+import pandas_bokeh
 
-from definitions import STANFORD_JARS
-from stylometry.char_trigrams import char_trigrams
-from stylometry.semantic_trigrams import sem_trigrams
-from stylometry.logistic_regression import trigram_distribution, logistic_regression
+from coherence.entities.coreferences import coref_annotation, coref_diagram
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
-    argparser.add_argument('text_files', type=str, nargs='*')
+    argparser.add_argument('text_files', type=str, nargs='+')
+    argparser.add_argument('-o', '--out', type=str, default='plot.html')
     args = argparser.parse_args()
 
-    texts = list[str]()
-    for text_file in args.text_files:
-        with open(text_file, 'r') as fp:
-            texts.append(fp.read())
+    pandas_bokeh.output_file(args.out)
 
-    char_grams = [char_trigrams(text) for text in texts]
-    with CoreNLPServer(*STANFORD_JARS):
-        parser = CoreNLPDependencyParser()
-        sem_grams = [sem_trigrams(text, parser) for text in texts]
-
-    semantic_distribution = trigram_distribution(sem_grams)
-    character_distribution = trigram_distribution(char_grams)
-    print(semantic_distribution)
-    print(character_distribution)
-
-    print(logistic_regression(semantic_distribution, [1, 0]))
-    print(logistic_regression(character_distribution, [1, 0]))
+    plots = list()
+    for tf in args.text_files:
+        with open(tf, 'r') as fp:
+            annotation = coref_annotation(fp.read())
+        plots.append(coref_diagram(annotation))
+    pandas_bokeh.plot_grid([plots], width=1250)
