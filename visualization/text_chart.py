@@ -2,9 +2,14 @@
 from dominate.tags import *
 
 # data: [(sentence/paragraph, [values])]
-# colors: CSS compatible color-strings; same length as [values]
+# colors: CSS compatible color-strings; min same length as [values] (default
+#     value from https://colorbrewer2.org/?type=qualitative&scheme=Set3&n=12)
 # labels: for [values], has to have same length
-def stacked_bar(data: list[tuple[str, list[float]]], colors: list[str], labels: list[str]) -> tuple[div, div]:
+def stacked_bar(
+    data: list[tuple[str, list[float]]],
+    labels: list[str],
+    colors: list[str] = ['#8dd3c7','#ffffb3','#bebada','#fb8072','#80b1d3','#fdb462','#b3de69','#fccde5','#d9d9d9','#bc80bd','#ccebc5','#ffed6f'],
+) -> tuple[div, div]:
     stack_height = max(sum(values) for _, values in data)
 
     chart = div()
