@@ -19,3 +19,5 @@ DATABASE_AUTHORS_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-authors.yaml')
 DATABASE_GEN_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-gen.yaml')
 
 QUERIES = os.getenv("QUERIES", "").split(", ")
+GPT_KEY = os.getenv("GPT_KEY", "")
+OPENAI_ORGA = os.getenv("OPENAI_ORGA", "")
