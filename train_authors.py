@@ -18,12 +18,17 @@ if __name__ == "__main__":
             sys.exit(1)
 
     authors = DatabaseAuthorship.get_authors()
+    print(authors)
     training_data = []
     os.makedirs(STYLOMETRY_DIR, exist_ok=True)
 
+    trainable_authors = []
     for author in authors:
         full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author(author)]
         training_data += full_article_list[:int(len(full_article_list)*0.8)]
+        if len(full_article_list) > 2:
+            trainable_authors.append(author)
+
 
     print('number of training articles:', len(training_data))
 
@@ -33,13 +38,14 @@ if __name__ == "__main__":
     
     character_distribution = trigram_distribution(char_grams)
     semantic_distribution = trigram_distribution(sem_grams)
-    print(character_distribution)
-    print(semantic_distribution)
+    #print(character_distribution)
+    #print(semantic_distribution)
     character_distribution.to_csv("char_distribution.csv")
     semantic_distribution.to_csv("sem_distribution.csv")
 
-    for author in authors:
-        truth_table = [1 if article_tuple[1] == author else 0 for article_tuple in training_data]
+    for author in trainable_authors:
+        truth_table = [1 if author in article_tuple[1] else 0 for article_tuple in training_data]
+        print(truth_table)
         with open(os.path.join(STYLOMETRY_DIR, author.replace('/', '_') + '_char.pickle'), 'wb') as f:
             pickle.dump(logistic_regression(character_distribution, truth_table), f)
         with open(os.path.join(STYLOMETRY_DIR, author.replace('/', '_') + '_sem.pickle'), 'wb') as f:
