@@ -83,8 +83,5 @@ class DatabaseGenArticles:
         data = DatabaseGenArticles.__get_data()
         if data == [] or data is None:
             data = []
-            data.append({"source": source, "text": text, "method": method})
-            DatabaseGenArticles.__write_data(data)
-        elif not any([source == article["source"] for article in data]):
-            data.append({"source": source, "text": text, "method": method})
-            DatabaseGenArticles.__write_data(data)
+        data.append({"source": source, "text": text, "method": method})
+        DatabaseGenArticles.__write_data(data)

@@ -29,6 +29,7 @@ if __name__ == '__main__':
             title = processor.get_title()
             if args.gpt3:
                 DatabaseGenArticles.insert_article(generate_gpt3_news_from_original(processed_page), url, "gpt3")
+
             if args.grover:
                 grover_input = json.dumps({"url": url, "url_used": url, "title": title, "text": processed_page,
                                     "summary": "", "authors": [], "publish_date": "04-19-2023", "domain": "www.com",
