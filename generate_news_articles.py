@@ -28,7 +28,9 @@ if __name__ == '__main__':
             processed_page = re.sub("\s+", " ", processor.get_fulltext())
             title = processor.get_title()
             if args.gpt3:
-                DatabaseGenArticles.insert_article(generate_gpt3_news_from_original(processed_page), url, "gpt3")
+                tmp = generate_gpt3_news_from_original(processed_page)
+                if tmp is not None:
+                    DatabaseGenArticles.insert_article(tmp, url, "gpt3")
 
             if args.grover:
                 grover_input = json.dumps({"url": url, "url_used": url, "title": title, "text": processed_page,
