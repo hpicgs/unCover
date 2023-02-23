@@ -5,3 +5,4 @@ database/files
 geckodriver.log
 __pycache__
 *.txt
+*.html

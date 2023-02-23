@@ -1,31 +1,31 @@
 import argparse
 
-from nltk.parse.corenlp import CoreNLPDependencyParser, CoreNLPServer
+import dominate
+# pyright: reportWildcardImportFromLibrary=false
+from dominate.tags import *
 
-from definitions import STANFORD_JARS
-from stylometry.char_trigrams import char_trigrams
-from stylometry.semantic_trigrams import sem_trigrams
-from stylometry.logistic_regression import trigram_distribution, logistic_regression
+from coherence.entities.coreferences import coref_annotation, coref_diagram
 
 if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
-    argparser.add_argument('text_files', type=str, nargs='*')
+    argparser.add_argument('text', type=str)
+    argparser.add_argument('-o', '--out', type=str, default='plot.html')
     args = argparser.parse_args()
 
-    texts = list[str]()
-    for text_file in args.text_files:
-        with open(text_file, 'r') as fp:
-            texts.append(fp.read())
+    with open(args.text, 'r') as fp:
+        annotation = coref_annotation(fp.read())
+    chart, legend = coref_diagram(annotation)
 
-    char_grams = [char_trigrams(text) for text in texts]
-    with CoreNLPServer(*STANFORD_JARS):
-        parser = CoreNLPDependencyParser()
-        sem_grams = [sem_trigrams(text, parser) for text in texts]
+    title = f'Entity occurrances for {args.text}'
+    doc = dominate.document(title=title)
+    with doc:
+        container = div(style='max-width: 900px; margin: auto')
+        with container:
+            h1(title)
+            h2('Text')
+        container.add(chart)
+        container.add(h2('Legend'))
+        container.add(legend)
 
-    semantic_distribution = trigram_distribution(sem_grams)
-    character_distribution = trigram_distribution(char_grams)
-    print(semantic_distribution)
-    print(character_distribution)
-
-    print(logistic_regression(semantic_distribution, [1, 0]))
-    print(logistic_regression(character_distribution, [1, 0]))
+    with open(args.out, 'w') as fp:
+        fp.write(doc.render())
