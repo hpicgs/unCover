@@ -113,4 +113,3 @@ dependencies:
     - wsproto==1.2.0
     - yarl==1.8.2
     - zipp==3.14.0
-prefix: /home/exarlae/anaconda3/envs/XAI

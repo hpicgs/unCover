@@ -18,6 +18,7 @@ class MockDatabase:
         except:
             return list()
 
+
 class DatabaseAuthorship:
     __db = MockDatabase(DATABASE_AUTHORS_PATH)
 
@@ -34,18 +35,18 @@ class DatabaseAuthorship:
     @staticmethod
     def get_articles_by_author(author):
         articles = DatabaseAuthorship.__db.get_data()
-        return [article for article in articles if author in article["author"].split(",") and article["text"] is not None]
-
+        return [article for article in articles if
+                author in article["author"].split(",") and article["text"] is not None]
 
     @staticmethod
     def insert_article(text, source, author):
         data = DatabaseAuthorship.__db.get_data()
         if data == [] or data is None:
             data = []
-            data.append({"source":source, "text":text, "author":author})
+            data.append({"source": source, "text": text, "author": author})
             DatabaseAuthorship.__db.write_data(data)
         elif not any([source == article["source"] for article in data]):
-            data.append({"source":source, "text":text, "author":author})
+            data.append({"source": source, "text": text, "author": author})
             DatabaseAuthorship.__db.write_data(data)
 
 
@@ -55,12 +56,9 @@ class DatabaseGenArticles:
     @staticmethod
     def get_method():
         articles = DatabaseGenArticles.__db.get_data()
-        methods = list()
-        for article in articles:
-            for method in article["method"].split(","):
-                if method not in methods and article["text"] is not None:
-                    methods.append(method)
-        return methods
+        return {
+            method for article in articles
+            for method in article['method'].split(',') if article['text'] is not None}
 
     @staticmethod
     def get_articles_by_method(method):
