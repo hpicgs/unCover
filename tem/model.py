@@ -31,4 +31,12 @@ class TopicEvolution:
                 if n < len(self.periods) - 1:
                     s.edge(str(n), str(n + 1))
 
+        # topic nodes for each period
+        for n, period in enumerate(self.periods):
+            with g.subgraph() as s:
+                s.attr(rank='same')
+                s.node(str(n))
+                for topic in period.topics:
+                    s.node(', '.join(topic.words))
+
         return g
