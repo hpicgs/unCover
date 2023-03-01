@@ -3,6 +3,8 @@ from itertools import chain
 
 from nltk.parse.dependencygraph import DependencyGraph
 from nltk.tree.tree import Tree
+from typing import Tuple, Dict
+
 
 def index_tree(graph: DependencyGraph):
     def _tree(address: int):
@@ -20,7 +22,7 @@ def index_tree(graph: DependencyGraph):
     deps = sorted(chain.from_iterable(node['deps'].values()))
     return Tree(str(node['address']), [_tree(dep) for dep in deps])
 
-def color_string(text: str, hsv: tuple[float, float, float], hl: bool=False):
+def color_string(text: str, hsv: Tuple[float, float, float], hl: bool=False):
     rgb = colorsys.hsv_to_rgb(*hsv)
     rgb = [int(c * 255) for c in rgb]
     return ''.join([
@@ -34,11 +36,11 @@ def print_dep_colors(dep_graph: DependencyGraph):
     if not tree: return
 
     root_address = dep_graph.root['address']
-    colors: dict[int, tuple[float, float, float]] = {
+    colors: Dict[int, Tuple[float, float, float]] = {
         root_address: (0, 0, 1)
     }
 
-    def _find_colors(tree: Tree, hue_range: tuple[float, float] = (0, 1), sat: float = 0.5, decline: float = 1):
+    def _find_colors(tree: Tree, hue_range: Tuple[float, float] = (0, 1), sat: float = 0.5, decline: float = 1):
         left, right = hue_range
         interval = float(right - left) / len(tree)
         for n, c in enumerate(tree):
