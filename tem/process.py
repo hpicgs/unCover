@@ -4,7 +4,7 @@ import yaml
 from tem.model import TopicEvolution
 
 def get_topic_evolution(
-    text: str,
+    corpus: list[list[list[str]]], # periods, docs, words
     c: float,
     alpha: float,
     beta: float,
@@ -14,6 +14,12 @@ def get_topic_evolution(
     mergeThreshold: float,
     evolutionThreshold: float,
 ) -> TopicEvolution:
+    structured_text = '\n\n'.join([
+        '\n'.join([
+            ' '.join(word for word in doc)
+        for doc in period])
+    for period in corpus])
+
     p = subprocess.Popen([
             'tem/topic-evolution-model/.build.out/out',
             '--c', str(c),
@@ -25,5 +31,7 @@ def get_topic_evolution(
             '--mergeThreshold', str(mergeThreshold),
             '--evolutionThreshold',str(evolutionThreshold) 
         ], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    out = p.communicate(input=text.encode())[0].decode()
+
+    out = p.communicate(input=structured_text.encode())[0].decode()
+
     return TopicEvolution(yaml.safe_load(out))
