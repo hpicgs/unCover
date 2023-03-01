@@ -13,29 +13,27 @@ def load_from_url(url):
     return "TODO"
 
 
-def load_full_text(t):
-    # TODO: Clean Text
-    return t
-
-
 def run_analysis(m, user_input):
     if m == 'URL':
         content = load_from_url(user_input)
     else:
-        content = load_full_text(user_input)
+        content = user_input
     with st.spinner('Wait for it...'):
-        chart, legend = coref_diagram(coref_annotation(content))
-        doc = dominate.document(title=title)
-        with doc:
-            container = div(style='max-width: 900px; margin: auto')
-            with container:
-                h1(title)
-                h2('Text')
-            container.add(chart)
-            container.add(h2('Legend'))
-            container.add(legend)
-    components.html(doc.render())
+        # TODO: Inlcude other analyis in here!
+        entity_html = entity_occurances(content)
+    st.subheader("Entity Occurrences Analysis:")
+    components.html(entity_html, height=1000, scrolling=True)
 
+
+def entity_occurances(text):
+    chart, legend = coref_diagram(coref_annotation(text))
+    doc = dominate.document(title="Entity Occurrences")
+    with doc:
+        container = div(style='max-width: 900px; margin: auto')
+        container.add(chart)
+        container.add(h2('Legend'))
+        container.add(legend)
+    return doc.render()
 
 if __name__ == '__main__':
     col1, col2 = st.columns([3, 1])
