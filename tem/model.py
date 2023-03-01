@@ -35,19 +35,25 @@ class TopicEvolution:
                     s.edge(str(n), str(n + 1))
 
         # TOPIC NODES FOR EACH PERIOD
-        # topic id -> id of node in previous period
-        previous_topics: dict[int, str] = {}
+        # topic id -> ids of (graph) nodes in previous period
+        previous_topics: dict[int, list[str]] = {}
+        # helper for dictionary
+        def append_or_set(d: dict[int, list[str]], k: int, v: str):
+            if k in d: d[k].append(v)
+            else: d[k] = [v]
+        # create nodes & edges
         for n, period in enumerate(self.periods):
-            current_topics: dict[int, str] = {}
+            current_topics: dict[int, list[str]] = {}
             with g.subgraph() as s:
                 s.attr(rank='same')
                 s.node(str(n))
                 for m, topic in enumerate(period.topics):
                     node_id = f'{n}-{m}'
-                    current_topics[topic.id] = node_id
+                    append_or_set(current_topics, topic.id, node_id)
                     s.node(node_id, label=', '.join(topic.words))
                     if topic.id in previous_topics:
-                        g.edge(previous_topics[topic.id], node_id)
+                        for predecessor in previous_topics[topic.id]:
+                            g.edge(predecessor, node_id)
             previous_topics = current_topics
 
         return g
