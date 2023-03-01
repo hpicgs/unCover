@@ -3,7 +3,7 @@ import graphviz
 class TopicEvolution:
     class Topic:
         def __init__(self, data):
-            self.words: list[str] = data['topic']
+            self.words: list[str] = [str(word) for word in data['topic']]
             self.id: int = data['id']
             self.health: float = data['health']
 
