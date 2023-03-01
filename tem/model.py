@@ -7,6 +7,16 @@ class TopicEvolution:
             self.id: int = data['id']
             self.health: float = data['health']
 
+        def label(self, max_width=32):
+            if len(self.words) == 0: return ''
+            lines = [self.words[0]]
+            for word in self.words[1:]:
+                if len(lines[-1]) < max_width:
+                    lines[-1] += ' ' + word
+                else:
+                    lines.append(word)
+            return '\n'.join(lines)
+
     class Period:
         def __init__(self, data):
             if not data:
@@ -50,7 +60,7 @@ class TopicEvolution:
                 for m, topic in enumerate(period.topics):
                     node_id = f'{n}-{m}'
                     append_or_set(current_topics, topic.id, node_id)
-                    s.node(node_id, label=', '.join(topic.words))
+                    s.node(node_id, label=topic.label())
                     if topic.id in previous_topics:
                         for predecessor in previous_topics[topic.id]:
                             g.edge(predecessor, node_id)
