@@ -9,6 +9,9 @@ class TopicEvolution:
 
     class Period:
         def __init__(self, data):
+            if not data:
+                self.topics = []
+                return
             self.topics = [
                 TopicEvolution.Topic(topic)
             for topic in data]
