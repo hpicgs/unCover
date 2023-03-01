@@ -15,11 +15,11 @@ def docs_from_period(period: str) -> list[list[str]]:
     ]
 
 # merge period into predecessor if number of docs < min_docs
-def merge_short_periods(corpus: list[list[list[str]]], min_docs = 1) -> list[list[list[str]]]:
+def merge_short_periods(corpus: list[list[list[str]]], min_docs = 2) -> list[list[list[str]]]:
     if len(corpus) == 0: return []
     merged = [corpus[0]]
     for period in corpus[1:]:
-        if len(merged[-1]) > min_docs:
+        if len(merged[-1]) >= min_docs:
             merged.append(period)
         else:
             merged[-1] += period
