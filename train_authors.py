@@ -1,4 +1,5 @@
-import pickle
+import pickle, time, subprocess
+import nltk
 from nltk.parse.corenlp import CoreNLPDependencyParser
 
 from definitions import STYLOMETRY_DIR, DATABASE_AUTHORS_PATH
@@ -8,7 +9,17 @@ from stylometry.logistic_regression import trigram_distribution, logistic_regres
 from database.mock_database import DatabaseAuthorship
 import os, zipfile, sys
 
+#needed because docker cannot run two bash tasks at the same time
+def preparation():
+    nltk.download("punkt")
+    server  = subprocess.Popen(["java", "-mx4g", "-cp", "models/stanford-corenlp-4.5.1/*", "edu.stanford.nlp.pipeline.StanfordCoreNLPServer", "-port", "9000", "-timeout", "15000"], stdout=subprocess.PIPE)
+    time.sleep(40)
+    return server
+
+
 if __name__ == "__main__":
+    #the docker container needs to download this separately
+    preparation()
     if not os.path.isfile(DATABASE_AUTHORS_PATH):
         if os.path.isfile("mock-authors.zip"):
             with zipfile.ZipFile("mock-authors.zip", "r") as zf:
@@ -40,8 +51,8 @@ if __name__ == "__main__":
     semantic_distribution = trigram_distribution(sem_grams)
     #print(character_distribution)
     #print(semantic_distribution)
-    character_distribution.to_csv("char_distribution.csv")
-    semantic_distribution.to_csv("sem_distribution.csv")
+    character_distribution.to_csv("models/stylometry/char_distribution.csv")
+    semantic_distribution.to_csv("models/stylometry/sem_distribution.csv")
 
     for author in trainable_authors:
         truth_table = [1 if author in article_tuple[1] else 0 for article_tuple in training_data]

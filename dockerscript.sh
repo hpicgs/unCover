@@ -1,0 +1,2 @@
+python3 train_authors.py
+python3 train_authors.py
