@@ -1,16 +1,25 @@
+import base64
+
 from PIL import Image
 import streamlit as st
 import streamlit.components.v1 as components
+import requests, re
 import dominate
 # pyright: reportWildcardImportFromLibrary=false
 from dominate.tags import *
 
+from scraper.page_processor import PageProcessor
 from coherence.entities.coreferences import coref_annotation, coref_diagram
+from tem.process import get_topic_evolution
+from tem.nlp import docs_from_period, merge_short_periods
 
 
 def load_from_url(url):
-    # TODO: load article
-    return "TODO"
+    page = requests.get(url).text
+    processor = PageProcessor(page)
+    processed_page = processor.get_fulltext_with_newline()
+    print(processed_page)
+    return processed_page
 
 
 def run_analysis(m, user_input):
@@ -18,11 +27,30 @@ def run_analysis(m, user_input):
         content = load_from_url(user_input)
     else:
         content = user_input
-    with st.spinner('Wait for it...'):
-        # TODO: Inlcude other analyis in here!
+    with st.spinner("Wait for entity occurrences..."):
+        # TODO: Inlcude other analyis like this!
         entity_html = entity_occurances(content)
     st.subheader("Entity Occurrences Analysis:")
     components.html(entity_html, height=1000, scrolling=True)
+    with st.spinner("Wait for Topic Analysis..."):
+        corpus = [docs_from_period(line) for line in content.split('\n') if len(line) > 0]
+        corpus = merge_short_periods(corpus, min_docs=2)
+        te = get_topic_evolution(
+            corpus,
+            c=0.5,
+            alpha=0,
+            beta=-1,
+            gamma=0,
+            delta=1,
+            theta=2,
+            mergeThreshold=100,
+            evolutionThreshold=100
+        )
+    st.subheader("Topic Evolution Analysis:")
+    image = te.graph().pipe(format='jpg')
+    st.image(image, caption="Topic Evolution on Input Text")
+
+
 
 
 def entity_occurances(text):
