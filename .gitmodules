@@ -1,3 +1,6 @@
 [submodule "grover"]
 	path = grover
 	url = https://github.com/lucasliebe/grover-module
+[submodule "tem/topic-evolution-model"]
+	path = tem/topic-evolution-model
+	url = https://github.com/jannis-baum/topic-evolution-model.git
