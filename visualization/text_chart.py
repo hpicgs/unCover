@@ -58,8 +58,8 @@ def stacked_bar(
     legend = div()
     for n, label in enumerate(labels):
         with legend:
-            with p():
-                span(style=f'display: inline-block; width: 1em; height: 1em; {_get_style(n)}; border: 1px solid black; margin-right: 0.25rem; border-radius: 9999px')
+            with p(style='display: flex; align-items: center'):
+                span(style=f'display: inline-block; width: 2em; height: 2em; {_get_style(n)}; border: 1px solid black; margin-right: 0.5rem; border-radius: 9999px')
                 span(label)
 
     return chart, legend
