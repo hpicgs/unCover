@@ -119,5 +119,6 @@ def sem_performance():
     #false_ai = sum([1 if prediction == correct_class[i] and prediction == 0 else 0 for i, prediction in enumerate(predictions)]) / predictions.count(-1)
     return {"accuracy":accuracy, "ai_true_positives":0, "ai_false_positives":0}
 
+write_test_distributions()
 print(char_performance())
 print(sem_performance())
