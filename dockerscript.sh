@@ -1,2 +1,2 @@
-python3 train_authors.py
-python3 train_authors.py
+python3 train_authors.py --nfeatures 20
+python3 train_authors.py --nfeatures 20

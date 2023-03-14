@@ -24,6 +24,16 @@ def trigram_distribution(trigram_lists: list[dict], max_features: int = 10):
 
     return pd.DataFrame(values, columns=features)
 
+def fixed_trigram_distribution(trigram_lists: list[dict], features):
+    values = list()
+    for trigrams in trigram_lists:
+        count = sum(c for c in trigrams.values())
+        values.append(np.transpose(np.array([
+            0 if feature not in trigrams else trigrams[feature] / count
+        for feature in features])))
+
+    return pd.DataFrame(values, columns=features)
+
 def logistic_regression(trigram_dataframe: pd.DataFrame, truth_labels: list()):
     if len(trigram_dataframe) <= 1:
         return
