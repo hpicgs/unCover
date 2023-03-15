@@ -58,8 +58,8 @@ def predict_author(text: str, n_features: int = 100):
     sem_features = [eval(feature) for feature in list(pd.read_csv(os.path.join(STYLOMETRY_DIR, "sem_distribution" + str(n_features) + ".csv")).columns)[1:]]
     char_grams = char_trigrams(text)
     sem_grams = sem_trigrams(text, parser)
-    char_distribution = fixed_trigram_distribution(char_grams, char_features)
-    sem_distribution = fixed_trigram_distribution(sem_grams, sem_features)
+    char_distribution = fixed_trigram_distribution([char_grams], char_features)
+    sem_distribution = fixed_trigram_distribution([sem_grams], sem_features)
     char_confidence = {}
     sem_confidence = {}
     for author in authors:
@@ -67,8 +67,8 @@ def predict_author(text: str, n_features: int = 100):
             char_confidence[author] = pickle.load(fp).predict_proba(char_distribution)
         with open(os.path.join(STYLOMETRY_DIR, author + "_sem" + str(n_features) + ".pickle"), "rb") as fp:
             sem_confidence[author] = pickle.load(fp).predict_proba(sem_distribution)
-    machine = any(sem_confidence[author] > 0.251 for author in authors[:2])
-    human = any(sem_confidence[author] > 0.13 for author in authors[2:])
+    machine = any(sem_confidence[author][0][1] > 0.251 for author in authors[:2])
+    human = any(sem_confidence[author][0][1] > 0.13 for author in authors[2:])
     if (machine and human) or (not human and not machine):
         return 0
     elif machine:
