@@ -12,6 +12,7 @@ from scraper.page_processor import PageProcessor
 from coherence.entities.coreferences import coref_annotation, coref_diagram
 from tem.process import get_topic_evolution
 from tem.nlp import docs_from_period, merge_short_periods
+from stylometry.logistic_regression import predict_author
 
 
 def load_from_url(url):
@@ -27,11 +28,12 @@ def run_analysis(m, user_input):
         content = load_from_url(user_input)
     else:
         content = user_input
+
     with st.spinner("Wait for entity occurrences..."):
-        # TODO: Inlcude other analyis like this!
         entity_html = entity_occurances(content)
     st.subheader("Entity Occurrences Analysis:")
     components.html(entity_html, height=1000, scrolling=True)
+
     with st.spinner("Wait for Topic Analysis..."):
         corpus = [docs_from_period(line) for line in content.split('\n') if len(line) > 0]
         corpus = merge_short_periods(corpus, min_docs=2)
@@ -49,6 +51,15 @@ def run_analysis(m, user_input):
     st.subheader("Topic Evolution Analysis:")
     image = te.graph().pipe(format='jpg')
     st.image(image, caption="Topic Evolution on Input Text")
+
+    with st.spinner("Wait for Style Analysis.."):
+        author = predict_author(content)
+        if author == 1:
+            st.subheader("This text was likely written by a machine!")
+        elif author == -1:
+            st.subheader("This text was likely written by a human author.")
+        elif author == 0:
+            st.subheader("We are not sure if this text was written by a machine or a human.")
 
 
 
