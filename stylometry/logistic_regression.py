@@ -9,6 +9,7 @@ from stylometry.semantic_trigrams import sem_trigrams
 from sklearn.linear_model import LogisticRegression
 from nltk.parse.corenlp import CoreNLPDependencyParser
 
+# TODO: https://github.com/jannis-baum/xai/pull/27#discussion_r1143833664
 authors = ["gpt3",
            "grover",
            "https:__www.theguardian.com_profile_hannah-ellis-petersen",
@@ -67,8 +68,11 @@ def predict_author(text: str, n_features: int = 100):
             char_confidence[author] = pickle.load(fp).predict_proba(char_distribution)
         with open(os.path.join(STYLOMETRY_DIR, author + "_sem" + str(n_features) + ".pickle"), "rb") as fp:
             sem_confidence[author] = pickle.load(fp).predict_proba(sem_distribution)
+
+    # TODO: https://github.com/jannis-baum/xai/pull/27#discussion_r1143835629
     machine = any(sem_confidence[author][0][1] > 0.251 for author in authors[:2])
     human = any(sem_confidence[author][0][1] > 0.13 for author in authors[2:])
+
     if machine == human:
         return 0
     elif machine:
