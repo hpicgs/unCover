@@ -29,6 +29,15 @@ def run_analysis(input_type, user_input):
     else:
         content = user_input
 
+    with st.spinner("Wait for Style Analysis.."):
+        author = predict_author(content)
+        if author == 1:
+            st.subheader("This text was likely written by a machine!")
+        elif author == -1:
+            st.subheader("This text was likely written by a human author.")
+        elif author == 0:
+            st.subheader("We are not sure if this text was written by a machine or a human.")
+
     with st.spinner("Wait for entity occurrences..."):
         entity_html = entity_occurrence_diagram(content)
     st.subheader("Entity Occurrences Analysis:")
@@ -51,17 +60,6 @@ def run_analysis(input_type, user_input):
     st.subheader("Topic Evolution Analysis:")
     image = te.graph().pipe(format='jpg')
     st.image(image, caption="Topic Evolution on Input Text")
-
-    with st.spinner("Wait for Style Analysis.."):
-        author = predict_author(content)
-        if author == 1:
-            st.subheader("This text was likely written by a machine!")
-        elif author == -1:
-            st.subheader("This text was likely written by a human author.")
-        elif author == 0:
-            st.subheader("We are not sure if this text was written by a machine or a human.")
-
-
 
 
 def entity_occurrence_diagram(text):
