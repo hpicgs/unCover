@@ -37,6 +37,9 @@ def run_analysis(input_type, user_input):
             st.subheader("This text was likely written by a human author.")
         elif author == 0:
             st.subheader("We are not sure if this text was written by a machine or a human.")
+    st.write(
+        "Please note that this estimation does not need to be correct and should be further supported by other "
+        "analysis below.")
 
     with st.spinner("Wait for entity occurrences..."):
         entity_html = entity_occurrence_diagram(content)
