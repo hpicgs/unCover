@@ -18,19 +18,19 @@ from stylometry.logistic_regression import predict_author
 def load_from_url(url):
     page = requests.get(url).text
     processor = PageProcessor(page)
-    processed_page = processor.get_fulltext_with_newline()
+    processed_page = processor.get_fulltext(separator="\n")
     print(processed_page)
     return processed_page
 
 
-def run_analysis(m, user_input):
-    if m == 'URL':
+def run_analysis(input_type, user_input):
+    if input_type == 'URL':
         content = load_from_url(user_input)
     else:
         content = user_input
 
     with st.spinner("Wait for entity occurrences..."):
-        entity_html = entity_occurances(content)
+        entity_html = entity_occurrence_diagram(content)
     st.subheader("Entity Occurrences Analysis:")
     components.html(entity_html, height=1000, scrolling=True)
 
@@ -64,7 +64,7 @@ def run_analysis(m, user_input):
 
 
 
-def entity_occurances(text):
+def entity_occurrence_diagram(text):
     chart, legend = coref_diagram(coref_annotation(text))
     doc = dominate.document(title="Entity Occurrences")
     with doc:
@@ -79,15 +79,15 @@ if __name__ == '__main__':
     col1.title("Welcome at unBlock")
     col2.image(Image.open("unBlock.png"), width=100)
     st.write(
-        " \nHere you can analyze a news article on topics and writing style to get further insights on if this text "
-        "might be written by an AI. This system was developed at Hasso-Plattner-Institute. To start please choose "
-        "the type of input and enter the url/ text in the field below.")
+        " \nHere you can analyze a news article on topics and writing style to get further insights on whether this text "
+        "might have been written by an AI. This system was developed at Hasso-Plattner-Institute. To start, please choose "
+        "the type of input and enter the url/text in the field below.")
     col3, col4 = st.columns(2)
-    mode = col3.selectbox("type of input", ('URL', 'Text'), label_visibility="collapsed")
+    input_type = col3.selectbox("type of input", ('URL', 'Text'), label_visibility="collapsed")
     text = ""
-    if mode == 'URL':
+    if input_type == 'URL':
         text = st.text_input("URL to analyze:", "")
     else:
-        text = st.text_area("Full-text to analyze:", height=300)
+        text = st.text_area("Full text to analyze:", height=300)
     if col4.button("Compute Results"):
-        run_analysis(mode, text)
+        run_analysis(input_type, text)

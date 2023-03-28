@@ -27,7 +27,7 @@ if __name__ == '__main__':
         urls = scraper.find_news_urls_for_query(query, args.narticles)
         print(urls)
         for url in urls:
-            print("Current URL Nr: " + str(count) + " " + url)
+            print(f"Current URL Nr: {count} {url}")
             count += 1
             page = requests.get(url).text
             processor = PageProcessor(page)

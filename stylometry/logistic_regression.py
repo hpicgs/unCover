@@ -69,7 +69,7 @@ def predict_author(text: str, n_features: int = 100):
             sem_confidence[author] = pickle.load(fp).predict_proba(sem_distribution)
     machine = any(sem_confidence[author][0][1] > 0.251 for author in authors[:2])
     human = any(sem_confidence[author][0][1] > 0.13 for author in authors[2:])
-    if (machine and human) or (not human and not machine):
+    if machine == human:
         return 0
     elif machine:
         return 1
