@@ -41,11 +41,6 @@ def run_analysis(input_type, user_input):
         "Please note that this estimation does not need to be correct and should be further supported by other "
         "analysis below.")
 
-    with st.spinner("Wait for entity occurrences..."):
-        entity_html = entity_occurrence_diagram(content)
-    st.subheader("Entity Occurrences Analysis:")
-    components.html(entity_html, height=1000, scrolling=True)
-
     with st.spinner("Wait for Topic Analysis..."):
         corpus = [docs_from_period(line) for line in content.split('\n') if len(line) > 0]
         corpus = merge_short_periods(corpus, min_docs=2)
@@ -63,6 +58,11 @@ def run_analysis(input_type, user_input):
     st.subheader("Topic Evolution Analysis:")
     image = te.graph().pipe(format='jpg')
     st.image(image, caption="Topic Evolution on Input Text")
+    
+    with st.spinner("Wait for entity occurrences..."):
+        entity_html = entity_occurrence_diagram(content)
+    st.subheader("Entity Occurrences Analysis:")
+    components.html(entity_html, height=1000, scrolling=True)
 
 
 def entity_occurrence_diagram(text):
