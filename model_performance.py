@@ -120,7 +120,7 @@ def char_performance():
     unsure_ai = sum([1 if prediction == 0 and correct_class[i] == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
     unsure_human = sum([1 if prediction == 0 and correct_class[i] == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
     unsure_total = sum([1 if prediction == 0 else 0 for prediction in predictions]) / len(predictions)
-    print({true_ai, false_ai, true_human, false_human, unsure_ai, unsure_human})
+    print([true_ai, false_ai, true_human, false_human, unsure_ai, unsure_human])
     return {"accuracy":accuracy, "ai_true_positives":true_ai, "ai_false_positives":false_ai, "unsure":unsure_total}
 
 def sem_performance():
@@ -146,7 +146,7 @@ def sem_performance():
     unsure_ai = sum([1 if prediction == 0 and correct_class[i] == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
     unsure_human = sum([1 if prediction == 0 and correct_class[i] == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
     unsure_total = sum([1 if prediction == 0 else 0 for prediction in predictions]) / len(predictions)
-    print({true_ai, false_ai, true_human, false_human, unsure_ai, unsure_human})
+    print([true_ai, false_ai, true_human, false_human, unsure_ai, unsure_human])
     return {"accuracy":accuracy, "ai_true_positives":true_ai, "ai_false_positives":false_ai, "unsure":unsure_total}
 
 
