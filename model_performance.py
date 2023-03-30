@@ -13,7 +13,7 @@ authors = ["gpt3",
            "https:__www.theguardian.com_profile_leyland-cecco",
            "https:__www.theguardian.com_profile_martin-chulov"
            ]
-n = "115"
+n = "100"
 
 def write_test_distributions():
     parser = CoreNLPDependencyParser(url='http://localhost:9000')
@@ -111,11 +111,17 @@ def char_performance():
     print(correct_class)
     print(predictions)
     accuracy = sum([1 if prediction == correct_class[i] else 0 for i, prediction in enumerate(predictions)]) / len(correct_class)
-    count = max(correct_class.count(1), 1)
-    true_ai = sum([1 if prediction == correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count
-    false_ai = sum([1 if prediction != correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count
-    unsure = sum([1 if prediction == 0 else 0 for prediction in predictions]) / len(predictions)
-    return {"accuracy":accuracy, "ai_true_positives":true_ai, "ai_false_positives":false_ai, "unsure":unsure}
+    count_ai = max(correct_class.count(1), 1)
+    count_human = max(correct_class.count(-1), 1)
+    true_ai = sum([1 if prediction == correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
+    false_ai = sum([1 if prediction != correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
+    true_human = sum([1 if prediction == correct_class[i] and prediction == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
+    false_human = sum([1 if prediction != correct_class[i] and prediction == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
+    unsure_ai = sum([1 if prediction == 0 and correct_class[i] == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
+    unsure_human = sum([1 if prediction == 0 and correct_class[i] == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
+    unsure_total = sum([1 if prediction == 0 else 0 for prediction in predictions]) / len(predictions)
+    print({true_ai, false_ai, true_human, false_human, unsure_ai, unsure_human})
+    return {"accuracy":accuracy, "ai_true_positives":true_ai, "ai_false_positives":false_ai, "unsure":unsure_total}
 
 def sem_performance():
     test_dataframe = pd.read_csv(os.path.join(STYLOMETRY_DIR, "test_sem_distribution" + n +".csv"))
@@ -131,11 +137,17 @@ def sem_performance():
     print(correct_class)
     print(predictions)
     accuracy = sum([1 if prediction == correct_class[i] else 0 for i, prediction in enumerate(predictions)]) / len(correct_class)
-    count = max(correct_class.count(1), 1)
-    true_ai = sum([1 if prediction == correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count
-    false_ai = sum([1 if prediction != correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count
-    unsure = sum([1 if prediction == 0 else 0 for prediction in predictions]) / len(predictions)
-    return {"accuracy":accuracy, "ai_true_positives":true_ai, "ai_false_positives":false_ai, "unsure":unsure}
+    count_ai = max(correct_class.count(1), 1)
+    count_human = max(correct_class.count(-1), 1)
+    true_ai = sum([1 if prediction == correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
+    false_ai = sum([1 if prediction != correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
+    true_human = sum([1 if prediction == correct_class[i] and prediction == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
+    false_human = sum([1 if prediction != correct_class[i] and prediction == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
+    unsure_ai = sum([1 if prediction == 0 and correct_class[i] == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
+    unsure_human = sum([1 if prediction == 0 and correct_class[i] == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
+    unsure_total = sum([1 if prediction == 0 else 0 for prediction in predictions]) / len(predictions)
+    print({true_ai, false_ai, true_human, false_human, unsure_ai, unsure_human})
+    return {"accuracy":accuracy, "ai_true_positives":true_ai, "ai_false_positives":false_ai, "unsure":unsure_total}
 
 
 write_test_distributions()
