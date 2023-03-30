@@ -4,6 +4,7 @@ from itertools import chain
 from nltk.parse.dependencygraph import DependencyGraph
 from nltk.tree.tree import Tree
 
+
 def index_tree(graph: DependencyGraph):
     def _tree(address: int):
         node = graph.get_by_address(address)

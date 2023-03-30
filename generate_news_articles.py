@@ -21,14 +21,20 @@ if __name__ == '__main__':
     if not args.grover and not args.gpt3:
         parser.error("please provide at least one method for generating news")
     for query in args.queries.split(","):
+        print("Round starting for " + query)
+        count = 1
         scraper = GoogleScraper(verbose=True)
         urls = scraper.find_news_urls_for_query(query, args.narticles)
         print(urls)
         for url in urls:
+            print(f"Current URL Nr: {count} {url}")
+            count += 1
             page = requests.get(url).text
             processor = PageProcessor(page)
+            print("fetched page")
             processed_page = re.sub("\s+", " ", processor.get_fulltext())
             title = processor.get_title()
+            print("start processing")
             if args.gpt3:
                 tmp = generate_gpt3_news_from_original(processed_page)
                 if tmp is not None:
