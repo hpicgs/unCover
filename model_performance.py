@@ -140,9 +140,9 @@ def sem_performance():
     count_ai = max(correct_class.count(1), 1)
     count_human = max(correct_class.count(-1), 1)
     true_ai = sum([1 if prediction == correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
-    false_ai = sum([1 if prediction != correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
+    false_ai = sum([1 if prediction != correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count_human
     true_human = sum([1 if prediction == correct_class[i] and prediction == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
-    false_human = sum([1 if prediction != correct_class[i] and prediction == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
+    false_human = sum([1 if prediction != correct_class[i] and prediction == -1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
     unsure_ai = sum([1 if prediction == 0 and correct_class[i] == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
     unsure_human = sum([1 if prediction == 0 and correct_class[i] == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
     unsure_total = sum([1 if prediction == 0 else 0 for prediction in predictions]) / len(predictions)
