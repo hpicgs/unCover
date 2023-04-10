@@ -53,6 +53,7 @@ def char_model_prediction(inp):
     confidence_values = {}
     for author in authors:
         confidence_values[author] = models[author].predict_proba(inp)
+    print(confidence_values)
     predictions = []
     for i in range(inp.shape[0]):
         machine = any(confidence_values[author][i][1] > 0.2 for author in authors[:2])
@@ -95,7 +96,7 @@ def char_performance():
             correct_class.append(-1)
         else:
             correct_class.append(0)
-    predictions = char_model_prediction(test_dataframe.drop(["author", "Unnamed: 0"], axis=1))
+    predictions = char_model_prediction(test_dataframe.drop(["author", "Unnamed: 0"], axis=1).iloc[300:310])
     print(predictions)
     accuracy = sum([1 if prediction == correct_class[i] else 0 for i, prediction in enumerate(predictions)]) / len(correct_class)
     #true_ai = sum([1 if prediction == correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / predictions.count(1)
@@ -119,6 +120,6 @@ def sem_performance():
     #false_ai = sum([1 if prediction == correct_class[i] and prediction == 0 else 0 for i, prediction in enumerate(predictions)]) / predictions.count(-1)
     return {"accuracy":accuracy, "ai_true_positives":0, "ai_false_positives":0}
 
-write_test_distributions()
+#write_test_distributions()
 print(char_performance())
-print(sem_performance())
+#print(sem_performance())
