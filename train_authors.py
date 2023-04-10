@@ -18,7 +18,7 @@ if __name__ == "__main__":
     #the docker container needs to download this separately
     preparation()
     parser = argparse.ArgumentParser()
-    parser.add_argument("--nfeatures", action="store", required=False, type=int, default=20, help="number of char trigram & semantic trigram features used in the distribution")
+    parser.add_argument("--nfeatures", action="store", required=False, type=int, default=100, help="number of char trigram & semantic trigram features used in the distribution")
     args = parser.parse_args()
     nfeatures = args.nfeatures
     
