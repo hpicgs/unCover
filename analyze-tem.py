@@ -63,7 +63,7 @@ def analyze_db(data: list[dict[str, str]]):
         if not img: continue
         with open(path, 'wb') as fp:
             fp.write(img)
-    print('done!')
+    print('\ndone!')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='TEM analyzer')
