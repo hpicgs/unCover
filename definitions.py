@@ -19,3 +19,7 @@ DATABASE_AUTHORS_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-authors.yaml')
 DATABASE_MACHINES_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-machines.yaml')
 
 QUERIES = os.getenv("QUERIES", "").split(", ")
+CHAR_MACHINE_CONFIDENCE = float(os.getenv("CHAR_MACHINE_CONFIDENCE", ""))   #tried & tested value: 0.253
+CHAR_HUMAN_CONFIDENCE = float(os.getenv("CHAR_HUMAN_CONFIDENCE", ""))       #tried & tested value: 0.1304
+SEM_MACHINE_CONFIDENCE = float(os.getenv("SEM_MACHINE_CONFIDENCE", ""))     #0.251
+SEM_HUMAN_CONFIDENCE = float(os.getenv("SEM_HUMAN_CONFIDENCE", ""))         #0.13
