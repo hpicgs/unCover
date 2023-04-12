@@ -7,20 +7,21 @@ from tem.model import TopicEvolution
 from tem.nlp import docs_from_period, merge_short_periods
 from tem.process import get_topic_evolution
 
-def te_analysis_data(te: TopicEvolution) -> dict[str, float]:
+def te_analysis_data(te: TopicEvolution) -> dict[str, float] | None:
     node_count_by_id: dict[int, int] = {}
     for period in te.periods:
         for topic in period.topics:
             node_count_by_id[topic.id] = 1 if topic.id not in node_count_by_id else node_count_by_id[topic.id] + 1
     node_count = sum((count for count in node_count_by_id.values()))
 
+    if node_count == 0: return None
     return {
         'n_ids/n_nodes': len(node_count_by_id) / node_count,
         'largest group / n_nodes': max((count for count in node_count_by_id.values())) / node_count,
         'mean n_words per topic': statistics.mean([len(words) for period in te.periods for topic in period.topics for words in topic.words])
     }
 
-def te_analysis_img(text: str) -> bytes:
+def te_analysis_img(text: str) -> bytes | None:
     corpus = [docs_from_period(line) for line in text.split('\n') if len(line) > 0]
     corpus = merge_short_periods(corpus, min_docs=2)
     te = get_topic_evolution(
@@ -35,6 +36,9 @@ def te_analysis_img(text: str) -> bytes:
         evolutionThreshold=100
     )
 
+    data = te_analysis_data(te)
+    if not data: return None
+
     graph = te.graph()
     graph.attr(label='''<<FONT POINT-SIZE="48" COLOR="white">
         <TABLE BGCOLOR="red" ALIGN="left" BORDER="0" CELLBORDER="0" CELLSPACING="40">
@@ -45,19 +49,20 @@ def te_analysis_img(text: str) -> bytes:
             <TD ALIGN="left">{key}</TD>
             <TD ALIGN="right">{value}</TD>
         </TR>
-    '''.format(key=key, value=value) for key, value in te_analysis_data(te).items()])))
+    '''.format(key=key, value=value) for key, value in data.items()])))
 
     return graph.pipe(format='png')
 
 def analyze_db(data: list[dict[str, str]]):
-    print()
     os.makedirs('out', exist_ok=True)
     for n, item in enumerate(data):
         path = f'out/{n}-{item["author"].split("/")[-1]}.png'
         print(f'\r\033[Kanalyzing text {n + 1} of {len(data)}. destination: {path}', end='')
         if not item['text']: continue
+        img = te_analysis_img(item['text'])
+        if not img: continue
         with open(path, 'wb') as fp:
-            fp.write(te_analysis_img(item['text']))
+            fp.write(img)
     print('done!')
 
 if __name__ == '__main__':
