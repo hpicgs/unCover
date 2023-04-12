@@ -1,5 +1,7 @@
 import argparse
+import os
 import statistics
+import yaml
 
 from tem.model import TopicEvolution
 from tem.nlp import docs_from_period, merge_short_periods
@@ -47,12 +49,31 @@ def te_analysis_img(text: str) -> bytes:
 
     return graph.pipe(format='png')
 
+def analyze_db(data: list[dict[str, str]]):
+    print()
+    os.makedirs('out', exist_ok=True)
+    for n, item in enumerate(data):
+        path = f'out/{n}-{item["author"].split("/")[-1]}.png'
+        print(f'\r\033[Kanalyzing text {n + 1} of {len(data)}. destination: {path}', end='')
+        if not item['text']: continue
+        with open(path, 'wb') as fp:
+            fp.write(te_analysis_img(item['text']))
+    print('done!')
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='TEM analyzer')
-    parser.add_argument('file', help='input text file')
+    parser.add_argument('file', help='input text or yaml database file')
     args = parser.parse_args()
 
-    with open(args.file, 'r') as fp:
-        text = fp.read()
-    with open(args.file + ".png", 'wb') as fp:
-        fp.write(te_analysis_img(text))
+    if args.file.endswith('.txt'):
+        with open(args.file, 'r') as fp:
+            text = fp.read()
+        with open(args.file + ".png", 'wb') as fp:
+            fp.write(te_analysis_img(text))
+    elif args.file.endswith('.yaml'):
+        print('reading yaml database')
+        with open(args.file, 'r') as fp:
+            data = yaml.safe_load(fp.read())
+            analyze_db(data)
+    else:
+        parser.error('Unknown file type')
