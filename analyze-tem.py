@@ -46,3 +46,13 @@ def te_analysis_img(text: str) -> bytes:
     '''.format(key=key, value=value) for key, value in te_analysis_data(te).items()])))
 
     return graph.pipe(format='png')
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(prog='TEM analyzer')
+    parser.add_argument('file', help='input text file')
+    args = parser.parse_args()
+
+    with open(args.file, 'r') as fp:
+        text = fp.read()
+    with open(args.file + ".png", 'wb') as fp:
+        fp.write(te_analysis_img(text))
