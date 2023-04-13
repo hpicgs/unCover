@@ -1,4 +1,5 @@
 import argparse
+import csv
 import os
 import statistics
 import yaml
@@ -36,24 +37,7 @@ def te_analysis_data(te: TopicEvolution) -> dict[str, float] | None:
         'median n_words per topic': statistics.median([len(words) for period in te.periods for topic in period.topics for words in topic.words]),
     }
 
-def te_analysis_img(text: str) -> bytes | None:
-    corpus = [docs_from_period(line) for line in text.split('\n') if len(line) > 0]
-    corpus = merge_short_periods(corpus, min_docs=2)
-    te = get_topic_evolution(
-        corpus,
-        c=0.5,
-        alpha=0,
-        beta=-1,
-        gamma=0,
-        delta=1,
-        theta=2,
-        mergeThreshold=100,
-        evolutionThreshold=100
-    )
-
-    data = te_analysis_data(te)
-    if not data: return None
-
+def te_annotated_img(te: TopicEvolution, data: dict[str, float]) -> bytes:
     graph = te.graph()
     graph.attr(label='''<<FONT POINT-SIZE="48" COLOR="white">
         <TABLE BGCOLOR="red" ALIGN="left" BORDER="0" CELLBORDER="0" CELLSPACING="40">
@@ -68,35 +52,61 @@ def te_analysis_img(text: str) -> bytes | None:
 
     return graph.pipe(format='png')
 
-def analyze_db(data: list[dict[str, str]]):
-    for n, item in enumerate(data):
+def get_te(text: str) -> TopicEvolution:
+    corpus = [docs_from_period(line) for line in text.split('\n') if len(line) > 0]
+    corpus = merge_short_periods(corpus, min_docs=2)
+    return get_topic_evolution(
+        corpus,
+        c=0.5,
+        alpha=0,
+        beta=-1,
+        gamma=0,
+        delta=1,
+        theta=2,
+        mergeThreshold=100,
+        evolutionThreshold=100
+    )
+
+def analyze_db(db: list[dict[str, str]]):
+    handles = list()
+    csv_by_author = dict()
+
+    for n, item in enumerate(db):
         if not item['author'] or not item['text']: continue
 
         author = 'human' if item['author'].startswith('http') else item['author']
+        print(f'\r\033[Kanalyzing text by {author} ({n + 1} of {len(db)})', end='')
+
+        te = get_te(item['text'])
+        data = te_analysis_data(te)
+        if not data: continue
+
         directory = os.path.join('out', author)
-        os.makedirs(directory, exist_ok=True)
-        path = os.path.join(directory, f'{n}.png')
 
-        print(f'\r\033[Kanalyzing text {n + 1} of {len(data)}. destination: {path}', end='')
-        img = te_analysis_img(item['text'])
-        if not img: continue
+        if author not in csv_by_author:
+            os.makedirs(directory, exist_ok=True)
+            fp = open(os.path.join(directory, '_stats.csv'), 'w')
+            handles.append(fp)
+            csv_by_author[author] = csv.writer(fp)
+            csv_by_author[author].writerow(data.keys())
+        
+        csv_by_author[author].writerow(data.values())
 
-        with open(path, 'wb') as fp:
+        img_path = os.path.join(directory, f'{n}.png')
+        img = te_annotated_img(te, data)
+        with open(img_path, 'wb') as fp:
             fp.write(img)
+
+    for fp in handles: fp.close()
 
     print('\ndone!')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='TEM analyzer')
-    parser.add_argument('file', help='input text or yaml database file')
+    parser.add_argument('file', help='input yaml database file')
     args = parser.parse_args()
 
-    if args.file.endswith('.txt'):
-        with open(args.file, 'r') as fp:
-            text = fp.read()
-        with open(args.file + ".png", 'wb') as fp:
-            fp.write(te_analysis_img(text))
-    elif args.file.endswith('.yaml'):
+    if args.file.endswith('.yaml'):
         print('reading yaml database')
         with open(args.file, 'r') as fp:
             data = yaml.safe_load(fp.read())
