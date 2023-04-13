@@ -67,7 +67,7 @@ def get_te(text: str) -> TopicEvolution:
         evolutionThreshold=100
     )
 
-def analyze_db(db: list[dict[str, str]]):
+def analyze_db(db: list[dict[str, str]], db_name: str):
     handles = list()
     csv_by_author = dict()
 
@@ -88,11 +88,12 @@ def analyze_db(db: list[dict[str, str]]):
             fp = open(os.path.join(directory, '_stats.csv'), 'w')
             handles.append(fp)
             csv_by_author[author] = csv.writer(fp)
-            csv_by_author[author].writerow(data.keys())
+            csv_by_author[author].writerow(['source'] + list(data.keys()))
         
-        csv_by_author[author].writerow(data.values())
+        item_name = f'{db_name}-{n}'
+        csv_by_author[author].writerow([item_name] + list(data.values()))
 
-        img_path = os.path.join(directory, f'{n}.png')
+        img_path = os.path.join(directory, f'{item_name}.png')
         img = te_annotated_img(te, data)
         with open(img_path, 'wb') as fp:
             fp.write(img)
@@ -110,6 +111,6 @@ if __name__ == '__main__':
         print('reading yaml database')
         with open(args.file, 'r') as fp:
             data = yaml.safe_load(fp.read())
-            analyze_db(data)
+            analyze_db(data, args.file.split('/')[-1].split('.')[0])
     else:
         parser.error('Unknown file type')
