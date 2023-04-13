@@ -69,15 +69,21 @@ def te_analysis_img(text: str) -> bytes | None:
     return graph.pipe(format='png')
 
 def analyze_db(data: list[dict[str, str]]):
-    os.makedirs('out', exist_ok=True)
     for n, item in enumerate(data):
-        path = f'out/{n}-{item["author"].split("/")[-1]}.png'
+        if not item['author'] or not item['text']: continue
+
+        author = 'human' if item['author'].startswith('http') else item['author']
+        directory = os.path.join('out', author)
+        os.makedirs(directory, exist_ok=True)
+        path = os.path.join(directory, f'{n}.png')
+
         print(f'\r\033[Kanalyzing text {n + 1} of {len(data)}. destination: {path}', end='')
-        if not item['text']: continue
         img = te_analysis_img(item['text'])
         if not img: continue
+
         with open(path, 'wb') as fp:
             fp.write(img)
+
     print('\ndone!')
 
 if __name__ == '__main__':
