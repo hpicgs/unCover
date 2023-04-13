@@ -26,7 +26,7 @@ def te_analysis_data(te: TopicEvolution) -> dict[str, float] | None:
         'abs(1 - n_ids/n_nodes)': abs(1 - len(node_count_by_id) / node_count),
         'largest group / n_nodes': max((count for count in node_count_by_id.values())) / node_count,
         'n_{periods with incoming} / (n_periods - 1)': sum(period_has_incoming) / (len(period_has_incoming) - 1),
-        'mean n_words per topic': statistics.mean([len(words) for period in te.periods for topic in period.topics for words in topic.words]),
+        'median n_words per topic': statistics.median([len(words) for period in te.periods for topic in period.topics for words in topic.words]),
     }
 
 def te_analysis_img(text: str) -> bytes | None:
