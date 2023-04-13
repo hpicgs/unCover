@@ -24,10 +24,15 @@ def te_analysis_data(te: TopicEvolution) -> dict[str, float] | None:
             n > 0 and any((i in period_topic_ids[n - 1] for i in ids))
     for n, ids in enumerate(period_topic_ids)]
 
+    longest_period_path = max((
+        len({ n for n, ids in enumerate(period_topic_ids) if topic_id in ids })
+    for topic_id in node_count_by_id.keys()))
+
     return {
         'abs(1 - n_ids/n_nodes)': abs(1 - len(node_count_by_id) / node_count),
         'largest group / n_nodes': max((count for count in node_count_by_id.values())) / node_count,
-        'n_{periods with incoming} / (n_periods - 1)': sum(period_has_incoming) / (len(period_has_incoming) - 1),
+        'n_{periods with incoming} / (n_periods - 1)': sum(period_has_incoming) / (len(te.periods) - 1),
+        'n_{longest connected periods} / (n_periods)': longest_period_path / len(te.periods),
         'median n_words per topic': statistics.median([len(words) for period in te.periods for topic in period.topics for words in topic.words]),
     }
 
