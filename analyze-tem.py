@@ -14,11 +14,19 @@ def te_analysis_data(te: TopicEvolution) -> dict[str, float] | None:
             node_count_by_id[topic.id] = 1 if topic.id not in node_count_by_id else node_count_by_id[topic.id] + 1
     node_count = sum((count for count in node_count_by_id.values()))
 
+    period_topic_ids = [
+            { topic.id for topic in period.topics }
+    for period in te.periods]
+    period_has_incoming = [
+            n > 0 and any((i in period_topic_ids[n - 1] for i in ids))
+    for n, ids in enumerate(period_topic_ids)]
+
     if node_count == 0: return None
     return {
         'n_ids/n_nodes': len(node_count_by_id) / node_count,
         'largest group / n_nodes': max((count for count in node_count_by_id.values())) / node_count,
-        'mean n_words per topic': statistics.mean([len(words) for period in te.periods for topic in period.topics for words in topic.words])
+        'n_{periods with incoming} / (n_periods - 1)': sum(period_has_incoming) / (len(period_has_incoming) - 1),
+        'mean n_words per topic': statistics.mean([len(words) for period in te.periods for topic in period.topics for words in topic.words]),
     }
 
 def te_analysis_img(text: str) -> bytes | None:
