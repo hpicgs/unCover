@@ -8,11 +8,14 @@ from tem.nlp import docs_from_period, merge_short_periods
 from tem.process import get_topic_evolution
 
 def te_analysis_data(te: TopicEvolution) -> dict[str, float] | None:
+    if len(te.periods) < 2: return None
+
     node_count_by_id: dict[int, int] = {}
     for period in te.periods:
         for topic in period.topics:
             node_count_by_id[topic.id] = 1 if topic.id not in node_count_by_id else node_count_by_id[topic.id] + 1
     node_count = sum((count for count in node_count_by_id.values()))
+    if node_count == 0: return None
 
     period_topic_ids = [
             { topic.id for topic in period.topics }
@@ -21,7 +24,6 @@ def te_analysis_data(te: TopicEvolution) -> dict[str, float] | None:
             n > 0 and any((i in period_topic_ids[n - 1] for i in ids))
     for n, ids in enumerate(period_topic_ids)]
 
-    if node_count == 0: return None
     return {
         'abs(1 - n_ids/n_nodes)': abs(1 - len(node_count_by_id) / node_count),
         'largest group / n_nodes': max((count for count in node_count_by_id.values())) / node_count,
