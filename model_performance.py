@@ -170,3 +170,5 @@ def sem_performance():
 #write_test_distributions()
 print(char_performance())
 print(sem_performance())
+
+#TODO: rescrape authors, get about 600 articles per author, scrape with line breaks at p tags

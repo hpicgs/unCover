@@ -5,7 +5,7 @@ class PageProcessor:
         self.__soup = BeautifulSoup(html, features="html.parser")
 
     def get_fulltext(self):
-        return " ".join([element.text for element in self.__soup.find_all("p")])
+        return "\n".join([element.text for element in self.__soup.find_all("p")])
     
     def get_author(self):
         author_elements = [meta_element for meta_element in self.__soup.find_all("meta") if any(["article:author" in meta_element.get(attribute) for attribute in meta_element.attrs])]
