@@ -49,7 +49,7 @@ class DatabaseAuthorship:
     def __write_data(data):
         os.makedirs(DATABASE_FILES_PATH, exist_ok=True)
         with open(DATABASE_AUTHORS_PATH, "w") as mock_db:
-            yaml.dump(data, mock_db, default_flow_style=False)
+            yaml.dump(data, mock_db, default_flow_style="|")
     
 
     @staticmethod
@@ -74,7 +74,14 @@ class DatabaseAuthorship:
     @staticmethod
     def get_articles_by_author(author):
         articles = DatabaseAuthorship.__get_data()
-        return [article for article in articles if author in article["author"].split(",") and article["text"] is not None]
+        return [
+            {
+                "author" : article["author"].split(","),
+                "source" : article["source"],
+                "text" : article["text"].replace("#customdelimiter#", "\n")
+            }
+            for article in articles if author in article["author"].split(",") and article["text"] is not None
+            ]
 
 
     @staticmethod

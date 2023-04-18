@@ -28,7 +28,7 @@ def generate_author_dataset(site, author, narticles=10):
         pagenum = 1
         while len(article_urls) < narticles:
             time.sleep(0.2)
-            url = author + "?page=" + str(pagenum)
+            url = site + "/profile/" + author + "?page=" + str(pagenum)
             urls = get_listed_articles(url)
             if urls and not any(link in article_urls for link in urls):
                 article_urls += urls
@@ -41,6 +41,7 @@ def generate_author_dataset(site, author, narticles=10):
         page = requests.get(article_url).text
         processor = PageProcessor(page)
         processed_page = preprocess_article(processor.get_fulltext())
+        print(len(processed_page.split("\n")))
         author = processor.get_author()
         DatabaseAuthorship.insert_article(processed_page, article_url, author)
 
