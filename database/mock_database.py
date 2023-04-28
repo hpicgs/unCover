@@ -21,7 +21,7 @@ class DatabaseMachines:
         articles = DatabaseMachines.__get_data()
         authors = list()
         for article in articles:
-            for author in article["author"].split(","):
+            for author in article["method"].split(","):
                 if author not in authors and article["text"] is not None:
                     authors.append(author)
         return authors
@@ -29,7 +29,7 @@ class DatabaseMachines:
     @staticmethod
     def get_articles_by_author(author):
         articles = DatabaseMachines.__get_data()
-        return [article for article in articles if author in article["author"].split(",") and article["text"] is not None]
+        return [article for article in articles if author in article["method"].split(",") and article["text"] is not None]
 
 
     @staticmethod

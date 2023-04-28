@@ -7,26 +7,34 @@ from nltk.parse.corenlp import CoreNLPDependencyParser
 import pandas as pd
 import pickle, os, argparse
 
-authors = ["gpt3",
+authors = ["gpt2",
+           "gpt3",
+           "gpt3-phrase",
            "grover",
            "https:__www.theguardian.com_profile_hannah-ellis-petersen",
            "https:__www.theguardian.com_profile_leyland-cecco",
-           "https:__www.theguardian.com_profile_martin-chulov"
+           "https:__www.theguardian.com_profile_martin-chulov",
+           "https:__www.theguardian.com_profile_julianborger",
+           "https:__www.theguardian.com_profile_helen-sullivan"
            ]
 
 author_types = {
+    "gpt2":"ai",
     "gpt3":"ai",
+    "gpt3-phrase":"ai",
     "grover":"ai",
     "https:__www.theguardian.com_profile_hannah-ellis-petersen":"human",
     "https:__www.theguardian.com_profile_leyland-cecco":"human",
-    "https:__www.theguardian.com_profile_martin-chulov":"human"
+    "https:__www.theguardian.com_profile_martin-chulov":"human",
+    "https:__www.theguardian.com_profile_julianborger":"human",
+    "https:__www.theguardian.com_profile_helen-sullivan":"human"
 }
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--nfeatures", action="store", required=False, type=int, default=100, help="number of char trigram & semantic trigram features used in the distribution")
 args = parser.parse_args()    
 
-nfeatures = args.nfeatures
+nfeatures = str(args.nfeatures) + "_2"
 
 def write_test_distributions():
     parser = CoreNLPDependencyParser(url='http://localhost:9000')
@@ -85,7 +93,7 @@ def char_model_prediction(inp):
         human = max(confidence_values[author][i][1] for author in authors if author_types[author] == "human")
         raw_predictions.append((machine, human))
 
-    print(raw_predictions)
+    #print(raw_predictions)
     return final_predictions
 
 def sem_model_prediction(inp):
@@ -111,7 +119,7 @@ def sem_model_prediction(inp):
         human = max(confidence_values[author][i][1] for author in authors if author_types[author] == "human")
         raw_predictions.append((machine, human))
 
-    print(raw_predictions)
+    #print(raw_predictions)
     return final_predictions
 
 def char_performance():
@@ -125,7 +133,7 @@ def char_performance():
         else:
             correct_class.append(0)
     predictions = char_model_prediction(test_dataframe.drop(["author", "Unnamed: 0"], axis=1))
-    print(correct_class)
+    #print(correct_class)
     print(predictions)
     accuracy = sum([1 if prediction == correct_class[i] else 0 for i, prediction in enumerate(predictions)]) / len(correct_class)
     count_ai = max(correct_class.count(1), 1)
@@ -151,7 +159,7 @@ def sem_performance():
         else:
             correct_class.append(0)
     predictions = sem_model_prediction(test_dataframe.drop(["author", "Unnamed: 0"], axis=1))
-    print(correct_class)
+    #print(correct_class)
     print(predictions)
     accuracy = sum([1 if prediction == correct_class[i] else 0 for i, prediction in enumerate(predictions)]) / len(correct_class)
     count_ai = max(correct_class.count(1), 1)
@@ -167,7 +175,7 @@ def sem_performance():
     return {"accuracy":accuracy, "ai_true_positives":true_ai, "ai_false_positives":false_ai, "unsure":unsure_total}
 
 
-#write_test_distributions()
+write_test_distributions()
 print(char_performance())
 print(sem_performance())
 

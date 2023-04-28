@@ -16,7 +16,7 @@ STANFORD_JARS = (
 
 DATABASE_FILES_PATH = os.path.join(ROOT_DIR, 'database', 'files')
 DATABASE_AUTHORS_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-authors.yaml')
-DATABASE_MACHINES_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-machines.yaml')
+DATABASE_MACHINES_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-gen.yaml')
 
 QUERIES = os.getenv("QUERIES", "").split(", ")
 CHAR_MACHINE_CONFIDENCE = float(os.getenv("CHAR_MACHINE_CONFIDENCE", ""))   #tried & tested value: 0.253

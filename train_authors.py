@@ -14,7 +14,7 @@ def preparation():
 
 
 if __name__ == "__main__":
-    preparation()
+    #preparation()
     parser = argparse.ArgumentParser()
     parser.add_argument("--nfeatures", action="store", required=False, type=int, default=100, help="number of char trigram & semantic trigram features used in the distribution")
     parser.add_argument("--minarticles", action="store", required=False, type=int, default=50, help="minimum number of articles required for training on a specific author/model")
@@ -66,15 +66,15 @@ if __name__ == "__main__":
     
     character_distribution = trigram_distribution(char_grams, nfeatures)
     semantic_distribution = trigram_distribution(sem_grams, nfeatures)
-    character_distribution.to_csv("models/stylometry/char_distribution"  + str(nfeatures) +  ".csv")
-    semantic_distribution.to_csv("models/stylometry/sem_distribution"  + str(nfeatures) + ".csv")
+    character_distribution.to_csv("models/stylometry/char_distribution"  + str(nfeatures) +  "_2.csv")
+    semantic_distribution.to_csv("models/stylometry/sem_distribution"  + str(nfeatures) + "_2.csv")
 
     training_subjects = trainable_authors + trainable_machines
-    for author in trainable_subjects:
+    for author in training_subjects:
         truth_table = [1 if author == article_tuple[1] else 0 for article_tuple in training_data]
         print(truth_table)
-        with open(os.path.join(STYLOMETRY_DIR, author.replace('/', '_') + '_char' + str(nfeatures) + '.pickle'), 'wb') as f:
+        with open(os.path.join(STYLOMETRY_DIR, author.replace('/', '_') + '_char' + str(nfeatures) + '_2.pickle'), 'wb') as f:
             pickle.dump(logistic_regression(character_distribution, truth_table), f)
-        with open(os.path.join(STYLOMETRY_DIR, author.replace('/', '_') + '_sem' + str(nfeatures) + '.pickle'), 'wb') as f:
+        with open(os.path.join(STYLOMETRY_DIR, author.replace('/', '_') + '_sem' + str(nfeatures) + '_2.pickle'), 'wb') as f:
             pickle.dump(logistic_regression(semantic_distribution, truth_table), f)
     print('TRAINING DONE!')
