@@ -13,11 +13,11 @@ from sklearn.model_selection import RepeatedStratifiedKFold
 from sklearn.linear_model import LogisticRegression
 
 author_mapping = {
-    "gpt3":0,
-    "gpt2":0,
-    "gpt3-phrase":0,
-    "grover":0,
-    "human":1
+    "gpt3":1,
+    "gpt2":1,
+    "gpt3-phrase":1,
+    "grover":1,
+    "human":0
 }
 
 
@@ -43,11 +43,20 @@ def tem_metric_training(path):
     return model.fit(X, labels)
 
 
+def predict_from_tem_metrics(te):
+    data = te_analysis_data(te)
+    data.pop('median n_words per topic')
+    df = pd.DataFrame(data, index=[0])
+    with open(os.path.join(MODELS_DIR, "tem_metrics", 'metrics_model.pickle'), "rb") as f:
+        model = pickle.load(f)
+    prediction = model.predict_proba(df)
+    return prediction[0].argmax()
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', action="store", required=False,
                         default=os.path.join(DATABASE_FILES_PATH, "tem_stats"),
                         help='directory where the training data is located')
     args = parser.parse_args()
-    with open(os.path.join(os.path.join(MODELS_DIR, "tem_metrics", 'metrics_model.pickle')), 'wb') as f:
+    with open(os.path.join(MODELS_DIR, "tem_metrics", 'metrics_model.pickle'), 'wb') as f:
         pickle.dump(tem_metric_training(args.path), f)

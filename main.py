@@ -13,6 +13,7 @@ from coherence.entities.coreferences import coref_annotation, coref_diagram
 from tem.process import get_topic_evolution
 from tem.nlp import docs_from_period, merge_short_periods
 from stylometry.logistic_regression import predict_author
+from train_tem_metrics import predict_from_tem_metrics
 
 
 def load_from_url(url):
@@ -29,19 +30,10 @@ def run_analysis(input_type, user_input):
     else:
         content = user_input
 
-    with st.spinner("Wait for Style Analysis.."):
-        author = predict_author(content)
-        if author == 1:
-            st.subheader("This text was likely written by a machine!")
-        elif author == -1:
-            st.subheader("This text was likely written by a human author.")
-        elif author == 0:
-            st.subheader("We are not sure if this text was written by a machine or a human.")
-    st.write(
-        "Please note that this estimation does not need to be correct and should be further supported by other "
-        "analysis below.")
+    with st.spinner("Computing Analysis... for long texts this can take a few minutes"):
 
-    with st.spinner("Wait for Topic Analysis..."):
+        style_prediction = predict_author(content)
+
         corpus = [docs_from_period(line) for line in content.split('\n') if len(line) > 0]
         corpus = merge_short_periods(corpus, min_docs=2)
         te = get_topic_evolution(
@@ -55,12 +47,23 @@ def run_analysis(input_type, user_input):
             mergeThreshold=100,
             evolutionThreshold=100
         )
+        te_prediction = predict_from_tem_metrics(te)
+
+        entity_html = entity_occurrence_diagram(content)
+
+    author = get_prediction(style_prediction, te_prediction)
+    if author == 1:
+        st.subheader("This text was likely written by a machine!")
+    elif author == -1:
+        st.subheader("This text was likely written by a human author.")
+    elif author == 0:
+        st.subheader("We are not sure if this text was written by a machine or a human.")
+    st.write(
+        "Please note that this estimation does not need to be correct and should be further supported by the in-depth "
+        "analysis below.")
     st.subheader("Topic Evolution Analysis:")
     image = te.graph().pipe(format='jpg')
     st.image(image, caption="Topic Evolution on Input Text")
-    
-    with st.spinner("Wait for entity occurrences..."):
-        entity_html = entity_occurrence_diagram(content)
     st.subheader("Entity Occurrences Analysis:")
     components.html(entity_html, height=1000, scrolling=True)
 
@@ -74,6 +77,23 @@ def entity_occurrence_diagram(text):
         container.add(h2('Legend'))
         container.add(legend)
     return doc.render()
+
+def get_prediction(style_prediction, te_prediction):
+    if te_prediction == 0:
+        te_prediction = -1
+    style = style_prediction[0] + style_prediction[1]
+    if style == 0:
+        return te_prediction
+    elif style < 0:
+        if te_prediction < 0:
+            return -1
+        else:
+            return 0
+    else:
+        if te_prediction < 0:
+            return 0
+        else:
+            return 1
 
 if __name__ == '__main__':
     col1, col2 = st.columns([3, 1])
