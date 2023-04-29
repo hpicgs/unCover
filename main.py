@@ -81,7 +81,7 @@ def entity_occurrence_diagram(text):
 def get_prediction(style_prediction, te_prediction):
     if te_prediction == 0:
         te_prediction = -1
-    style = style_prediction[0] + style_prediction[1]
+    style = sum(style_prediction)
     if style == 0:
         return te_prediction
     elif style < 0:

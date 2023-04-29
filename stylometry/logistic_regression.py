@@ -106,5 +106,4 @@ def predict_author(text: str, n_features: int = 100):
         sem = 1
     elif human_sem:
         sem = -1
-
-    return [char,sem]
+    return [char, sem]
