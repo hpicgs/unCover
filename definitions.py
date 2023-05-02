@@ -17,6 +17,7 @@ STANFORD_JARS = (
 DATABASE_FILES_PATH = os.path.join(ROOT_DIR, 'database', 'files')
 DATABASE_AUTHORS_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-authors.yaml')
 DATABASE_GEN_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-gen.yaml')
+DATABASE_TEST_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-test.yaml')
 
 QUERIES = os.getenv("QUERIES", "").split(", ")
 GPT_KEY = os.getenv("GPT_KEY", "")
