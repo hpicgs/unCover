@@ -2,11 +2,11 @@ import argparse
 import csv
 import os
 import statistics
+
 import yaml
 
 from tem.model import TopicEvolution
-from tem.nlp import docs_from_period, merge_short_periods
-from tem.process import get_topic_evolution
+from tem.process import get_default_te
 
 def te_analysis_data(te: TopicEvolution) -> dict[str, float] | None:
     if len(te.periods) < 2: return None
@@ -52,21 +52,6 @@ def te_annotated_img(te: TopicEvolution, data: dict[str, float]) -> bytes:
 
     return graph.pipe(format='png')
 
-def get_te(text: str) -> TopicEvolution:
-    corpus = [docs_from_period(line) for line in text.split('\n') if len(line) > 0]
-    corpus = merge_short_periods(corpus, min_docs=2)
-    return get_topic_evolution(
-        corpus,
-        c=0.5,
-        alpha=0,
-        beta=-1,
-        gamma=0,
-        delta=1,
-        theta=2,
-        mergeThreshold=100,
-        evolutionThreshold=100
-    )
-
 def analyze_db(db: list[dict[str, str]], db_name: str):
     handles = list()
     csv_by_author = dict()
@@ -77,7 +62,7 @@ def analyze_db(db: list[dict[str, str]], db_name: str):
         author = 'human' if item['author'].startswith('http') else item['author']
         print(f'\r\033[Kanalyzing text by {author} ({n + 1} of {len(db)})', end='')
 
-        te = get_te(item['text'])
+        te = get_default_te(item['text'])
         data = te_analysis_data(te)
         if not data: continue
 

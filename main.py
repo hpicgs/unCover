@@ -1,16 +1,15 @@
 from PIL import Image
 import streamlit as st
 import streamlit.components.v1 as components
-import requests, re
+import requests
 import dominate
 # pyright: reportWildcardImportFromLibrary=false
 from dominate.tags import *
 
 from scraper.page_processor import PageProcessor
 from coherence.entities.coreferences import coref_annotation, coref_diagram
-from tem.process import get_topic_evolution
-from tem.nlp import docs_from_period, merge_short_periods
 from stylometry.logistic_regression import predict_author
+from tem.process import get_default_te
 from train_tem_metrics import predict_from_tem_metrics
 
 
@@ -33,7 +32,8 @@ def run_analysis(input_type, user_input):
         style_prediction = predict_author(content)
 
         try:
-            te_prediction, te = run_tem_on(content)
+            te = get_default_te(text)
+            te_prediction = predict_from_tem_metrics(te)
         except AttributeError:  # some texts are not working for tem
             st.error("The input text is too short for the Topic Evolution Model to work. Please enter a different "
                      "text. If you are using a URL, please try to copy the text manually since some websites can block "
@@ -68,23 +68,6 @@ def entity_occurrence_diagram(text):
         container.add(h2('Legend'))
         container.add(legend)
     return doc.render()
-
-
-def run_tem_on(text):
-    corpus = [docs_from_period(line) for line in text.split('\n') if len(line) > 0]
-    corpus = merge_short_periods(corpus, min_docs=2)
-    te = get_topic_evolution(
-        corpus,
-        c=0.5,
-        alpha=0,
-        beta=-1,
-        gamma=0,
-        delta=1,
-        theta=2,
-        mergeThreshold=100,
-        evolutionThreshold=100
-    )
-    return predict_from_tem_metrics(te), te
 
 
 def get_prediction(style_prediction, te_prediction):
