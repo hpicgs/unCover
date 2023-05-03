@@ -24,7 +24,7 @@ def query_generation(queries, args):
             page = requests.get(url).text
             processor = PageProcessor(page)
             print("fetched page")
-            processed_page = re.sub("\s+", " ", processor.get_fulltext())
+            processed_page = re.sub(r"\s+", " ", processor.get_fulltext())
             title = processor.get_title()
             print("start processing")
             if args.gpt2:
