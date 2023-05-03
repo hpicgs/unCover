@@ -23,13 +23,12 @@ def generate_gpt3_news_from(doc, size=1000):
 
 def generate_gpt2_news_from(doc, size=1000):
     print("Starting GPT2 Generation")
+    doc_prompt = "I would write a news article about the topic like this:"
     generator = pipeline('text-generation', model='gpt2-large')
     set_seed(42)
-    # doc += "Russia and Ukraine: Who will win this war? It is unlikely a 'third force,' will prevail: A former Soviet politician. In general War is"
-    doc += ". I would write a news article about the topic like this:"
+    doc += ". " + doc_prompt
     result = generator(doc, max_length=size, num_return_sequences=1)[0]["generated_text"]
     print("GPT2 Finished")
     print(result)
-    # return result.rsplit(".", 1)[0] + "."
-    return (result.rsplit(".", 1)[0] + ".").split("I would write a news article about the topic like this:", 1)[1]
+    return (result.rsplit(".", 1)[0] + ".").split(doc_prompt, 1)[1]
 
