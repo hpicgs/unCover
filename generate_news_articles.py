@@ -15,8 +15,6 @@ def query_generation(queries, args):
         count = 1
         scraper = GoogleScraper(verbose=True)
         urls = scraper.find_news_urls_for_query(query, args.narticles)
-        f = open("deleteme", "r")
-        urls = f.read().split(",")
         print(urls)
         for url in urls:
             print(f"Current URL Nr: {count} {url}")
@@ -56,7 +54,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--narticles", action="store", type=int, default=5, required=False, help="maximum number of articles to scrape per query, that will then be used by each method to generate")
     parser.add_argument("--queries", action="store", type=str, required=False, help="scrape articles for a given query, insert multiple values comma separated")
-    parser.add_argument("--phrases", action="store", type=str, required=False, help="generate an articles after comma separated phrases")
+    parser.add_argument("--phrases", action="store", type=str, required=False, help="generate an articles by comma separated phrases")
     parser.add_argument("--gpt3", action="store_true", required=False, help="use gpt3 for text generation")
     parser.add_argument("--gpt2", action="store_true", required=False, help="use gpt2 for text generation, only uses title or phrase not whole articles")
     parser.add_argument("--grover", action="store_true", required=False, help="use grover for text generation, does not work with phrases")
