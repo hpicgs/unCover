@@ -11,6 +11,7 @@ import yaml
 
 from coherence.entities.coreferences import coref_annotation, coref_diagram
 from main import get_prediction
+from nlp.helpers import normalize_quotes
 from stylometry.logistic_regression import predict_author
 from tem.model import TopicEvolution
 from tem.process import get_default_te
@@ -26,7 +27,9 @@ def html_results(text: str, author: Literal[0, 1, -1], te: TopicEvolution, entit
 
         container.add(h2('Full text'))
         for paragraph in text.split('\n'):
-            container.add(p(paragraph))
+            # dominate doesn't do well with unicode characters so we change the
+            # most frequent ones (quotes) into their ascii equivalents
+            container.add(p(normalize_quotes(paragraph)))
 
         container.add(h2('Prediction based on Topic Evolution & stilometry markers'))
         container.add(p([
