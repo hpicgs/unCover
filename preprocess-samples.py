@@ -1,5 +1,6 @@
 import argparse
 import base64
+import csv
 import os
 import random
 from typing import Literal
@@ -51,43 +52,66 @@ def html_results(text: str, author: Literal[0, 1, -1], te: TopicEvolution, entit
 
     return doc.render()
 
-def analyze_samples(db: list[dict[str, str]], db_name: str, samples: int):
-    directory = os.path.join('samples', db_name)
-    os.makedirs(directory, exist_ok=True)
+def analyze_samples(databases: list[tuple[str, list[dict[str, str]]]], sets: int, samples: int):
+    directory = os.path.join('samples')
+    os.makedirs(directory)
 
-    sampled = 0
-    while sampled < samples and len(db) > 0:
-        print(f'\r\033[Kanalyzing random sample {sampled + 1} of {samples}', end='')
+    def draw() -> tuple[str, dict[str, str]]:
+        if len(databases) == 0:
+            raise IndexError('Not enough samples in databases.')
+        i = random.choice(range(len(databases)))
+        db = databases[i][1]
+        j = random.choice(range(len(db)))
+        sample = db.pop(j)
+        if len(db) == 0:
+            databases.pop(i)
+        return (databases[i][0], sample)
 
-        i = random.choice(range(len(db)))
-        text = db.pop(i)['text']
-        if not text: continue
+    sources_fp = open(os.path.join(directory, '.sources.csv'), 'w')
+    sources_writer = csv.writer(sources_fp)
+    sources_writer.writerow(['set', 'sample', 'source'])
 
-        try:
-            style_prediction = predict_author(text)
-            te = get_default_te(text)
-            te_prediction = predict_from_tem_metrics(te)
-            author = get_prediction(style_prediction, te_prediction)
-            entity_diagram = coref_diagram(coref_annotation(text))
-        except: continue
+    for i in range(sets):
+        directory_i = os.path.join(directory, str(i))
+        os.makedirs(directory_i)
+        sampled = 0
+        while sampled < samples:
+            print(f'\r\033[Kanalyzing sample {sampled + 1} of {samples} for set {i + 1} of {sets}', end='')
+            source, sample = draw()
+            text = sample['text']
+            if not text: continue
 
-        with open(os.path.join(directory, f'{i}.html'), 'w') as fp:
-            fp.write(html_results(text, author, te, entity_diagram))
+            try:
+                style_prediction = predict_author(text)
+                te = get_default_te(text)
+                te_prediction = predict_from_tem_metrics(te)
+                author = get_prediction(style_prediction, te_prediction)
+                entity_diagram = coref_diagram(coref_annotation(text))
+            except: continue
 
-        sampled += 1
+            sources_writer.writerow([i, sampled, source])
+            with open(os.path.join(directory_i, f'{sampled}.html'), 'w') as fp:
+                fp.write(html_results(text, author, te, entity_diagram))
 
+            sampled += 1
+
+    sources_fp.close()
     print('\ndone!')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='Analysis preprocessor')
-    parser.add_argument('file', type=str, help='input yaml database file')
-    parser.add_argument('--samples', '-n', type=int, required=True, help='number of samples to draw from the database')
+    parser.add_argument('files', type=str, nargs='+', help='input yaml database files to uniformly draw samples from')
+    parser.add_argument('--samples', '-m', type=int, required=True, help='number of samples per set')
+    parser.add_argument('--sets', '-n', type=int, required=True, help='number of sample sets')
     args = parser.parse_args()
 
-    if args.file.endswith('.yaml'):
-        print('reading yaml database')
-        with open(args.file, 'r') as fp:
+    databases: list[tuple[str, list[dict[str, str]]]] = list()
+    for i, db in enumerate(args.files):
+        name = db.split('/')[-1].split('.')[0]
+        print(f'\r\033[Kreading yaml database "{name}" ({i + 1}/{len(args.files)})', end='')
+        with open(db, 'r') as fp:
             data = yaml.safe_load(fp.read())
-            analyze_samples(data, args.file.split('/')[-1].split('.')[0], args.samples)
-    else:
-        parser.error('Unknown file type')
+            databases.append((name, data))
+    print('\ndone reading')
+
+    analyze_samples(databases, args.sets, args.samples)
