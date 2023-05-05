@@ -8,6 +8,7 @@ from typing import Literal
 import dominate
 # pyright: reportWildcardImportFromLibrary=false
 from dominate.tags import *
+from dominate.util import raw
 import yaml
 
 from coherence.entities.coreferences import coref_annotation, coref_diagram
@@ -22,15 +23,27 @@ def html_results(text: str, author: Literal[0, 1, -1], te: TopicEvolution, entit
     te_img_data = base64.encodebytes(te.graph().pipe(format='png')).decode('ascii')
 
     doc = dominate.document(title='unBlock analysis')
+    with doc.head:
+        # raw prevents escaping of `>` character
+        # CSS `#container > * + *` is like tailwind's `space-y` class
+        style(raw('''\
+            #container > * + * { margin-top: 2rem; }
+            h2 {
+                border-top: 1px solid lightgray;
+                padding-top: 1rem
+            }
+        '''))
+
     with doc:
-        container = div(style='max-width: 900px; margin: auto')
+        container = div(id='container', style='max-width: 900px; margin: auto')
         container.add(h1('unBlock analysis'))
 
         container.add(h2('Full text'))
+        text_container = container.add(div())
         for paragraph in text.split('\n'):
             # dominate doesn't do well with unicode characters so we change the
             # most frequent ones (quotes) into their ascii equivalents
-            container.add(p(normalize_quotes(paragraph)))
+            text_container.add(p(raw(normalize_quotes(paragraph))))
 
         container.add(h2('Prediction based on Topic Evolution & stilometry markers'))
         container.add(p([
