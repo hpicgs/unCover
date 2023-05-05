@@ -84,12 +84,14 @@ def analyze_samples(databases: list[tuple[str, list[dict[str, str]]]], sets: int
     sources_writer = csv.writer(sources_fp)
     sources_writer.writerow(['set', 'sample', 'source'])
 
+    total = sets * samples
     for i in range(sets):
         directory_i = os.path.join(directory, str(i))
         os.makedirs(directory_i)
         sampled = 0
         while sampled < samples:
-            print(f'\r\033[Kanalyzing sample {sampled + 1} of {samples} for set {i + 1} of {sets}', end='')
+            progress = i * samples + sampled + 1
+            print(f'\r\033[Kanalyzing sample {progress}/{total}', end='')
             source, sample = draw()
             text = sample['text']
             if not text: continue
