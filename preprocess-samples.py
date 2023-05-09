@@ -33,7 +33,10 @@ def html_results(
         # raw prevents escaping of `>` character
         # CSS `#container > * + *` is like tailwind's `space-y` class
         style(raw('''\
-            body { padding: 0 4rem; }
+            body {
+                padding: 0 4rem;
+                color: #333;
+            }
             h2 {
                 border-top: 1px solid lightgray;
                 padding-top: 1rem
@@ -42,7 +45,10 @@ def html_results(
             #container { display: flex; }
             #container > * + * { margin-left: 4rem; }
 
-            #left { flex-basis: 33.33333333%; }
+            #left {
+                color: #666;
+                flex-basis: 33.33333333%;
+            }
             #right { flex-basis: 66.66666667%; }
             .col > * + * { margin-top: 2rem; }
 
