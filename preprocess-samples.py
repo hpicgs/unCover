@@ -28,7 +28,7 @@ def html_results(
 ) -> str:
     te_img_data = base64.encodebytes(te.graph().pipe(format='png')).decode('ascii')
 
-    doc = dominate.document(title='unBlock analysis')
+    doc = dominate.document(title=title)
     with doc.head:
         # raw prevents escaping of `>` character
         # CSS `#container > * + *` is like tailwind's `space-y` class
@@ -122,7 +122,7 @@ def analyze_samples(databases: list[tuple[str, list[dict[str, str]]]], sets: int
 
             sources_writer.writerow([i, sampled, source])
             with open(os.path.join(directory_i, f'{sampled}.html'), 'w') as fp:
-                fp.write(html_results(text, author, te, entity_diagram))
+                fp.write(html_results(text, author, te, entity_diagram, title=f'unBlock Analysis for text {sampled}'))
 
             sampled += 1
 
