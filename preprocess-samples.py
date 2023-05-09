@@ -73,12 +73,12 @@ def analyze_samples(databases: list[tuple[str, list[dict[str, str]]]], sets: int
         if len(databases) == 0:
             raise IndexError('Not enough samples in databases.')
         i = random.choice(range(len(databases)))
-        db = databases[i][1]
+        name, db = databases[i]
         j = random.choice(range(len(db)))
         sample = db.pop(j)
         if len(db) == 0:
             databases.pop(i)
-        return (databases[i][0], sample)
+        return (name, sample)
 
     sources_fp = open(os.path.join(directory, '.sources.csv'), 'w')
     sources_writer = csv.writer(sources_fp)
