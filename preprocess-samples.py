@@ -104,7 +104,7 @@ def analyze_samples(databases: list[tuple[str, list[dict[str, str]]]], sets: int
 
     sources_fp = open(os.path.join(directory, '.sources.csv'), 'w')
     sources_writer = csv.writer(sources_fp)
-    sources_writer.writerow(['set', 'sample', 'source'])
+    sources_writer.writerow(['set', 'sample', 'source', 'prediction'])
 
     total = sets * samples
     for set_id in range(1, sets + 1):
@@ -127,7 +127,7 @@ def analyze_samples(databases: list[tuple[str, list[dict[str, str]]]], sets: int
                 entity_diagram = coref_diagram(coref_annotation(text))
             except: continue
 
-            sources_writer.writerow([set_id, text_id, source])
+            sources_writer.writerow([set_id, text_id, source, ['Not sure', 'Machine', 'Human'][author]])
             with open(os.path.join(directory_i, f'{text_id}.html'), 'w') as fp:
                 fp.write(html_results(text, author, te, entity_diagram, title=f'unBlock Analysis for text {text_id}'))
 
