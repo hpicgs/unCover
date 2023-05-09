@@ -101,12 +101,13 @@ def analyze_samples(databases: list[tuple[str, list[dict[str, str]]]], sets: int
     sources_writer.writerow(['set', 'sample', 'source'])
 
     total = sets * samples
-    for i in range(sets):
-        directory_i = os.path.join(directory, str(i))
+    for set_id in range(1, sets + 1):
+        directory_i = os.path.join(directory, str(set_id))
         os.makedirs(directory_i)
         sampled = 0
         while sampled < samples:
-            progress = i * samples + sampled + 1
+            text_id = sampled + 1
+            progress = (set_id - 1) * samples + text_id
             print(f'\r\033[Kanalyzing sample {progress}/{total}', end='')
             source, sample = draw()
             text = sample['text']
@@ -120,9 +121,9 @@ def analyze_samples(databases: list[tuple[str, list[dict[str, str]]]], sets: int
                 entity_diagram = coref_diagram(coref_annotation(text))
             except: continue
 
-            sources_writer.writerow([i, sampled, source])
-            with open(os.path.join(directory_i, f'{sampled}.html'), 'w') as fp:
-                fp.write(html_results(text, author, te, entity_diagram, title=f'unBlock Analysis for text {sampled}'))
+            sources_writer.writerow([set_id, text_id, source])
+            with open(os.path.join(directory_i, f'{text_id}.html'), 'w') as fp:
+                fp.write(html_results(text, author, te, entity_diagram, title=f'unBlock Analysis for text {text_id}'))
 
             sampled += 1
 
