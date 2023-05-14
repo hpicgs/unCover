@@ -29,40 +29,74 @@ if __name__ == '__main__':
     for query in args.queries.split(","):
         print("Round starting for " + query)
         scraper = GoogleScraper(verbose=True)
-        urls = scraper.find_news_urls_for_query(query, args.narticles)
+        try:
+            urls = scraper.find_news_urls_for_query(query, args.narticles)
+        except:
+            try:
+                urls = scraper.find_news_urls_for_query(query, args.narticles)
+            except:
+                print("error fetching urls")
+                continue
         print(urls)
         for url in urls:
             print(f"Current URL Nr: {count} {url}")
-            page = requests.get(url).text
-            processor = PageProcessor(page)
-            print("fetched page")
+            try:
+                page = requests.get(url, timeout=60).text
+                processor = PageProcessor(page)
+                print("fetched page")
+            except:
+                print("error fetching page")
+                continue
             processed_page = re.sub("\s+", " ", processor.get_fulltext())
             title = processor.get_title()
             print("start processing")
+            gpt3, gpt2, grover, human = None, None, None, None
             if "gpt3" in methods:
                 # we will use gpt3 for generating news from titles and whole articles for the same amount
                 if count % 2 == 0:
-                    tmp = generate_gpt3_news_from(title)
+                    gpt3 = generate_gpt3_news_from(title)
                 else:
-                    tmp = generate_gpt3_news_from(processed_page)
-                if tmp is None:
+                    gpt3 = generate_gpt3_news_from(processed_page)
+                if gpt3 is None:
                     print("article at this url too long for gpt3; -> skipping for consistency")
-                    break
-                TestDatabase.insert_article(tmp, url, "gpt3")
+                    continue
             if "gpt2" in methods:
-                TestDatabase.insert_article(generate_gpt2_news_from(title), url, "gpt2")
+                try:
+                    gpt2 = generate_gpt2_news_from(title)
+                except:
+                    print("article produces error for gpt2; -> skipping for consistency")
+                    continue
+                if len(gpt2) < 50:
+                    print("article by gpt2 is too short; -> skipping for consistency")
+                    continue
             if "grover" in methods:
-                grover_input = json.dumps({"url": url, "url_used": url, "title": title, "text": processed_page,
-                                           "summary": "", "authors": [], "publish_date": "04-19-2023",
-                                           "domain": "www.com", "warc_date": "20190424064330", "status": "success",
-                                           "split": "gen","inst_index": 0})
-                TestDatabase.insert_article(
-                    generate_grover_news_from_original(grover_input, "base", MODELS_DIR), url, "grover")
+                try:
+                    grover_input = json.dumps({"url": url, "url_used": url, "title": title, "text": processed_page,
+                                               "summary": "", "authors": [], "publish_date": "04-19-2023",
+                                               "domain": "www.com", "warc_date": "20190424064330", "status": "success",
+                                               "split": "gen","inst_index": 0})
+                    grover = generate_grover_news_from_original(grover_input, "base", MODELS_DIR)
+                except:
+                    print("article produces error for grover; -> skipping for consistency")
+                    continue
             if "human" in methods:
-                TestDatabase.insert_article(processor.get_fulltext(separator="\n"), url, "human")
+                human = processor.get_fulltext(separator="\n")
+                if len(human) < 100:
+                    print("article by gpt2 is too short; -> skipping for consistency")
+                    continue
+                TestDatabase.insert_article(human , url, "human")
+
+            if gpt3:
+                TestDatabase.insert_article(gpt3, url, "gpt3")
+            if gpt2:
+                TestDatabase.insert_article(gpt2, url, "gpt2")
+            if grover:
+                TestDatabase.insert_article(grover, url, "grover")
 
             if count == args.max_amount:
                 break
             count += 1
         if count == args.max_amount:
+            print("reached maximum amount of articles, ended on query: " + query)
             break
+    print("finished at count: " + str(count))
