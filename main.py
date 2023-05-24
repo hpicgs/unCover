@@ -32,7 +32,13 @@ def run_analysis(input_type, user_input):
 
         style_prediction = predict_author(content)
 
-        te_prediction, te = run_tem_on(content)
+        try:
+            te_prediction, te = run_tem_on(content)
+        except AttributeError:  # some texts are not working for tem
+            st.error("The input text is too short for the Topic Evolution Model to work. Please enter a different "
+                     "text. If you are using a URL, please try to copy the text manually since some websites can block "
+                     "our scraper. And result in this error since no text was found.")
+            return
 
         entity_html = entity_occurrence_diagram(content)
 
