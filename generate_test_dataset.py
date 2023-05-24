@@ -66,7 +66,7 @@ if __name__ == '__main__':
                 except:
                     print("article produces error for gpt2; -> skipping for consistency")
                     continue
-                if len(gpt2) < 50:
+                if len(gpt2) < 200:  # make sure gpt2 generated well enough
                     print("article by gpt2 is too short; -> skipping for consistency")
                     continue
             if "grover" in methods:
@@ -81,8 +81,8 @@ if __name__ == '__main__':
                     continue
             if "human" in methods:
                 human = processor.get_fulltext(separator="\n")
-                if len(human) < 100:
-                    print("article by gpt2 is too short; -> skipping for consistency")
+                if len(human) < 600:  # this is to filter out error messages and other scraping mistakes
+                    print("original article is too short; -> skipping for consistency")
                     continue
                 TestDatabase.insert_article(human , url, "human")
 

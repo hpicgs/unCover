@@ -1,5 +1,3 @@
-import base64
-
 from PIL import Image
 import streamlit as st
 import streamlit.components.v1 as components
@@ -34,20 +32,7 @@ def run_analysis(input_type, user_input):
 
         style_prediction = predict_author(content)
 
-        corpus = [docs_from_period(line) for line in content.split('\n') if len(line) > 0]
-        corpus = merge_short_periods(corpus, min_docs=2)
-        te = get_topic_evolution(
-            corpus,
-            c=0.5,
-            alpha=0,
-            beta=-1,
-            gamma=0,
-            delta=1,
-            theta=2,
-            mergeThreshold=100,
-            evolutionThreshold=100
-        )
-        te_prediction = predict_from_tem_metrics(te)
+        te_prediction, te = run_tem_on(content)
 
         entity_html = entity_occurrence_diagram(content)
 
@@ -78,22 +63,45 @@ def entity_occurrence_diagram(text):
         container.add(legend)
     return doc.render()
 
+
+def run_tem_on(text):
+    corpus = [docs_from_period(line) for line in text.split('\n') if len(line) > 0]
+    corpus = merge_short_periods(corpus, min_docs=2)
+    te = get_topic_evolution(
+        corpus,
+        c=0.5,
+        alpha=0,
+        beta=-1,
+        gamma=0,
+        delta=1,
+        theta=2,
+        mergeThreshold=100,
+        evolutionThreshold=100
+    )
+    return predict_from_tem_metrics(te), te
+
+
 def get_prediction(style_prediction, te_prediction):
+    te_confidence = te_prediction[1]
+    te_prediction = te_prediction[0]
     if te_prediction == 0:
         te_prediction = -1
     style = sum(style_prediction)
-    if style == 0:
+    if style * te_prediction > 0:
+        return te_prediction
+    if style == 0 or te_confidence > 0.8:
         return te_prediction
     elif style < 0:
-        if te_prediction < 0:
+        if te_prediction < 0 or te_confidence < 0.6:
             return -1
         else:
             return 0
     else:
-        if te_prediction < 0:
+        if te_prediction < 0 and te_confidence > 0.7:
             return 0
         else:
             return 1
+
 
 if __name__ == '__main__':
     col1, col2 = st.columns([3, 1])

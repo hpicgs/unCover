@@ -90,7 +90,7 @@ def predict_author(text: str, n_features: int = 100):
     machine_char = any(char_confidence[author][0][1] > 0.0949 for author in authors if author_types[author] == "ai")
     human_char = any(char_confidence[author][0][1] > 0.0939 for author in authors if author_types[author] == "human")
     machine_sem = any(sem_confidence[author][0][1] > 0.099 for author in authors if author_types[author] == "ai")
-    human_sem = any(sem_confidence[author][0][1] > 0.0941 for author in authors if author_types[author] == "human")
+    human_sem = any(sem_confidence[author][0][1] > 0.0939 for author in authors if author_types[author] == "human")
 
     char = 0
     if machine_char == human_char:

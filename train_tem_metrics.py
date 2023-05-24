@@ -50,7 +50,7 @@ def predict_from_tem_metrics(te):
     with open(os.path.join(MODELS_DIR, "tem_metrics", 'metrics_model.pickle'), "rb") as f:
         model = pickle.load(f)
     prediction = model.predict_proba(df)
-    return prediction[0].argmax()
+    return prediction[0].argmax(), prediction[0].max()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
