@@ -62,8 +62,12 @@ if __name__ == '__main__':
     print("total Number of articles analyzed: ", str(total_count))
     print(predictions_per_author)
     total_char_true, total_sem_true, total_style_true, total_te_true, total_total_true = 0, 0, 0, 0, 0
-    total_char_unsure, total_sem_unsure, total_style_unsure, total_te_unsure, total_total_unsure = 0, 0, 0, 0, 0
-    total_char_false, total_sem_false, total_style_false, total_te_false, total_total_false = 0, 0, 0, 0, 0
+    ai_total_char_true, ai_total_sem_true, ai_total_style_true, ai_total_te_true, ai_total_total_true = 0, 0, 0, 0, 0
+    ai_total_char_unsure, ai_total_sem_unsure, ai_total_style_unsure, ai_total_te_unsure, ai_total_total_unsure = 0, 0, 0, 0, 0
+    ai_total_char_false, ai_total_sem_false, ai_total_style_false, ai_total_te_false, ai_total_total_false = 0, 0, 0, 0, 0
+    human_total_char_true, human_total_sem_true, human_total_style_true, human_total_te_true, human_total_total_true = 0, 0, 0, 0, 0
+    human_total_char_unsure, human_total_sem_unsure, human_total_style_unsure, human_total_te_unsure, human_total_total_unsure = 0, 0, 0, 0, 0
+    human_total_char_false, human_total_sem_false, human_total_style_false, human_total_te_false, human_total_total_false = 0, 0, 0, 0, 0
     for source in predictions_per_author:
         print("\nStarting for Source: ", source)
         count = predictions_per_author[source]["count"]
@@ -81,29 +85,61 @@ if __name__ == '__main__':
         total_style_true += predictions_per_author[source]["total_style"][source_mapping[source]]
         total_te_true += predictions_per_author[source]["te"][source_mapping[source]]
         total_total_true += predictions_per_author[source]["total"][source_mapping[source]]
-        total_char_unsure += predictions_per_author[source]["char_style"][0]
-        total_sem_unsure += predictions_per_author[source]["sem_style"][0]
-        total_style_unsure += predictions_per_author[source]["total_style"][0]
-        total_te_unsure += predictions_per_author[source]["te"][0]
-        total_total_unsure += predictions_per_author[source]["total"][0]
-        total_char_false += predictions_per_author[source]["char_style"][-source_mapping[source]]
-        total_sem_false += predictions_per_author[source]["sem_style"][-source_mapping[source]]
-        total_style_false += predictions_per_author[source]["total_style"][-source_mapping[source]]
-        total_te_false += predictions_per_author[source]["te"][-source_mapping[source]]
-        total_total_false += predictions_per_author[source]["total"][-source_mapping[source]]
+        if source == "human":
+            continue
+        ai_total_char_true += predictions_per_author[source]["char_style"][1]
+        ai_total_sem_true += predictions_per_author[source]["sem_style"][1]
+        ai_total_style_true += predictions_per_author[source]["total_style"][1]
+        ai_total_te_true += predictions_per_author[source]["te"][1]
+        ai_total_total_true += predictions_per_author[source]["total"][1]
+        ai_total_char_unsure += predictions_per_author[source]["char_style"][0]
+        ai_total_sem_unsure += predictions_per_author[source]["sem_style"][0]
+        ai_total_style_unsure += predictions_per_author[source]["total_style"][0]
+        ai_total_te_unsure += predictions_per_author[source]["te"][0]
+        ai_total_total_unsure += predictions_per_author[source]["total"][0]
+        ai_total_char_false += predictions_per_author[source]["char_style"][-1]
+        ai_total_sem_false += predictions_per_author[source]["sem_style"][-1]
+        ai_total_style_false += predictions_per_author[source]["total_style"][-1]
+        ai_total_te_false += predictions_per_author[source]["te"][-1]
+        ai_total_total_false += predictions_per_author[source]["total"][-1]
+    human_total_char_true += predictions_per_author["human"]["char_style"][-1]
+    human_total_sem_true += predictions_per_author["human"]["sem_style"][-1]
+    human_total_style_true += predictions_per_author["human"]["total_style"][-1]
+    human_total_te_true += predictions_per_author["human"]["te"][-1]
+    human_total_total_true += predictions_per_author["human"]["total"][-1]
+    human_total_char_unsure += predictions_per_author["human"]["char_style"][0]
+    human_total_sem_unsure += predictions_per_author["human"]["sem_style"][0]
+    human_total_style_unsure += predictions_per_author["human"]["total_style"][0]
+    human_total_te_unsure += predictions_per_author["human"]["te"][0]
+    human_total_total_unsure += predictions_per_author["human"]["total"][0]
+    human_total_char_false += predictions_per_author["human"]["char_style"][1]
+    human_total_sem_false += predictions_per_author["human"]["sem_style"][1]
+    human_total_style_false += predictions_per_author["human"]["total_style"][1]
+    human_total_te_false += predictions_per_author["human"]["te"][1]
+    human_total_total_false += predictions_per_author["human"]["total"][1]
     print("\nchar accuracy: ", str(round(total_char_true / total_count * 100, 2)), "%")
     print("sem accuracy: ", str(round(total_sem_true / total_count * 100, 2)), "%")
     print("style accuracy: ", str(round(total_style_true / total_count * 100, 2)), "%")
     print("te accuracy: ", str(round(total_te_true / total_count * 100, 2)), "%")
     print("final accuracy: ", str(round(total_total_true / total_count * 100, 2)), "%")
-    print("\nchar unsure: ", str(round(total_char_unsure / total_count * 100, 2)), "%")
-    print("sem unsure: ", str(round(total_sem_unsure / total_count * 100, 2)), "%")
-    print("style unsure: ", str(round(total_style_unsure / total_count * 100, 2)), "%")
-    print("te unsure: ", str(round(total_te_unsure / total_count * 100, 2)), "%")
-    print("final unsure: ", str(round(total_total_unsure / total_count * 100, 2)), "%")
-    print("\nchar false: ", str(round(total_char_false / total_count * 100, 2)), "%")
-    print("sem false: ", str(round(total_sem_false / total_count * 100, 2)), "%")
-    print("style false: ", str(round(total_style_false / total_count * 100, 2)), "%")
-    print("te false: ", str(round(total_te_false / total_count * 100, 2)), "%")
-    print("final false: ", str(round(total_total_false / total_count * 100, 2)), "%")
+    precision_char = ai_total_char_true / (ai_total_char_true + ai_total_char_false)
+    precision_sem = ai_total_sem_true / (ai_total_sem_true + ai_total_sem_false)
+    precision_style = ai_total_style_true / (ai_total_style_true + ai_total_style_false)
+    precision_te = ai_total_te_true / (ai_total_te_true + ai_total_te_false)
+    precision_total = ai_total_total_true / (ai_total_total_true + ai_total_total_false)
+    recall_char = ai_total_char_true / (ai_total_char_true + ai_total_char_false + 0.5 * ai_total_char_unsure)
+    recall_sem = ai_total_sem_true / (ai_total_sem_true + ai_total_sem_false + 0.5 * ai_total_sem_unsure)
+    recall_style = ai_total_style_true / (ai_total_style_true + ai_total_style_false + 0.5 * ai_total_style_unsure)
+    recall_te = ai_total_te_true / (ai_total_te_true + ai_total_te_false + 0.5 * ai_total_te_unsure)
+    recall_total = ai_total_total_true / (ai_total_total_true + ai_total_total_false + 0.5 * ai_total_total_unsure)
+    f1_char = 2 * precision_char * recall_char / (precision_char + recall_char)
+    f1_sem = 2 * precision_sem * recall_sem / (precision_sem + recall_sem)
+    f1_style = 2 * precision_style * recall_style / (precision_style + recall_style)
+    f1_te = 2 * precision_te * recall_te / (precision_te + recall_te)
+    f1_total = 2 * precision_total * recall_total / (precision_total + recall_total)
+    print("\nchar f1: ", str(round(f1_char * 100, 2)), "%")
+    print("sem f1: ", str(round(f1_sem * 100, 2)), "%")
+    print("style f1: ", str(round(f1_style * 100, 2)), "%")
+    print("te f1: ", str(round(f1_te * 100, 2)), "%")
+    print("final f1: ", str(round(f1_total * 100, 2)), "%")
 
