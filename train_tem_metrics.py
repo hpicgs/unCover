@@ -14,9 +14,9 @@ from sklearn.linear_model import LogisticRegression
 
 author_mapping = {
     "gpt3":1,
-    "gpt2":1,
-    "gpt3-phrase":1,
-    "grover":1,
+    "gpt2":2,
+    "gpt3-phrase":3,
+    "grover":4,
     "human":0
 }
 
@@ -50,7 +50,10 @@ def predict_from_tem_metrics(te):
     with open(os.path.join(MODELS_DIR, "tem_metrics", 'metrics_model.pickle'), "rb") as f:
         model = pickle.load(f)
     prediction = model.predict_proba(df)
-    return prediction[0].argmax(), prediction[0].max()
+    argmax = prediction[0].argmax()
+    if argmax > 1:  # if class is one of AI classes we want to only output the AI class 1
+        argmax = 1
+    return argmax, prediction[0].max()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
