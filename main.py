@@ -111,8 +111,8 @@ def get_prediction(style_prediction, te_prediction):
 
 if __name__ == '__main__':
     col1, col2 = st.columns([3, 1])
-    col1.title("Welcome at unBlock")
-    col2.image(Image.open("unBlock.png"), width=100)
+    col1.title("Welcome at unCover")
+    col2.image(Image.open("unCover.png"), width=100)
     st.write(
         " \nHere you can analyze a news article on topics and writing style to get further insights on whether this text "
         "might have been written by an AI. This system was developed at Hasso-Plattner-Institute. To start, please choose "
