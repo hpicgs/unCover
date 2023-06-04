@@ -10,12 +10,29 @@ from sklearn.linear_model import LogisticRegression
 from nltk.parse.corenlp import CoreNLPDependencyParser
 
 # TODO: https://github.com/jannis-baum/xai/pull/27#discussion_r1143833664
-authors = ["gpt3",
+authors = ["gpt2",
+           "gpt3",
+           "gpt3-phrase",
            "grover",
            "https:__www.theguardian.com_profile_hannah-ellis-petersen",
            "https:__www.theguardian.com_profile_leyland-cecco",
-           "https:__www.theguardian.com_profile_martin-chulov"
+           "https:__www.theguardian.com_profile_martin-chulov",
+           "https:__www.theguardian.com_profile_julianborger",
+           "https:__www.theguardian.com_profile_helen-sullivan"
            ]
+
+author_types = {
+    "gpt2":"ai",
+    "gpt3":"ai",
+    "gpt3-phrase":"ai",
+    "grover":"ai",
+    "https:__www.theguardian.com_profile_hannah-ellis-petersen":"human",
+    "https:__www.theguardian.com_profile_leyland-cecco":"human",
+    "https:__www.theguardian.com_profile_martin-chulov":"human",
+    "https:__www.theguardian.com_profile_julianborger":"human",
+    "https:__www.theguardian.com_profile_helen-sullivan":"human"
+}
+
 
 
 def _most_common_trigrams(trigram_lists: list[dict], max_features: int):
@@ -70,12 +87,23 @@ def predict_author(text: str, n_features: int = 100):
             sem_confidence[author] = pickle.load(fp).predict_proba(sem_distribution)
 
     # TODO: https://github.com/jannis-baum/xai/pull/27#discussion_r1143835629
-    machine = any(sem_confidence[author][0][1] > 0.251 for author in authors[:2])
-    human = any(sem_confidence[author][0][1] > 0.13 for author in authors[2:])
+    machine_char = any(char_confidence[author][0][1] > 0.0949 for author in authors if author_types[author] == "ai")
+    human_char = any(char_confidence[author][0][1] > 0.0939 for author in authors if author_types[author] == "human")
+    machine_sem = any(sem_confidence[author][0][1] > 0.099 for author in authors if author_types[author] == "ai")
+    human_sem = any(sem_confidence[author][0][1] > 0.0939 for author in authors if author_types[author] == "human")
 
-    if machine == human:
-        return 0
-    elif machine:
-        return 1
-    elif human:
-        return -1
+    char = 0
+    if machine_char == human_char:
+        char = 0
+    elif machine_char:
+        char = 1
+    elif human_char:
+        char = -1
+    sem = 0
+    if machine_sem == human_sem:
+        sem = 0
+    elif machine_sem:
+        sem = 1
+    elif human_sem:
+        sem = -1
+    return [char, sem]

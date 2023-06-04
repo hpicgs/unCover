@@ -1,4 +1,4 @@
-from definitions import DATABASE_AUTHORS_PATH, DATABASE_FILES_PATH, DATABASE_GEN_PATH
+from definitions import DATABASE_AUTHORS_PATH, DATABASE_FILES_PATH, DATABASE_GEN_PATH, DATABASE_TEST_PATH
 import yaml, os
 
 
@@ -54,7 +54,7 @@ class DatabaseGenArticles:
     __db = MockDatabase(DATABASE_GEN_PATH)
 
     @staticmethod
-    def get_method():
+    def get_methods():
         articles = DatabaseGenArticles.__db.get_data()
         return {
             method for article in articles
@@ -73,3 +73,23 @@ class DatabaseGenArticles:
             data = []
         data.append({"source": source, "text": text, "method": method})
         DatabaseGenArticles.__db.write_data(data)
+
+
+class TestDatabase:
+    __db = MockDatabase(DATABASE_TEST_PATH)
+
+    @staticmethod
+    def get_all_articles_sorted_by_methods():
+        articles = TestDatabase.__db.get_data()
+        return {label: [article['text'] for article in articles if
+                        label in article["label"].split(",") and article["text"] is not None]
+                for label in [l for a in articles for l in a['label'].split(',')]
+                }
+
+    @staticmethod
+    def insert_article(text, source, label):
+        data = TestDatabase.__db.get_data()
+        if data == [] or data is None:
+            data = []
+        data.append({"source": source, "text": text, "label": label})
+        TestDatabase.__db.write_data(data)

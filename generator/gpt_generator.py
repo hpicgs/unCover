@@ -29,6 +29,5 @@ def generate_gpt2_news_from(doc, size=1000):
     doc += ". " + doc_prompt
     result = generator(doc, max_length=size, num_return_sequences=1)[0]["generated_text"]
     print("GPT2 Finished")
-    print(result)
     return (result.rsplit(".", 1)[0] + ".").split(doc_prompt, 1)[1]
 
