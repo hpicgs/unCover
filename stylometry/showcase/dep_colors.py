@@ -25,7 +25,7 @@ def color_string(text: str, hsv: tuple[float, float, float], hl: bool=False):
     rgb = colorsys.hsv_to_rgb(*hsv)
     rgb = [int(c * 255) for c in rgb]
     return ''.join([
-        f'\033[{"1;4;" if hl else ""}38;2;{rgb[0]};{rgb[1]};{rgb[2]}m',
+        f'\033[1;{"4;" if hl else ""}38;2;{rgb[0]};{rgb[1]};{rgb[2]}m',
         text,
         '\033[0m'
     ])
@@ -36,17 +36,17 @@ def print_dep_colors(dep_graph: DependencyGraph):
 
     root_address = dep_graph.root['address']
     colors: dict[int, tuple[float, float, float]] = {
-        root_address: (0, 0, 1)
+        root_address: (0, 0, 0)
     }
 
-    def _find_colors(tree: Tree, hue_range: tuple[float, float] = (0, 1), sat: float = 0.5, decline: float = 1):
+    def _find_colors(tree: Tree, hue_range: tuple[float, float] = (0, 1), sat: float = 0.8, decline: float = 1):
         left, right = hue_range
         interval = float(right - left) / len(tree)
         for n, c in enumerate(tree):
             idx = int(c.label() if type(c) is Tree else c)
             l = left + interval * n
             r = l + interval
-            colors[idx] = ((l + r) / 2, sat, 1)
+            colors[idx] = ((l + r) / 2, sat, 0.9)
             if type(c) is Tree:
                 _find_colors(c, (l, r), sat * decline)
 
