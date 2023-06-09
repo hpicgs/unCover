@@ -32,7 +32,7 @@ def run_analysis(input_type, user_input):
         style_prediction = predict_author(content)
 
         try:
-            te = get_default_te(text)
+            te = get_default_te(content)
             te_prediction = predict_from_tem_metrics(te)
         except AttributeError:  # some texts are not working for tem
             st.error("The input text is too short for the Topic Evolution Model to work. Please enter a different "
@@ -52,10 +52,12 @@ def run_analysis(input_type, user_input):
     st.write(
         "Stylometry indicated that the text " + ("author could not be identified" if sum(style_prediction) == 0
                                                else "was written by a " + ("machine" if sum(style_prediction) > 0
-                                                                           else "human")) + ".\n"
-        "Metrics on the Topic Graph indicated that the text was written by a " + ("machine" if te_prediction[0] == 1
-                                                                                  else "human")
-        + "With a confidence of" + te_prediction[1] + ".\n"
+                                                                           else "human")) + ".")
+    st.write(
+        "Metrics on the Topic Graph indicated that the text was written by a " + ("machine, " if te_prediction[0] == 1
+                                                                                  else "human, ")
+        + "with a confidence of " + str(round(te_prediction[1] * 100, 2)) + ".")
+    st.write(
         "Please note that this estimation does not need to be correct and should be further supported by the in-depth "
         "analysis below.")
     st.subheader("Topic Evolution Analysis:")
