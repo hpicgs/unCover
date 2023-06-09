@@ -50,6 +50,12 @@ def run_analysis(input_type, user_input):
     elif author == 0:
         st.subheader("We are not sure if this text was written by a machine or a human.")
     st.write(
+        "Stylometry indicated that the text " + ("author could not be identified" if sum(style_prediction) == 0
+                                               else "was written by a " + ("machine" if sum(style_prediction) > 0
+                                                                           else "human")) + ".\n"
+        "Metrics on the Topic Graph indicated that the text was written by a " + ("machine" if te_prediction[0] == 1
+                                                                                  else "human")
+        + "With a confidence of" + te_prediction[1] + ".\n"
         "Please note that this estimation does not need to be correct and should be further supported by the in-depth "
         "analysis below.")
     st.subheader("Topic Evolution Analysis:")
