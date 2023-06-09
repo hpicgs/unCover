@@ -1,10 +1,8 @@
 from scraper.article_scraper import GoogleScraper
 from scraper.page_processor import PageProcessor
 from database.mock_database import DatabaseAuthorship
-from definitions import QUERIES
-from dotenv import load_dotenv
 from bs4 import BeautifulSoup
-import re, requests, argparse, time, sys
+import re, requests, argparse, time
 
 
 
@@ -40,7 +38,7 @@ def generate_author_dataset(site, author, narticles=10):
         print(article_url)
         page = requests.get(article_url).text
         processor = PageProcessor(page)
-        processed_page = preprocess_article(processor.get_fulltext())
+        processed_page = preprocess_article(processor.get_fulltext(separator="\n"))
         print(len(processed_page.split("\n")))
         author = processor.get_author()
         DatabaseAuthorship.insert_article(processed_page, article_url, author)
@@ -68,7 +66,7 @@ if __name__ == '__main__':
         for url in urls:
             page = requests.get(url).text
             processor = PageProcessor(page)
-            processed_page = preprocess_article(processor.get_fulltext())
+            processed_page = preprocess_article(processor.get_fulltext(separator="\n"))
             author = processor.get_author()
             DatabaseAuthorship.insert_article(processed_page, url, author)
 

@@ -2,7 +2,9 @@ models
 .env
 .idea
 database/files
+out/
+samples/
 geckodriver.log
 __pycache__
 *.txt
-!requirements.txt
+*.html

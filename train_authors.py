@@ -1,20 +1,14 @@
 from nltk.parse.corenlp import CoreNLPDependencyParser
 
-from definitions import STYLOMETRY_DIR, DATABASE_AUTHORS_PATH, DATABASE_FILES_PATH, DATABASE_MACHINES_PATH
+from definitions import STYLOMETRY_DIR, DATABASE_AUTHORS_PATH, DATABASE_GEN_PATH
 from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams
 from stylometry.logistic_regression import trigram_distribution, logistic_regression
-from database.mock_database import DatabaseAuthorship, DatabaseMachines
-import os, zipfile, sys, pickle, time, subprocess, argparse
-
-def preparation():
-    server  = subprocess.Popen(["java", "-mx4g", "-cp", "models/stanford-corenlp-4.5.1/*", "edu.stanford.nlp.pipeline.StanfordCoreNLPServer", "-port", "9000", "-timeout", "15000"], stdout=subprocess.PIPE)
-    time.sleep(40)
-    return server
+from database.mock_database import DatabaseAuthorship, DatabaseGenArticles
+import os, sys, pickle, argparse
 
 
 if __name__ == "__main__":
-    #preparation()
     parser = argparse.ArgumentParser()
     parser.add_argument("--nfeatures", action="store", required=False, type=int, default=100, help="number of char trigram & semantic trigram features used in the distribution")
     parser.add_argument("--minarticles", action="store", required=False, type=int, default=50, help="minimum number of articles required for training on a specific author/model")
@@ -25,12 +19,12 @@ if __name__ == "__main__":
     if not os.path.isfile(DATABASE_AUTHORS_PATH):
          print("ERROR: no database for human authors was provided")
          sys.exit(1)
-    if not os.path.isfile(DATABASE_MACHINES_PATH):
+    if not os.path.isfile(DATABASE_GEN_PATH):
         print("Error: no database for machine authors was provided")
         sys.exit(1)
 
     authors = DatabaseAuthorship.get_authors()
-    machines = DatabaseMachines.get_authors()
+    machines = DatabaseGenArticles.get_methods()
     print("Human authors:")
     print(authors)
     print("Language models:")

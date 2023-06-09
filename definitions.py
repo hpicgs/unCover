@@ -16,10 +16,14 @@ STANFORD_JARS = (
 
 DATABASE_FILES_PATH = os.path.join(ROOT_DIR, 'database', 'files')
 DATABASE_AUTHORS_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-authors.yaml')
-DATABASE_MACHINES_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-gen.yaml')
+DATABASE_GEN_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-gen.yaml')
+DATABASE_TEST_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-test.yaml')
 
 QUERIES = os.getenv("QUERIES", "").split(", ")
-CHAR_MACHINE_CONFIDENCE = float(os.getenv("CHAR_MACHINE_CONFIDENCE", ""))   #tried & tested value: 0.253
-CHAR_HUMAN_CONFIDENCE = float(os.getenv("CHAR_HUMAN_CONFIDENCE", ""))       #tried & tested value: 0.1304
-SEM_MACHINE_CONFIDENCE = float(os.getenv("SEM_MACHINE_CONFIDENCE", ""))     #0.251
-SEM_HUMAN_CONFIDENCE = float(os.getenv("SEM_HUMAN_CONFIDENCE", ""))         #0.13
+GPT_KEY = os.getenv("GPT_KEY", "")
+OPENAI_ORGA = os.getenv("OPENAI_ORGA", "")
+
+CHAR_MACHINE_CONFIDENCE = float(os.getenv("CHAR_MACHINE_CONFIDENCE", ""))
+CHAR_HUMAN_CONFIDENCE = float(os.getenv("CHAR_HUMAN_CONFIDENCE", ""))
+SEM_MACHINE_CONFIDENCE = float(os.getenv("SEM_MACHINE_CONFIDENCE", ""))
+SEM_HUMAN_CONFIDENCE = float(os.getenv("SEM_HUMAN_CONFIDENCE", ""))
