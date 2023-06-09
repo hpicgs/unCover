@@ -56,7 +56,7 @@ def run_analysis(input_type, user_input):
     st.write(
         "Metrics on the Topic Graph indicated that the text was written by a " + ("machine, " if te_prediction[0] == 1
                                                                                   else "human, ")
-        + "with a confidence of " + str(round(te_prediction[1] * 100, 2)) + ".")
+        + "with a confidence of " + str(round(te_prediction[1] * 100, 2)) + "%.")
     st.write(
         "Please note that this estimation does not need to be correct and should be further supported by the in-depth "
         "analysis below.")
