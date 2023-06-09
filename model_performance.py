@@ -84,7 +84,6 @@ def char_model_prediction(inp):
         human = max(confidence_values[author][i][1] for author in authors if used_authors[author] == "human")
         raw_predictions.append((machine, human))
 
-    #print(raw_predictions)
     return final_predictions
 
 def sem_model_prediction(inp):
@@ -111,7 +110,6 @@ def sem_model_prediction(inp):
         human = max(confidence_values[author][i][1] for author in authors if used_authors[author] == "human")
         raw_predictions.append((machine, human))
 
-    #print(raw_predictions)
     return final_predictions
 
 def char_performance():
@@ -125,7 +123,6 @@ def char_performance():
         else:
             correct_class.append(0)
     predictions = char_model_prediction(test_dataframe.drop(["author", "Unnamed: 0"], axis=1))
-    #print(correct_class)
     print(predictions)
     accuracy = sum([1 if prediction == correct_class[i] else 0 for i, prediction in enumerate(predictions)]) / len(correct_class)
     count_ai = max(correct_class.count(1), 1)
@@ -151,7 +148,6 @@ def sem_performance():
         else:
             correct_class.append(0)
     predictions = sem_model_prediction(test_dataframe.drop(["author", "Unnamed: 0"], axis=1))
-    #print(correct_class)
     print(predictions)
     accuracy = sum([1 if prediction == correct_class[i] else 0 for i, prediction in enumerate(predictions)]) / len(correct_class)
     count_ai = max(correct_class.count(1), 1)
