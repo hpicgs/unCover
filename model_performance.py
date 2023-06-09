@@ -1,5 +1,5 @@
 from definitions import STYLOMETRY_DIR, CHAR_MACHINE_CONFIDENCE, CHAR_HUMAN_CONFIDENCE, SEM_MACHINE_CONFIDENCE, SEM_HUMAN_CONFIDENCE
-from database.mock_database import DatabaseAuthorship, DatabaseMachines
+from database.mock_database import DatabaseAuthorship, DatabaseGenArticles
 from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams
 from stylometry.logistic_regression import fixed_trigram_distribution
@@ -7,18 +7,7 @@ from nltk.parse.corenlp import CoreNLPDependencyParser
 import pandas as pd
 import pickle, os, argparse
 
-authors = ["gpt2",
-           "gpt3",
-           "gpt3-phrase",
-           "grover",
-           "https:__www.theguardian.com_profile_hannah-ellis-petersen",
-           "https:__www.theguardian.com_profile_leyland-cecco",
-           "https:__www.theguardian.com_profile_martin-chulov",
-           "https:__www.theguardian.com_profile_julianborger",
-           "https:__www.theguardian.com_profile_helen-sullivan"
-           ]
-
-author_types = {
+used_authors = {
     "gpt2":"ai",
     "gpt3":"ai",
     "gpt3-phrase":"ai",
@@ -43,12 +32,13 @@ def write_test_distributions():
     author_frame = pd.DataFrame({"author":[]})
     char_frames = []
     sem_frames = []
+    authors = used_authors.keys()
     for author in authors:
         print("working on author " + author)
-        if author_types[author] == "human":
+        if used_authors[author] == "human":
             full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author(author.replace("_", "/"))]
-        elif author_types[author] == "ai":
-            full_article_list = [(article["text"], author) for article in DatabaseMachines.get_articles_by_author(author.replace("_", "/"))]
+        elif used_authors[author] == "ai":
+            full_article_list = [(article["text"], author) for article in DatabaseGenArticles.get_articles_by_author(author.replace("_", "/"))]
         test_data = full_article_list[int(len(full_article_list)*0.8):]
         print("creating char trigrams")
         char_grams = [char_trigrams(article_tuple[0]) for article_tuple in test_data]
@@ -70,6 +60,7 @@ def write_test_distributions():
     full_sem_distribution.to_csv(os.path.join(STYLOMETRY_DIR, "test_sem_distribution" + nfeatures +".csv"))
 
 def char_model_prediction(inp):
+    authors = used_authors.keys()
     models = {}
     for author in authors:
         with open(os.path.join(STYLOMETRY_DIR, author + "_char" + nfeatures +".pickle"), "rb") as fp:
@@ -81,22 +72,23 @@ def char_model_prediction(inp):
     final_predictions = []
     raw_predictions = []
     for i in range(inp.shape[0]):
-        machine = any(confidence_values[author][i][1] > CHAR_MACHINE_CONFIDENCE for author in authors if author_types[author] == "ai")
-        human = any(confidence_values[author][i][1] > CHAR_HUMAN_CONFIDENCE for author in authors if author_types[author] == "human")
+        machine = any(confidence_values[author][i][1] > CHAR_MACHINE_CONFIDENCE for author in authors if used_authors[author] == "ai")
+        human = any(confidence_values[author][i][1] > CHAR_HUMAN_CONFIDENCE for author in authors if used_authors[author] == "human")
         if (machine and human) or (not human and not machine):
             final_predictions.append(0)
         elif machine:
             final_predictions.append(1)
         elif human:
             final_predictions.append(-1)
-        machine = max(confidence_values[author][i][1] for author in authors if author_types[author] == "ai")
-        human = max(confidence_values[author][i][1] for author in authors if author_types[author] == "human")
+        machine = max(confidence_values[author][i][1] for author in authors if used_authors[author] == "ai")
+        human = max(confidence_values[author][i][1] for author in authors if used_authors[author] == "human")
         raw_predictions.append((machine, human))
 
     #print(raw_predictions)
     return final_predictions
 
 def sem_model_prediction(inp):
+    authors = used_authors.keys()
     models = {}
     for author in authors:
         with open(os.path.join(STYLOMETRY_DIR, author + "_sem" + nfeatures +".pickle"), "rb") as fp:
@@ -107,16 +99,16 @@ def sem_model_prediction(inp):
     final_predictions = []
     raw_predictions = []
     for i in range(inp.shape[0]):
-        machine = any(confidence_values[author][i][1] > SEM_MACHINE_CONFIDENCE for author in authors if author_types[author] == "ai")
-        human = any(confidence_values[author][i][1] > SEM_HUMAN_CONFIDENCE for author in authors if author_types[author] == "human")
+        machine = any(confidence_values[author][i][1] > SEM_MACHINE_CONFIDENCE for author in authors if used_authors[author] == "ai")
+        human = any(confidence_values[author][i][1] > SEM_HUMAN_CONFIDENCE for author in authors if used_authors[author] == "human")
         if (machine and human) or (not human and not machine):
             final_predictions.append(0)
         elif machine:
             final_predictions.append(1)
         elif human:
             final_predictions.append(-1)
-        machine = max(confidence_values[author][i][1] for author in authors if author_types[author] == "ai")
-        human = max(confidence_values[author][i][1] for author in authors if author_types[author] == "human")
+        machine = max(confidence_values[author][i][1] for author in authors if used_authors[author] == "ai")
+        human = max(confidence_values[author][i][1] for author in authors if used_authors[author] == "human")
         raw_predictions.append((machine, human))
 
     #print(raw_predictions)
@@ -126,9 +118,9 @@ def char_performance():
     test_dataframe = pd.read_csv(os.path.join(STYLOMETRY_DIR, "test_char_distribution" + nfeatures +".csv"))
     correct_class = []
     for i in range(test_dataframe.shape[0]):
-        if author_types[test_dataframe.iloc[i]["author"]] == "ai":
+        if used_authors[test_dataframe.iloc[i]["author"]] == "ai":
             correct_class.append(1)
-        elif author_types[test_dataframe.iloc[i]["author"]] == "human":
+        elif used_authors[test_dataframe.iloc[i]["author"]] == "human":
             correct_class.append(-1)
         else:
             correct_class.append(0)
@@ -152,9 +144,9 @@ def sem_performance():
     test_dataframe = pd.read_csv(os.path.join(STYLOMETRY_DIR, "test_sem_distribution" + nfeatures +".csv"))
     correct_class = []
     for i in range(test_dataframe.shape[0]):
-        if author_types[test_dataframe.iloc[i]["author"]] == "ai":
+        if used_authors[test_dataframe.iloc[i]["author"]] == "ai":
             correct_class.append(1)
-        elif author_types[test_dataframe.iloc[i]["author"]] == "human":
+        elif used_authors[test_dataframe.iloc[i]["author"]] == "human":
             correct_class.append(-1)
         else:
             correct_class.append(0)
@@ -178,5 +170,3 @@ def sem_performance():
 write_test_distributions()
 print(char_performance())
 print(sem_performance())
-
-#TODO: rescrape authors, get about 600 articles per author, scrape with line breaks at p tags
