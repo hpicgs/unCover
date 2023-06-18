@@ -27,14 +27,14 @@ nfeatures = str(args.nfeatures) + "_2"
 
 def write_test_distributions():
     parser = CoreNLPDependencyParser(url='http://localhost:9000')
-    char_features = list(pd.read_csv(os.path.join(STYLOMETRY_DIR, "char_distribution" + nfeatures +".csv")).columns)[1:]
-    sem_features = [eval(feature) for feature in list(pd.read_csv(os.path.join(STYLOMETRY_DIR, "sem_distribution" + nfeatures +".csv")).columns)[1:]]
+    char_features = list(pd.read_csv(os.path.join(STYLOMETRY_DIR, f"char_distribution{nfeatures}.csv")).columns)[1:]
+    sem_features = [eval(feature) for feature in list(pd.read_csv(os.path.join(STYLOMETRY_DIR, f"sem_distribution{nfeatures}.csv")).columns)[1:]]
     author_frame = pd.DataFrame({"author":[]})
     char_frames = []
     sem_frames = []
     authors = used_authors.keys()
     for author in authors:
-        print("working on author " + author)
+        print(f"working on author {author}")
         if used_authors[author] == "human":
             full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author(author.replace("_", "/"))]
         elif used_authors[author] == "ai":
@@ -56,14 +56,14 @@ def write_test_distributions():
         full_sem_distribution = pd.concat([full_sem_distribution, sem_frames[i+1]])
     full_char_distribution.insert(0, "author", author_frame["author"].to_list())
     full_sem_distribution.insert(0, "author", author_frame["author"].to_list())
-    full_char_distribution.to_csv(os.path.join(STYLOMETRY_DIR, "test_char_distribution" + nfeatures +".csv"))
-    full_sem_distribution.to_csv(os.path.join(STYLOMETRY_DIR, "test_sem_distribution" + nfeatures +".csv"))
+    full_char_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"test_char_distribution{nfeatures}.csv"))
+    full_sem_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"test_sem_distribution{nfeatures}.csv"))
 
 def char_model_prediction(inp):
     authors = used_authors.keys()
     models = {}
     for author in authors:
-        with open(os.path.join(STYLOMETRY_DIR, author + "_char" + nfeatures +".pickle"), "rb") as fp:
+        with open(os.path.join(STYLOMETRY_DIR, f"{author}_char{nfeatures}.pickle"), "rb") as fp:
             models[author] = pickle.load(fp)
     confidence_values = {}
     for author in authors:
@@ -90,7 +90,7 @@ def sem_model_prediction(inp):
     authors = used_authors.keys()
     models = {}
     for author in authors:
-        with open(os.path.join(STYLOMETRY_DIR, author + "_sem" + nfeatures +".pickle"), "rb") as fp:
+        with open(os.path.join(STYLOMETRY_DIR, f"{author}_sem{nfeatures}.pickle"), "rb") as fp:
             models[author] = pickle.load(fp)
     confidence_values = {}
     for author in authors:
@@ -113,7 +113,7 @@ def sem_model_prediction(inp):
     return final_predictions
 
 def char_performance():
-    test_dataframe = pd.read_csv(os.path.join(STYLOMETRY_DIR, "test_char_distribution" + nfeatures +".csv"))
+    test_dataframe = pd.read_csv(os.path.join(STYLOMETRY_DIR, f"test_char_distribution{nfeatures}.csv"))
     correct_class = []
     for i in range(test_dataframe.shape[0]):
         if used_authors[test_dataframe.iloc[i]["author"]] == "ai":
@@ -138,7 +138,7 @@ def char_performance():
     return {"accuracy":accuracy, "ai_true_positives":true_ai, "ai_false_positives":false_ai, "unsure":unsure_total}
 
 def sem_performance():
-    test_dataframe = pd.read_csv(os.path.join(STYLOMETRY_DIR, "test_sem_distribution" + nfeatures +".csv"))
+    test_dataframe = pd.read_csv(os.path.join(STYLOMETRY_DIR, f"test_sem_distribution{nfeatures}.csv"))
     correct_class = []
     for i in range(test_dataframe.shape[0]):
         if used_authors[test_dataframe.iloc[i]["author"]] == "ai":

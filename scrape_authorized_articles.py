@@ -26,7 +26,7 @@ def generate_author_dataset(site, author, narticles=10):
         pagenum = 1
         while len(article_urls) < narticles:
             time.sleep(0.2)
-            url = site + "/profile/" + author + "?page=" + str(pagenum)
+            url = f"{site}/profile/{author}?page={pagenum}"
             urls = get_listed_articles(url)
             if urls and not any(link in article_urls for link in urls):
                 article_urls += urls

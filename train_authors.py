@@ -17,7 +17,7 @@ if __name__ == "__main__":
     minarticles = args.minarticles
     
     if not os.path.isfile(DATABASE_AUTHORS_PATH):
-         print("ERROR: no database for human authors was provided")
+         print("Error: no database for human authors was provided")
          sys.exit(1)
     if not os.path.isfile(DATABASE_GEN_PATH):
         print("Error: no database for machine authors was provided")
@@ -37,14 +37,14 @@ if __name__ == "__main__":
         full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author(author)]
         training_data += full_article_list[:int(len(full_article_list)*0.8)]
         if len(full_article_list) >= minarticles:
-            print("chose author: " + author)
+            print(f"chose author: {author}")
             trainable_authors.append(author)
     trainable_machines = []
     for machine in machines:
         full_article_list = [(article["text"], machine) for article in DatabaseMachines.get_articles_by_author(machine)]
         training_data += full_article_list[:int(len(full_article_list)*0.8)]
         if len(full_article_list) >= minarticles:
-            print("chose language model: " + machine)
+            print("chose language model: {machine}")
             trainable_machines.append(machine)
 
 
@@ -60,15 +60,15 @@ if __name__ == "__main__":
     
     character_distribution = trigram_distribution(char_grams, nfeatures)
     semantic_distribution = trigram_distribution(sem_grams, nfeatures)
-    character_distribution.to_csv("models/stylometry/char_distribution"  + str(nfeatures) +  ".csv")
-    semantic_distribution.to_csv("models/stylometry/sem_distribution"  + str(nfeatures) + ".csv")
+    character_distribution.to_csv("models/stylometry/char_distribution{nfeatures}.csv")
+    semantic_distribution.to_csv("models/stylometry/sem_distribution{nfeatures}.csv")
 
     training_subjects = trainable_authors + trainable_machines
     for author in training_subjects:
         truth_table = [1 if author == article_tuple[1] else 0 for article_tuple in training_data]
         print(truth_table)
-        with open(os.path.join(STYLOMETRY_DIR, author.replace('/', '_') + '_char' + str(nfeatures) + '.pickle'), 'wb') as f:
+        with open(os.path.join(STYLOMETRY_DIR, f"{author.replace('/', '_')_char{nfeatures}.pickle"), "wb") as f:
             pickle.dump(logistic_regression(character_distribution, truth_table), f)
-        with open(os.path.join(STYLOMETRY_DIR, author.replace('/', '_') + '_sem' + str(nfeatures) + '.pickle'), 'wb') as f:
+        with open(os.path.join(STYLOMETRY_DIR, f"author.replace('/', '_')_sem{nfeatures}.pickle"), "wb") as f:
             pickle.dump(logistic_regression(semantic_distribution, truth_table), f)
     print('TRAINING DONE!')
