@@ -22,3 +22,8 @@ DATABASE_TEST_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-test.yaml')
 QUERIES = os.getenv("QUERIES", "").split(", ")
 GPT_KEY = os.getenv("GPT_KEY", "")
 OPENAI_ORGA = os.getenv("OPENAI_ORGA", "")
+
+CHAR_MACHINE_CONFIDENCE = float(os.getenv("CHAR_MACHINE_CONFIDENCE", ""))
+CHAR_HUMAN_CONFIDENCE = float(os.getenv("CHAR_HUMAN_CONFIDENCE", ""))
+SEM_MACHINE_CONFIDENCE = float(os.getenv("SEM_MACHINE_CONFIDENCE", ""))
+SEM_HUMAN_CONFIDENCE = float(os.getenv("SEM_HUMAN_CONFIDENCE", ""))

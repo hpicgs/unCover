@@ -35,8 +35,14 @@ class DatabaseAuthorship:
     @staticmethod
     def get_articles_by_author(author):
         articles = DatabaseAuthorship.__db.get_data()
-        return [article for article in articles if
-                author in article["author"].split(",") and article["text"] is not None]
+        return [
+            {
+                "author" : article["author"].split(","),
+                "source" : article["source"],
+                "text" : article["text"]
+            }
+            for article in articles if author in article["author"].split(",") and article["text"] is not None
+            ]
 
     @staticmethod
     def insert_article(text, source, author):
