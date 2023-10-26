@@ -24,7 +24,7 @@ def html_results(
     author: Literal[0, 1, -1],
     te: TopicEvolution,
     entity_diagram: tuple[div, div],
-    title: str = 'unBlock Analysis',
+    title: str = 'unCover Analysis',
 ) -> str:
     te_img_data = base64.encodebytes(te.graph().pipe(format='png')).decode('ascii')
 
@@ -129,7 +129,7 @@ def analyze_samples(databases: list[tuple[str, list[dict[str, str]]]], sets: int
 
             sources_writer.writerow([set_id, text_id, source, ['Not sure', 'Machine', 'Human'][author]])
             with open(os.path.join(directory_i, f'{text_id}.html'), 'w') as fp:
-                fp.write(html_results(text, author, te, entity_diagram, title=f'unBlock Analysis for text {text_id}'))
+                fp.write(html_results(text, author, te, entity_diagram, title=f'unCover Analysis for text {text_id}'))
 
             sampled += 1
 
