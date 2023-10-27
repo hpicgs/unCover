@@ -41,12 +41,11 @@ if __name__ == "__main__":
             trainable_authors.append(author)
     trainable_machines = []
     for machine in machines:
-        full_article_list = [(article["text"], machine) for article in DatabaseMachines.get_articles_by_author(machine)]
+        full_article_list = [(article["text"], machine) for article in DatabaseGenArticles.get_articles_by_method(machine)]
         training_data += full_article_list[:int(len(full_article_list)*0.8)]
         if len(full_article_list) >= minarticles:
             print("chose language model: {machine}")
             trainable_machines.append(machine)
-
 
     print('number of training articles:', len(training_data))
     print('trainable authors:')
@@ -67,7 +66,7 @@ if __name__ == "__main__":
     for author in training_subjects:
         truth_table = [1 if author == article_tuple[1] else 0 for article_tuple in training_data]
         print(truth_table)
-        with open(os.path.join(STYLOMETRY_DIR, f"{author.replace('/', '_')_char{nfeatures}.pickle"), "wb") as f:
+        with open(os.path.join(STYLOMETRY_DIR, f"author.replace('/', '_')_char{nfeatures}.pickle"), "wb") as f:
             pickle.dump(logistic_regression(character_distribution, truth_table), f)
         with open(os.path.join(STYLOMETRY_DIR, f"author.replace('/', '_')_sem{nfeatures}.pickle"), "wb") as f:
             pickle.dump(logistic_regression(semantic_distribution, truth_table), f)

@@ -1,3 +1,6 @@
+import urllib.error
+from urllib import request
+import subprocess
 from PIL import Image
 import streamlit as st
 import streamlit.components.v1 as components
@@ -5,6 +8,7 @@ import requests
 import dominate
 # pyright: reportWildcardImportFromLibrary=false
 from dominate.tags import *
+from nltk.parse.corenlp import CoreNLPDependencyParser
 
 from scraper.page_processor import PageProcessor
 from coherence.entities.coreferences import coref_annotation, coref_diagram
@@ -101,6 +105,10 @@ def get_prediction(style_prediction, te_prediction):
 
 
 if __name__ == '__main__':
+    try:
+        request.urlopen("http://localhost:9000").getcode()
+    except urllib.error.URLError:
+        subprocess.call(['sh', 'run_CoreNLP_Server.sh'], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
     col1, col2 = st.columns([3, 1])
     col1.title("Welcome at unCover")
     col2.image(Image.open("unCover.png"), width=100)
