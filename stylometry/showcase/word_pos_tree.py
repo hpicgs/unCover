@@ -3,6 +3,7 @@ from itertools import chain
 from nltk.parse.corenlp import DependencyGraph
 from nltk.tree.tree import Tree
 
+
 def word_pos_tree(graph: DependencyGraph):
     def _tree(address: int):
         node = graph.get_by_address(address)

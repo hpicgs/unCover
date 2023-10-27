@@ -11,13 +11,14 @@ from dominate.tags import *
 from dominate.util import raw
 import yaml
 
-from coherence.entities.coreferences import coref_annotation, coref_diagram
+from entityCoherence.coreferences import coref_annotation, coref_diagram
 from main import get_prediction
 from nlp.helpers import normalize_quotes
 from stylometry.logistic_regression import predict_author
 from tem.model import TopicEvolution
 from tem.process import get_default_te
 from train_tem_metrics import predict_from_tem_metrics
+
 
 def html_results(
     text: str,
@@ -87,6 +88,7 @@ def html_results(
 
     return doc.render()
 
+
 def analyze_samples(databases: list[tuple[str, list[dict[str, str]]]], sets: int, samples: int):
     directory = os.path.join('samples')
     os.makedirs(directory)
@@ -135,6 +137,7 @@ def analyze_samples(databases: list[tuple[str, list[dict[str, str]]]], sets: int
 
     sources_fp.close()
     print('\ndone!')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='Analysis preprocessor')

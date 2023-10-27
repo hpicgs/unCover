@@ -11,7 +11,7 @@ from dominate.tags import *
 from nltk.parse.corenlp import CoreNLPDependencyParser
 
 from scraper.page_processor import PageProcessor
-from coherence.entities.coreferences import coref_annotation, coref_diagram
+from entityCoherence.coreferences import coref_annotation, coref_diagram
 from stylometry.logistic_regression import predict_author
 from tem.process import get_default_te
 from train_tem_metrics import predict_from_tem_metrics

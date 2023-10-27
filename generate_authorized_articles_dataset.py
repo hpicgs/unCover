@@ -5,14 +5,13 @@ from bs4 import BeautifulSoup
 import re, requests, argparse, time
 
 
-
 def preprocess_article(doc):
     paragraph = re.sub("\s+", " ", doc)
     return paragraph
 
 
 def generate_author_dataset(site, author, narticles=10):
-    #writes the narticles most recent articles into the mock database
+    # writes the narticles most recent articles into the mock database
     article_urls = []
     if "theguardian.com" in site:
         def get_listed_articles(url):
@@ -42,7 +41,6 @@ def generate_author_dataset(site, author, narticles=10):
         print(len(processed_page.split("\n")))
         author = processor.get_author()
         DatabaseAuthorship.insert_article(processed_page, article_url, author)
-
 
 
 if __name__ == '__main__':

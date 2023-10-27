@@ -55,6 +55,7 @@ def predict_from_tem_metrics(te):
         argmax = 1
     return argmax, prediction[0].max()
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--path', action="store", required=False,

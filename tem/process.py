@@ -4,6 +4,7 @@ import yaml
 from tem.model import TopicEvolution
 from tem.nlp import docs_from_period, merge_short_periods
 
+
 def get_topic_evolution(
     corpus: list[list[list[str]]], # periods, docs, words
     c: float,
@@ -36,6 +37,7 @@ def get_topic_evolution(
     out = p.communicate(input=structured_text.encode())[0].decode()
 
     return TopicEvolution(yaml.safe_load(out))
+
 
 def get_default_te(text: str) -> TopicEvolution:
     corpus = [docs_from_period(line) for line in text.split('\n') if len(line) > 0]

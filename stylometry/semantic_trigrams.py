@@ -7,6 +7,7 @@ from nltk import download
 
 from nlp.helpers import lower_alnum
 
+
 def _dep_tree(graph: DependencyGraph):
     def _tree(address: int):
         node = graph.get_by_address(address)
@@ -24,12 +25,14 @@ def _dep_tree(graph: DependencyGraph):
     deps = sorted(chain.from_iterable(node['deps'].values()))
     return Tree(tag, [_tree(dep) for dep in deps])
 
+
 def _depth_search(tree: Tree, fun, is_root: bool = True):
     if is_root: fun(tree)
     for subtree in tree:
         fun(subtree)
         if type(subtree) is not Tree: continue
         _depth_search(subtree, fun, False)
+
 
 def _add_sem_trigrams(tree: Tree, trigrams: dict[tuple, int]):
     def _add_or_increment(tree: tuple):
@@ -57,6 +60,7 @@ def _add_sem_trigrams(tree: Tree, trigrams: dict[tuple, int]):
                 _add_or_increment(tree)
 
     _depth_search(tree, _process_node)
+
 
 def sem_trigrams(text: str, parser: CoreNLPDependencyParser) -> dict[tuple, int]:
     try:  # check if nltk is installed and download if it is not

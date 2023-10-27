@@ -21,6 +21,7 @@ def index_tree(graph: DependencyGraph):
     deps = sorted(chain.from_iterable(node['deps'].values()))
     return Tree(str(node['address']), [_tree(dep) for dep in deps])
 
+
 def color_string(text: str, hsv: tuple[float, float, float], hl: bool=False):
     rgb = colorsys.hsv_to_rgb(*hsv)
     rgb = [int(c * 255) for c in rgb]
@@ -29,6 +30,7 @@ def color_string(text: str, hsv: tuple[float, float, float], hl: bool=False):
         text,
         '\033[0m'
     ])
+
 
 def print_dep_colors(dep_graph: DependencyGraph):
     tree = index_tree(dep_graph)

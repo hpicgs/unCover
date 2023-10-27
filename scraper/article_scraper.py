@@ -5,6 +5,7 @@ from selenium.webdriver.common.keys import Keys
 
 import time
 
+
 class GoogleScraper:
     def __init__(self, verbose=False, log_prefix=''):
         self.__verbose = verbose

@@ -8,6 +8,7 @@ import yaml
 from tem.model import TopicEvolution
 from tem.process import get_default_te
 
+
 def te_analysis_data(te: TopicEvolution) -> dict[str, float] | None:
     if len(te.periods) < 2: return None
 
@@ -37,6 +38,7 @@ def te_analysis_data(te: TopicEvolution) -> dict[str, float] | None:
         'median n_words per topic': statistics.median([len(words) for period in te.periods for topic in period.topics for words in topic.words]),
     }
 
+
 def te_annotated_img(te: TopicEvolution, data: dict[str, float]) -> bytes:
     graph = te.graph()
     graph.attr(label='''<<FONT POINT-SIZE="48" COLOR="white">
@@ -51,6 +53,7 @@ def te_annotated_img(te: TopicEvolution, data: dict[str, float]) -> bytes:
     '''.format(key=key, value=value) for key, value in data.items()])))
 
     return graph.pipe(format='png')
+
 
 def analyze_db(db: list[dict[str, str]], db_name: str):
     handles = list()
@@ -86,6 +89,7 @@ def analyze_db(db: list[dict[str, str]], db_name: str):
     for fp in handles: fp.close()
 
     print('\ndone!')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='TEM analyzer')
