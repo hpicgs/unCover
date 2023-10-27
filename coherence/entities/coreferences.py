@@ -5,9 +5,11 @@ from nlp.helpers import normalize_quotes
 from stylometry.showcase.dep_colors import color_string
 from visualization.text_chart import stacked_bar
 
+
 def coref_annotation(text: str):
     with CoreNLPClient(start_server=StartServer.DONT_START, annotators=['tokenize','pos','lemma', 'ner', 'coref'], timeout=30000) as client:
         return client.annotate(normalize_quotes(text))
+
 
 def coref_colored(annotation):
     coref_chains = [
@@ -25,6 +27,7 @@ def coref_colored(annotation):
             pretty_tokens.append(color_string(token.originalText, (coref_colors[color_index], 0.8, 1)))
 
     return ' '.join(pretty_tokens).replace(' .', '.')
+
 
 def coref_diagram(annotation):
     def text_for_mention_chain(chain):
