@@ -11,7 +11,7 @@ from dominate.tags import *
 from dominate.util import raw
 import yaml
 
-from entityCoherence.coreferences import coref_annotation, coref_diagram
+from entity_coherence.coreferences import coref_annotation, coref_diagram
 from main import get_prediction
 from nlp.helpers import normalize_quotes
 from stylometry.logistic_regression import predict_author
