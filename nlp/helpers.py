@@ -1,9 +1,19 @@
 import re
 
-from nltk.tokenize import word_tokenize
+from nltk import download
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
-from nltk import download
+from nltk.tokenize import word_tokenize
+
+from definitions import NLTK_DATA
+
+
+def handle_nltk_download(e: LookupError):
+    message = e.args[0]
+    resource_match = re.search(r"nltk\.download\('([^']+)'\)", message)
+    if not resource_match: raise e
+    resource = resource_match.group(1)
+    download(resource, download_dir=NLTK_DATA)
 
 
 def lower_alnum(doc: str) -> str:
@@ -30,8 +40,8 @@ def normalize_quotes(doc: str) -> str:
 # optionally clears stopwords and stems word
 try:  # check if nltk is installed and download if it is not
     __stopwords = set(stopwords.words('english'))
-except LookupError:
-    download('stopwords')
+except LookupError as e:
+    handle_nltk_download(e)
     __stopwords = set(stopwords.words('english'))
 finally:
     __ps = PorterStemmer()

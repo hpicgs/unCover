@@ -3,9 +3,8 @@ from itertools import chain
 from nltk.parse.corenlp import CoreNLPDependencyParser, DependencyGraph
 from nltk.tree.tree import Tree
 from nltk.tokenize import sent_tokenize
-from nltk import download
 
-from nlp.helpers import lower_alnum
+from nlp.helpers import handle_nltk_download, lower_alnum
 
 
 def _dep_tree(graph: DependencyGraph):
@@ -65,8 +64,8 @@ def _add_sem_trigrams(tree: Tree, trigrams: dict[tuple, int]):
 def sem_trigrams(text: str, parser: CoreNLPDependencyParser) -> dict[tuple, int]:
     try:  # check if nltk is installed and download if it is not
         sentences = [lower_alnum(sent) for sent in sent_tokenize(text)]
-    except LookupError:
-        download('punkt')
+    except LookupError as e:
+        handle_nltk_download(e)
         sentences = [lower_alnum(sent) for sent in sent_tokenize(text)]
 
     parsed = parser.raw_parse_sents(sentences)
