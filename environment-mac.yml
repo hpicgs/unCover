@@ -31,6 +31,6 @@ dependencies:
     - tensorboard-data-server==0.6.1
     - tensorboard-plugin-wit==1.8.1
     - tensorflow-estimator==2.11.0
-    - tensorflow-gpu==2.11.0
+    - tensorflow-metal==1.1.0
     - tensorflow-io-gcs-filesystem==0.34.0
     - transformers==4.27.4
