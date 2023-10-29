@@ -19,6 +19,9 @@ DATABASE_AUTHORS_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-authors.yaml')
 DATABASE_GEN_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-gen.yaml')
 DATABASE_TEST_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-test.yaml')
 
+ENV_DIR = os.getenv("CONDA_PREFIX", os.getenv("HOME", ''))
+NLTK_DATA = os.path.join(ENV_DIR, 'nltk_data')
+
 GPT_KEY = os.getenv("GPT_KEY", "")
 OPENAI_ORGA = os.getenv("OPENAI_ORGA", "")
 
