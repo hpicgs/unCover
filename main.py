@@ -1,17 +1,18 @@
-import urllib.error
-from urllib import request
+import os
 import subprocess
+from urllib import request
+import urllib.error
+
 from PIL import Image
+import dominate
+from dominate.tags import *
+import requests
 import streamlit as st
 import streamlit.components.v1 as components
-import requests
-import dominate
-# pyright: reportWildcardImportFromLibrary=false
-from dominate.tags import *
-from nltk.parse.corenlp import CoreNLPDependencyParser
 
-from scraper.page_processor import PageProcessor
+from definitions import ROOT_DIR
 from entity_coherence.coreferences import coref_annotation, coref_diagram
+from scraper.page_processor import PageProcessor
 from stylometry.logistic_regression import predict_author
 from tem.process import get_default_te
 from train_tem_metrics import predict_from_tem_metrics
@@ -108,7 +109,7 @@ if __name__ == '__main__':
     try:
         request.urlopen("http://localhost:9000").getcode()
     except urllib.error.URLError:
-        subprocess.call(['sh', 'run_CoreNLP_Server.sh'], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+        subprocess.call([os.path.join(ROOT_DIR, 'corenlp')], stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
     col1, col2 = st.columns([3, 1])
     col1.title("Welcome at unCover")
     col2.image(Image.open("unCover.png"), width=100)
