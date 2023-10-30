@@ -6,23 +6,32 @@ if ! which java 1>/dev/null 2>/dev/null; then
     exit 1
 fi
 
-# find & go to appropriate model directory (in conda env or repo)
-if [ -n "$CONDA_PREFIX" ]; then
-    MODEL_DIR="$CONDA_PREFIX/models"
-else
-    SCRIPT="`readlink -f $0`"
-    REPO_DIR="`dirname $SCRIPT`"
-    MODEL_DIR="$REPO_DIR/.models"
+# make sure we have conda activated
+if [ "$CONDA_DEFAULT_ENV" != "unCover" ]; then
+    echo "Please activate unCover's Anaconda environment"
+    exit 1
 fi
+
+# model directory
+MODEL_DIR="$CONDA_PREFIX/models"
 mkdir -p "$MODEL_DIR"
 cd "$MODEL_DIR"
+
+DOWNLOAD_FILE=download.zip
+if test -f $DOWNLOAD_FILE; then
+    echo "It looks like another process is downloading CoreNLP right now."
+    echo "If this is doesn't look right, run"
+    echo "    rm $MODEL_DIR/$DOWNLOAD_FILE"
+    echo "and start this script again."
+    exit 1
+fi
 
 # download stanford parser if not there
 PARSER_DIR=`ls | grep 'stanford-corenlp-4.5' | tail -1`
 if [ -z "$PARSER_DIR" ]; then
-    curl -o download.zip https://downloads.cs.stanford.edu/nlp/software/stanford-corenlp-4.5.5.zip
-    unzip download.zip
-    rm download.zip
+    curl -o $DOWNLOAD_FILE https://downloads.cs.stanford.edu/nlp/software/stanford-corenlp-4.5.5.zip
+    unzip $DOWNLOAD_FILE
+    rm $DOWNLOAD_FILE
     PARSER_DIR="stanford-corenlp-4.5.5"
 fi
 
