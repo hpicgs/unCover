@@ -28,6 +28,10 @@ activate the environment with
 conda activate unCover
 ```
 
+<!--
+TODO: tell people to set up .env
+-->
+
 ## Usage
 
 <!--
