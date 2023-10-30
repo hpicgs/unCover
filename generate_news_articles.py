@@ -36,7 +36,7 @@ def query_generation(queries, args):
                                     "summary": "", "authors": [], "publish_date": "04-19-2023", "domain": "www.com",
                                     "warc_date":"20190424064330", "status": "success", "split": "gen", "inst_index": 0})
                 DatabaseGenArticles.insert_article(
-                    generate_grover_news_from_original(grover_input, "base", MODELS_DIR), url, "grover")
+                    generate_grover_news_from_original(grover_input, args.grover, MODELS_DIR), url, "grover")
 
 
 def phrase_generation(phrases, args):
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     parser.add_argument("--phrases", action="store", type=str, required=False, help="generate an articles by comma separated phrases")
     parser.add_argument("--gpt3", action="store_true", required=False, help="use gpt3 for text generation")
     parser.add_argument("--gpt2", action="store_true", required=False, help="use gpt2 for text generation, only uses title or phrase not whole articles")
-    parser.add_argument("--grover", action="store_true", required=False, help="use grover for text generation, does not work with phrases")
+    parser.add_argument("--grover", action="store", type=str, required=False, help="use grover for text generation and mention model size, does not work with phrases")
 
     args = parser.parse_args()
     if args.queries and args.phrases:
