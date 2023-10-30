@@ -27,11 +27,7 @@ print_bold "Compiling TEM"
 make -C tem/topic-evolution-model/
 
 print_bold "Creating Anaconda environment"
-if [ "$OSTYPE" == "darwin"* ]; then
-    conda env create -f environment-mac.yml
-else
-    conda env create -f environment.yml
-fi
+conda env create -f environment.yml
 conda activate unCover
 
 print_bold "Installing CoreNLP"
