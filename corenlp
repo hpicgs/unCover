@@ -35,6 +35,8 @@ if [ -z "$PARSER_DIR" ]; then
     PARSER_DIR="stanford-corenlp-4.5.5"
 fi
 
-# run parser
-cd "$PARSER_DIR"
-java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 150000
+if [ "$1" != "--no-run" ]; then
+    # run parser
+    cd "$PARSER_DIR"
+    java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 150000
+fi
