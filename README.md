@@ -8,18 +8,18 @@ Detailed information about unCover can be found in the following publication:
 
 ## Setup
 
-To run this project on your own machine, set up the
-[Anaconda](https://www.anaconda.com) environment by running
+<!--
+TODO: do we want to include instructions to deploy on streamlit?
+-->
+
+To setup this project to run on your own machine, run the following command
 
 ```sh
-conda env create -f environment.yml
+sh <(curl -s https://raw.githubusercontent.com/hpicgs/unCover/main/install.sh)
 ```
 
-or, if you are on Apple Silicon
-
-```sh
-conda env create -f environment-mac.yml
-```
+This will download and install all requirements to an
+[Anaconda](https://www.anaconda.com) environment.
 
 Then, whenever you want to run any of the following scripts, make sure you first
 activate the environment with
