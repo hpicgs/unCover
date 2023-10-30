@@ -6,7 +6,7 @@ Detailed information about unCover can be found in the following publication:
 > Identifying AI Generated News Articles by Linguistic Analysis and
 > Visualization
 
-## Usage
+## Setup
 
 To run this project on your own machine, set up the
 [Anaconda](https://www.anaconda.com) environment by running
@@ -28,7 +28,22 @@ activate the environment with
 conda activate unCover
 ```
 
+## Usage
+
+<!--
+TODO: introductory paragraph for different usage modes (running the server,
+scraping, etc
+-->
+
+<!--
+TODO: include instructions for running the server normally
+-->
+
 ### Scraping
+
+<!--
+TODO: check if this is correct & up to date
+-->
 
 Scraping can be done either in query mode or dataset mode - query mode uses a
 search query provided by you to gather articles on google news, while dataset
