@@ -1,17 +1,41 @@
-# XAI Project
+# unCover
 
-Download [Stanford's CoreNLP
-4.5.*](https://stanfordnlp.github.io/CoreNLP/index.html), unzip it and place it
-into the `models` directory.
+Detailed information about unCover can be found in the following publication:
 
-## Scraping
+> Liebe L, Baum J, Schutze T, Cech T, Scheibel W, and Dollner J (2023). UNCOVER:
+> Identifying AI Generated News Articles by Linguistic Analysis and
+> Visualization
+
+## Usage
+
+To run this project on your own machine, set up the
+[Anaconda](https://www.anaconda.com) environment by running
+
+```sh
+conda env create -f environment.yml
+```
+
+or, if you are on Apple Silicon
+
+```sh
+conda env create -f environment-mac.yml
+```
+
+Then, whenever you want to run any of the following scripts, make sure you first
+activate the environment with
+
+```sh
+conda activate unCover
+```
+
+### Scraping
 
 Scraping can be done either in query mode or dataset mode - query mode uses a
 search query provided by you to gather articles on google news, while dataset
 mode looks up the personal pages of specific authors on their publication and
 collects hundreds of articles for a single person.
 
-### Query mode
+#### Query mode
 
 Query mode is pretty straightforward:
 
@@ -22,7 +46,7 @@ python3 generate_authorized_articles_dataset.py --query <your_query>
 Some queries fetch no results on news.google.com, the scraper will break after
 10 seconds in that case.
 
-### Dataset mode
+#### Dataset mode
 
 Dataset mode is quicker and has higher output but takes a bit more work on your
 part. For one, every news publication has their own way of listing articles by
