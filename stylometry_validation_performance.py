@@ -12,11 +12,11 @@ used_authors = {
     "gpt3":"ai",
     "gpt3-phrase":"ai",
     "grover":"ai",
-    "https:__www.theguardian.com_profile_hannah-ellis-petersen":"human",
-    "https:__www.theguardian.com_profile_leyland-cecco":"human",
-    "https:__www.theguardian.com_profile_martin-chulov":"human",
-    "https:__www.theguardian.com_profile_julianborger":"human",
-    "https:__www.theguardian.com_profile_helen-sullivan":"human"
+    "human1":"human",
+    "human2":"human",
+    "human3":"human",
+    "human4":"human",
+    "human5":"human"
 }
 
 parser = argparse.ArgumentParser()

@@ -80,7 +80,7 @@ Here is a practical example for dataset mode:
 python3 generate_authorized_articles_dataset.py \
     --dataset \
     --publication theguardian.com \
-    --author https://www.theguardian.com/profile/martin-chulov \
+    --author https://www.theguardian.com/profile/<author name> \
     --narticles 300
 ```
 
