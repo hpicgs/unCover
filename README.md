@@ -31,12 +31,11 @@ all the information in `.env.example` and save it as `.env`. OpenAI-credentials 
 only required for generation, however, fine-tuning the confidence thresholds to the 
 used models will greatly benefit performance and is required to achieve good results.
 
+Our pre-trained model files can be found in [Google Drive](https://drive.google.com/drive/folders/1fMZgGC2Bnp5K-ZoANXB_S0AI02akye_c?usp=drive_link).
+By default, they need to be located in the `models` folder to be used by the scripts.
+
 ## Usage
 
-<!--
-TODO: introductory paragraph for different usage modes (running the server,
-scraping, etc
--->
 There are multiple ways to use unCover, depending on your use case.
 First, you can run the server and use the web interface to explore the system.
 Second, you can generate your own news dataset following the proposed methods.
