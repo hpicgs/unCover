@@ -6,13 +6,11 @@ Detailed information about unCover can be found in the following publication:
 > Identifying AI Generated News Articles by Linguistic Analysis and
 > Visualization
 
+An interactive example deployment of unCover can be found at [uncover.streamlit.app](https://uncover.streamlit.app).
+
 ## Setup
 
-<!--
-TODO: do we want to include instructions to deploy on streamlit?
--->
-
-To setup this project to run on your own machine, run the following command
+To set up this project to run on your own machine, run the following command
 
 ```sh
 sh <(curl -s https://raw.githubusercontent.com/hpicgs/unCover/main/install.sh)
@@ -28,9 +26,10 @@ activate the environment with
 conda activate unCover
 ```
 
-<!--
-TODO: tell people to set up .env
--->
+To take full advantage of all capabilities in this repository you should fill out 
+all the information in `.env.example` and save it as `.env`. OpenAI-credentials are
+only required for generation, however, fine-tuning the confidence thresholds to the 
+used models will greatly benefit performance and is required to achieve good results.
 
 ## Usage
 
@@ -38,40 +37,43 @@ TODO: tell people to set up .env
 TODO: introductory paragraph for different usage modes (running the server,
 scraping, etc
 -->
+There are multiple ways to use unCover, depending on your use case.
+First, you can run the server and use the web interface to explore the system.
+Second, you can generate your own news dataset following the proposed methods.
+Third, you can use the datasets to re-train and/ or test the unCover models.
 
-<!--
-TODO: include instructions for running the server normally
--->
+### Running unCover
 
-### Scraping
+To run and try out unCover in its base configuration follow the setup guide and run
 
-<!--
-TODO: check if this is correct & up to date
--->
+```
+streamlit run main.py
+```
+
+This will start the process and ensure all sub-systems are installed and running, 
+then you can access the web interface locally at `http://localhost:8501/`.
+
+### Scraping news articles
 
 Scraping can be done either in query mode or dataset mode - query mode uses a
-search query provided by you to gather articles on google news, while dataset
+search query provided by you to gather articles on Google News, while dataset
 mode looks up the personal pages of specific authors on their publication and
 collects hundreds of articles for a single person.
 
 #### Query mode
 
-Query mode is pretty straightforward:
+Query mode is very simple and will fetch news from Google News depending on the query:
 
 ```shell
 python3 generate_authorized_articles_dataset.py --query <your_query>
 ```
 
-Some queries fetch no results on news.google.com, the scraper will break after
-10 seconds in that case.
-
 #### Dataset mode
 
-Dataset mode is quicker and has higher output but takes a bit more work on your
-part. For one, every news publication has their own way of listing articles by
-author, if at all, therefore we need to write helper functions for every single
-publication. At the moment, dataset mode only works for our favourite newspaper,
-TheGuardian.
+Dataset mode is quicker and has higher output but takes a bit more work to set up. 
+For one, every news publication has their own way of listing articles by
+author, therefore a helper functions is required for every single
+publication. At the moment, dataset mode only works for TheGuardian.
 
 Here is a practical example for dataset mode:
 
@@ -87,3 +89,29 @@ The publication argument will activate dataset creation for TheGuardian, you
 should provide the URL of theguardian.com here. The author argument is the most
 important one - you need to provide the (full) URL of your specific author's
 personal page on theguardian.com, where all their articles are listed.
+
+### Generating news articles
+
+To generate news articles, we also scrape news from Google News, but this time
+we use the query as context for a generative language model. The model will
+then generate a new article based on this context. The following could is an example command:
+
+```shell
+python3 generate_news_articles.py --queries <your queries> --grover base --gpt3
+```
+
+### Training the models
+
+New models can be trained using `train_authors.py` for stylometry models and 
+`train_tem_metrics.py` for the TEM based prediction model. The commandline options
+for these scripts are documented in the scripts themselves. If your dataset is stored
+in a different location, please modify `definitions.py` accordingly.
+
+### Recreating the test performance
+
+Including both former methods, `generate_test_dataset.py` has been used to create
+the test dataset including both human authors and AI models as text sources.
+
+After creating this test dataset or using the provided dataset, 
+`test_performance.py` can be used to create test results and a performance summary.
+
