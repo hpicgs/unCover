@@ -6,7 +6,12 @@ Detailed information about unCover can be found in the following publication:
 > Identifying AI Generated News Articles by Linguistic Analysis and
 > Visualization
 
-An interactive example deployment of unCover can be found at [uncover.streamlit.app](https://uncover.streamlit.app).
+An interactive example deployment of unCover can be found at 
+[uncover.streamlit.app](https://uncover.streamlit.app).
+Our datasets and pre-trained models can be found in 
+[Google Drive](https://drive.google.com/drive/folders/1fMZgGC2Bnp5K-ZoANXB_S0AI02akye_c?usp=drive_link).
+Please note that for copyright reasons we removed the plain text of the scraped 
+news articles and only left the metadata and the generated texts in the dataset files.
 
 ## Setup
 
@@ -31,7 +36,6 @@ all the information in `.env.example` and save it as `.env`. OpenAI-credentials 
 only required for generation, however, fine-tuning the confidence thresholds to the 
 used models will greatly benefit performance and is required to achieve good results.
 
-Our pre-trained model files can be found in [Google Drive](https://drive.google.com/drive/folders/1fMZgGC2Bnp5K-ZoANXB_S0AI02akye_c?usp=drive_link).
 By default, they need to be located in the `models` folder to be used by the scripts.
 
 ## Usage

@@ -17,7 +17,7 @@ MODEL_DIR="$CONDA_PREFIX/models"
 mkdir -p "$MODEL_DIR"
 cd "$MODEL_DIR"
 
-DOWNLOAD_FILE=download.zip
+DOWNLOAD_FILE=download_corenlp.zip
 if test -f $DOWNLOAD_FILE; then
     echo "It looks like another process is downloading CoreNLP right now."
     echo "If this is doesn't look right, run"

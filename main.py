@@ -2,6 +2,10 @@ from PIL import Image
 import dominate
 from dominate.tags import *
 import requests
+import threading
+import subprocess
+import sys
+import os
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -11,6 +15,16 @@ from stylometry.corenlp import connect_corenlp
 from stylometry.logistic_regression import predict_author
 from tem.process import get_default_te
 from train_tem_metrics import predict_from_tem_metrics
+from definitions import ROOT_DIR
+
+def __models_thread():
+    proc = subprocess.run([os.path.join(ROOT_DIR, 'prepare_models')], capture_output=True)
+    if proc.returncode != 0:
+        print(proc.stdout.decode())
+    # we ignore exit code 2 because we might be waiting for another process to
+    # finish the download
+    if proc.returncode == 1:
+        sys.exit(1)
 
 
 def load_from_url(url):
@@ -102,6 +116,9 @@ def get_prediction(style_prediction, te_prediction):
 
 if __name__ == '__main__':
     connect_corenlp()
+    # ensure models are available
+    thread = threading.Thread(target=__models_thread)
+    thread.start()
 
     col1, col2 = st.columns([3, 1])
     col1.title("Welcome at unCover")

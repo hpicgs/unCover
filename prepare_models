@@ -1,0 +1,37 @@
+#!/bin/sh
+
+# make sure we have conda activated
+if [ "$CONDA_DEFAULT_ENV" != "unCover" ]; then
+    echo "Please activate unCover's Anaconda environment"
+    exit 1
+fi
+
+# model directory
+MODEL_DIR="$CONDA_PREFIX/models"
+mkdir -p "$MODEL_DIR"
+cd "$MODEL_DIR"
+
+DOWNLOAD_FILE=download_models.zip
+if test -f $DOWNLOAD_FILE; then
+    echo "It looks like another process is downloading CoreNLP right now."
+    echo "If this is doesn't look right, run"
+    echo "    rm $MODEL_DIR/$DOWNLOAD_FILE"
+    echo "and start this script again."
+    exit 1
+fi
+
+# download models from drive if not there
+PARSER_DIR=`ls | grep 'stylometry'`
+if [ -z "$PARSER_DIR" ]; then
+    echo "Downloading Stylometry models"
+    curl -o $DOWNLOAD_FILE -L "https://drive.google.com/uc?export=download&id=101zoikmBJ0EFdVD0spNCGrt7puv_1YQQ"
+    unzip $DOWNLOAD_FILE
+    rm $DOWNLOAD_FILE
+fi
+PARSER_DIR=`ls | grep 'tem_metrics'`
+if [ -z "$PARSER_DIR" ]; then
+    echo "Downloading TEM metrics models"
+    curl -o $DOWNLOAD_FILE -L "https://drive.google.com/uc?export=download&id=15NpVneM9u58YeGm6rV7IfmQsvbSsM9tk"
+    unzip $DOWNLOAD_FILE
+    rm $DOWNLOAD_FILE
+fi
