@@ -6,6 +6,8 @@ Detailed information about unCover can be found in the following publication:
 > Identifying AI Generated News Articles by Linguistic Analysis and
 > Visualization
 
+![Teaser](https://drive.google.com/uc?export=download&id=1i49F16U7TiHCS8-17lBv8ofPsnvd-RE0)
+
 An interactive example deployment of unCover can be found at 
 [uncover.streamlit.app](https://uncover.streamlit.app).
 Our datasets and pre-trained models can be found in 
