@@ -11,7 +11,7 @@ from dominate.tags import *
 from dominate.util import raw
 import yaml
 
-from coherence.entities.coreferences import coref_annotation, coref_diagram
+from entity_coherence.coreferences import coref_annotation, coref_diagram
 from main import get_prediction
 from nlp.helpers import normalize_quotes
 from stylometry.logistic_regression import predict_author
@@ -19,12 +19,13 @@ from tem.model import TopicEvolution
 from tem.process import get_default_te
 from train_tem_metrics import predict_from_tem_metrics
 
+
 def html_results(
     text: str,
     author: Literal[0, 1, -1],
     te: TopicEvolution,
     entity_diagram: tuple[div, div],
-    title: str = 'unBlock Analysis',
+    title: str = 'unCover Analysis',
 ) -> str:
     te_img_data = base64.encodebytes(te.graph().pipe(format='png')).decode('ascii')
 
@@ -87,6 +88,7 @@ def html_results(
 
     return doc.render()
 
+
 def analyze_samples(databases: list[tuple[str, list[dict[str, str]]]], sets: int, samples: int):
     directory = os.path.join('samples')
     os.makedirs(directory)
@@ -129,12 +131,13 @@ def analyze_samples(databases: list[tuple[str, list[dict[str, str]]]], sets: int
 
             sources_writer.writerow([set_id, text_id, source, ['Not sure', 'Machine', 'Human'][author]])
             with open(os.path.join(directory_i, f'{text_id}.html'), 'w') as fp:
-                fp.write(html_results(text, author, te, entity_diagram, title=f'unBlock Analysis for text {text_id}'))
+                fp.write(html_results(text, author, te, entity_diagram, title=f'unCover Analysis for text {text_id}'))
 
             sampled += 1
 
     sources_fp.close()
     print('\ndone!')
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='Analysis preprocessor')

@@ -12,18 +12,19 @@ used_authors = {
     "gpt3":"ai",
     "gpt3-phrase":"ai",
     "grover":"ai",
-    "https:__www.theguardian.com_profile_hannah-ellis-petersen":"human",
-    "https:__www.theguardian.com_profile_leyland-cecco":"human",
-    "https:__www.theguardian.com_profile_martin-chulov":"human",
-    "https:__www.theguardian.com_profile_julianborger":"human",
-    "https:__www.theguardian.com_profile_helen-sullivan":"human"
+    "human1":"human",
+    "human2":"human",
+    "human3":"human",
+    "human4":"human",
+    "human5":"human"
 }
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--nfeatures", action="store", required=False, type=int, default=100, help="number of char trigram & semantic trigram features used in the distribution")
-args = parser.parse_args()    
+args = parser.parse_args()
 
-nfeatures = str(args.nfeatures) + "_2"
+nfeatures = str(args.nfeatures)
+
 
 def write_test_distributions():
     parser = CoreNLPDependencyParser(url='http://localhost:9000')
@@ -59,21 +60,29 @@ def write_test_distributions():
     full_char_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"test_char_distribution{nfeatures}.csv"))
     full_sem_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"test_sem_distribution{nfeatures}.csv"))
 
-def char_model_prediction(inp):
+
+def model_prediction(inp, type):
     authors = used_authors.keys()
     models = {}
     for author in authors:
-        with open(os.path.join(STYLOMETRY_DIR, f"{author}_char{nfeatures}.pickle"), "rb") as fp:
+        with open(os.path.join(STYLOMETRY_DIR, f"{author}_{type}{nfeatures}.pickle"), "rb") as fp:
             models[author] = pickle.load(fp)
     confidence_values = {}
     for author in authors:
         confidence_values[author] = models[author].predict_proba(inp)
-    print(confidence_values)
     final_predictions = []
     raw_predictions = []
     for i in range(inp.shape[0]):
-        machine = any(confidence_values[author][i][1] > CHAR_MACHINE_CONFIDENCE for author in authors if used_authors[author] == "ai")
-        human = any(confidence_values[author][i][1] > CHAR_HUMAN_CONFIDENCE for author in authors if used_authors[author] == "human")
+        if type == "char":
+            machine = any(confidence_values[author][i][1] > CHAR_MACHINE_CONFIDENCE for author in authors if
+                          used_authors[author] == "ai")
+            human = any(confidence_values[author][i][1] > CHAR_HUMAN_CONFIDENCE for author in authors if
+                        used_authors[author] == "human")
+        else:
+            machine = any(confidence_values[author][i][1] > SEM_MACHINE_CONFIDENCE for author in authors if
+                          used_authors[author] == "ai")
+            human = any(confidence_values[author][i][1] > SEM_HUMAN_CONFIDENCE for author in authors if
+                        used_authors[author] == "human")
         if (machine and human) or (not human and not machine):
             final_predictions.append(0)
         elif machine:
@@ -86,83 +95,43 @@ def char_model_prediction(inp):
 
     return final_predictions
 
-def sem_model_prediction(inp):
-    authors = used_authors.keys()
-    models = {}
-    for author in authors:
-        with open(os.path.join(STYLOMETRY_DIR, f"{author}_sem{nfeatures}.pickle"), "rb") as fp:
-            models[author] = pickle.load(fp)
-    confidence_values = {}
-    for author in authors:
-        confidence_values[author] = models[author].predict_proba(inp)
-    final_predictions = []
-    raw_predictions = []
-    for i in range(inp.shape[0]):
-        machine = any(confidence_values[author][i][1] > SEM_MACHINE_CONFIDENCE for author in authors if used_authors[author] == "ai")
-        human = any(confidence_values[author][i][1] > SEM_HUMAN_CONFIDENCE for author in authors if used_authors[author] == "human")
-        if (machine and human) or (not human and not machine):
-            final_predictions.append(0)
-        elif machine:
-            final_predictions.append(1)
-        elif human:
-            final_predictions.append(-1)
-        machine = max(confidence_values[author][i][1] for author in authors if used_authors[author] == "ai")
-        human = max(confidence_values[author][i][1] for author in authors if used_authors[author] == "human")
-        raw_predictions.append((machine, human))
 
-    return final_predictions
-
-def char_performance():
-    test_dataframe = pd.read_csv(os.path.join(STYLOMETRY_DIR, f"test_char_distribution{nfeatures}.csv"))
-    correct_class = []
-    for i in range(test_dataframe.shape[0]):
-        if used_authors[test_dataframe.iloc[i]["author"]] == "ai":
-            correct_class.append(1)
-        elif used_authors[test_dataframe.iloc[i]["author"]] == "human":
-            correct_class.append(-1)
+def performance():
+    correct_class = [[], []]
+    char_test_dataframe = pd.read_csv(os.path.join(STYLOMETRY_DIR, f"test_char_distribution{nfeatures}.csv"))
+    for i in range(char_test_dataframe.shape[0]):
+        if used_authors[char_test_dataframe.iloc[i]["author"]] == "ai":
+            correct_class[0].append(1)
+        elif used_authors[char_test_dataframe.iloc[i]["author"]] == "human":
+            correct_class[0].append(-1)
         else:
-            correct_class.append(0)
-    predictions = char_model_prediction(test_dataframe.drop(["author", "Unnamed: 0"], axis=1))
-    print(predictions)
-    accuracy = sum([1 if prediction == correct_class[i] else 0 for i, prediction in enumerate(predictions)]) / len(correct_class)
-    count_ai = max(correct_class.count(1), 1)
-    count_human = max(correct_class.count(-1), 1)
-    true_ai = sum([1 if prediction == correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
-    false_ai = sum([1 if prediction != correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count_human
-    true_human = sum([1 if prediction == correct_class[i] and prediction == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
-    false_human = sum([1 if prediction != correct_class[i] and prediction == -1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
-    unsure_ai = sum([1 if prediction == 0 and correct_class[i] == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
-    unsure_human = sum([1 if prediction == 0 and correct_class[i] == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
-    unsure_total = sum([1 if prediction == 0 else 0 for prediction in predictions]) / len(predictions)
-    print([true_ai, false_ai, true_human, false_human, unsure_ai, unsure_human])
-    return {"accuracy":accuracy, "ai_true_positives":true_ai, "ai_false_positives":false_ai, "unsure":unsure_total}
-
-def sem_performance():
-    test_dataframe = pd.read_csv(os.path.join(STYLOMETRY_DIR, f"test_sem_distribution{nfeatures}.csv"))
-    correct_class = []
-    for i in range(test_dataframe.shape[0]):
-        if used_authors[test_dataframe.iloc[i]["author"]] == "ai":
-            correct_class.append(1)
-        elif used_authors[test_dataframe.iloc[i]["author"]] == "human":
-            correct_class.append(-1)
+            correct_class[0].append(0)
+    sem_test_dataframe = pd.read_csv(os.path.join(STYLOMETRY_DIR, f"test_sem_distribution{nfeatures}.csv"))
+    for i in range(sem_test_dataframe.shape[0]):
+        if used_authors[sem_test_dataframe.iloc[i]["author"]] == "ai":
+            correct_class[1].append(1)
+        elif used_authors[sem_test_dataframe.iloc[i]["author"]] == "human":
+            correct_class[1].append(-1)
         else:
-            correct_class.append(0)
-    predictions = sem_model_prediction(test_dataframe.drop(["author", "Unnamed: 0"], axis=1))
-    print(predictions)
-    accuracy = sum([1 if prediction == correct_class[i] else 0 for i, prediction in enumerate(predictions)]) / len(correct_class)
-    count_ai = max(correct_class.count(1), 1)
-    count_human = max(correct_class.count(-1), 1)
-    true_ai = sum([1 if prediction == correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
-    false_ai = sum([1 if prediction != correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(predictions)]) / count_human
-    true_human = sum([1 if prediction == correct_class[i] and prediction == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
-    false_human = sum([1 if prediction != correct_class[i] and prediction == -1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
-    unsure_ai = sum([1 if prediction == 0 and correct_class[i] == 1 else 0 for i, prediction in enumerate(predictions)]) / count_ai
-    unsure_human = sum([1 if prediction == 0 and correct_class[i] == -1 else 0 for i, prediction in enumerate(predictions)]) / count_human
-    unsure_total = sum([1 if prediction == 0 else 0 for prediction in predictions]) / len(predictions)
-    print([true_ai, false_ai, true_human, false_human, unsure_ai, unsure_human])
-    return {"accuracy":accuracy, "ai_true_positives":true_ai, "ai_false_positives":false_ai, "unsure":unsure_total}
+            correct_class[1].append(0)
+    predictions = []
+    predictions[0] = model_prediction(char_test_dataframe.drop(["author", "Unnamed: 0"], axis=1), "char")
+    predictions[1] = model_prediction(sem_test_dataframe.drop(["author", "Unnamed: 0"], axis=1), "sem")
+    for i, prediction in enumerate(predictions):
+        print(prediction)
+        accuracy = sum([1 if prediction == correct_class[i] else 0 for i, prediction in enumerate(prediction)]) / len(correct_class)
+        count_ai = max(correct_class[i].count(1), 1)
+        count_human = max(correct_class[i].count(-1), 1)
+        true_ai = sum([1 if prediction == correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(prediction)]) / count_ai
+        false_ai = sum([1 if prediction != correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(prediction)]) / count_human
+        true_human = sum([1 if prediction == correct_class[i] and prediction == -1 else 0 for i, prediction in enumerate(prediction)]) / count_human
+        false_human = sum([1 if prediction != correct_class[i] and prediction == -1 else 0 for i, prediction in enumerate(prediction)]) / count_ai
+        unsure_ai = sum([1 if prediction == 0 and correct_class[i] == 1 else 0 for i, prediction in enumerate(prediction)]) / count_ai
+        unsure_human = sum([1 if prediction == 0 and correct_class[i] == -1 else 0 for i, prediction in enumerate(prediction)]) / count_human
+        unsure_total = sum([1 if prediction == 0 else 0 for prediction in prediction]) / len(prediction)
+        print([true_ai, false_ai, true_human, false_human, unsure_ai, unsure_human])
+        print({"accuracy":accuracy, "ai_true_positives":true_ai, "ai_false_positives":false_ai, "unsure":unsure_total})
 
 
 write_test_distributions()
-print(char_performance())
-print(sem_performance())
+performance()

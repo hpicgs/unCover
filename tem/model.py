@@ -1,5 +1,6 @@
 import graphviz
 
+
 class TopicEvolution:
     class Topic:
         def __init__(self, data):
@@ -47,6 +48,7 @@ class TopicEvolution:
         # TOPIC NODES FOR EACH PERIOD
         # topic id -> ids of (graph) nodes in previous period
         previous_topics: dict[int, list[str]] = {}
+
         # helper for dictionary
         def append_or_set(d: dict[int, list[str]], k: int, v: str):
             if k in d: d[k].append(v)

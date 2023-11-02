@@ -1,0 +1,42 @@
+#!/bin/sh
+
+# make sure we have java
+if ! which java 1>/dev/null 2>/dev/null; then
+    echo "Please ensure java is installed and on your PATH."
+    exit 1
+fi
+
+# make sure we have conda activated
+if [ "$CONDA_DEFAULT_ENV" != "unCover" ]; then
+    echo "Please activate unCover's Anaconda environment"
+    exit 1
+fi
+
+# model directory
+MODEL_DIR="$CONDA_PREFIX/models"
+mkdir -p "$MODEL_DIR"
+cd "$MODEL_DIR"
+
+DOWNLOAD_FILE=download_corenlp.zip
+if test -f $DOWNLOAD_FILE; then
+    echo "It looks like another process is downloading CoreNLP right now."
+    echo "If this is doesn't look right, run"
+    echo "    rm $MODEL_DIR/$DOWNLOAD_FILE"
+    echo "and start this script again."
+    exit 1
+fi
+
+# download stanford parser if not there
+PARSER_DIR=`ls | grep 'stanford-corenlp-4.5' | tail -1`
+if [ -z "$PARSER_DIR" ]; then
+    curl -o $DOWNLOAD_FILE https://downloads.cs.stanford.edu/nlp/software/stanford-corenlp-4.5.5.zip
+    unzip $DOWNLOAD_FILE
+    rm $DOWNLOAD_FILE
+    PARSER_DIR="stanford-corenlp-4.5.5"
+fi
+
+if [ "$1" != "--no-run" ]; then
+    # run parser
+    cd "$PARSER_DIR"
+    java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 150000
+fi

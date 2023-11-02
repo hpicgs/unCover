@@ -28,11 +28,13 @@ _styles = [
     ''',
 ]
 
+
 # loop through colors for each pattern-style
 # then loop through pattern-styles
 def _get_style(n: int):
     color = _colors[n % len(_colors)]
     return _styles[int(n / len(_colors)) % len(_styles)].format(color=color, neutral='#333')
+
 
 # data: [(sentence/paragraph, [values])]
 # labels: for [values], has to have same length

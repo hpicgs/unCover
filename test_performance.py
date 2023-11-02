@@ -1,6 +1,8 @@
 from database.mock_database import TestDatabase
 from stylometry.logistic_regression import predict_author
-from main import get_prediction, run_tem_on
+from main import get_prediction
+from tem.process import get_default_te
+from train_tem_metrics import predict_from_tem_metrics
 
 source_mapping = {
     "human": -1,
@@ -8,6 +10,7 @@ source_mapping = {
     "gpt3": 1,
     "grover": 1
 }
+
 
 # Print iterations progress
 def printProgressBar (iteration, total, decimals = 1, fill = '█', printEnd = "\r"):
@@ -18,6 +21,7 @@ def printProgressBar (iteration, total, decimals = 1, fill = '█', printEnd = "
     # Print New Line on Complete
     if iteration == total:
         print()
+
 
 if __name__ == '__main__':
     data = TestDatabase.get_all_articles_sorted_by_methods()
@@ -34,11 +38,12 @@ if __name__ == '__main__':
         for article in articles:
             total_count += 1
             printProgressBar(total_count, 771)
-            if(len(article) > 120000):
+            if len(article) > 120000:
                 article = article[:120000]
             try:
                 style_prediction = predict_author(article)
-                te_prediction, _ = run_tem_on(article)
+                te = get_default_te(article)
+                te_prediction = predict_from_tem_metrics(te)
             except AttributeError:  # some texts are still not working for tem
                 total_count -= 1
                 continue

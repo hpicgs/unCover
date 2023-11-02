@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 
+
 class PageProcessor:
     def __init__(self, html):
         self.__soup = BeautifulSoup(html, features="html.parser")
