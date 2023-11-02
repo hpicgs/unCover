@@ -9,6 +9,7 @@ dependencies:
   - pip
   - regex
   - requests
+  - openjdk
   - pip:
     - altair==4.2.2
     - beautifulsoup4==4.11.2
