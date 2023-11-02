@@ -21,15 +21,15 @@ if test -f $DOWNLOAD_FILE; then
 fi
 
 # download models from drive if not there
-PARSER_DIR=`ls | grep 'stylometry'`
-if [ -z "$PARSER_DIR" ]; then
+STYLOMETRY_DIR=`ls | grep 'stylometry'`
+if [ -z "$STYLOMETRY_DIR" ]; then
     echo "Downloading Stylometry models"
     curl -o $DOWNLOAD_FILE -L "https://drive.google.com/uc?export=download&id=101zoikmBJ0EFdVD0spNCGrt7puv_1YQQ"
     unzip $DOWNLOAD_FILE
     rm $DOWNLOAD_FILE
 fi
-PARSER_DIR=`ls | grep 'tem_metrics'`
-if [ -z "$PARSER_DIR" ]; then
+TEM_DIR=`ls | grep 'tem_metrics'`
+if [ -z "$TEM_DIR" ]; then
     echo "Downloading TEM metrics models"
     curl -o $DOWNLOAD_FILE -L "https://drive.google.com/uc?export=download&id=15NpVneM9u58YeGm6rV7IfmQsvbSsM9tk"
     unzip $DOWNLOAD_FILE
