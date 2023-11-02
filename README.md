@@ -33,8 +33,8 @@ activate the environment with
 conda activate unCover
 ```
 
-To take full advantage of all capabilities in this repository you should fill out 
-all the information in `.env.example` and save it as `.env`. OpenAI-credentials are
+To take full advantage of all capabilities in this repository you should update 
+all the information in `.env`. OpenAI-credentials are
 only required for generation, however, fine-tuning the confidence thresholds to the 
 used models will greatly benefit performance and is required to achieve good results.
 
