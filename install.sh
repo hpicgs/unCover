@@ -33,4 +33,7 @@ conda activate unCover
 print_bold "Installing CoreNLP"
 ./corenlp --no-run
 
+print_bold "Downloading Models"
+./prepare_models
+
 print_bold "Done!"
