@@ -35,5 +35,6 @@ print_bold "Installing CoreNLP"
 
 print_bold "Downloading Models"
 ./prepare_models
+cp ./.env.example ./.env
 
 print_bold "Done!"
