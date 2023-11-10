@@ -28,7 +28,7 @@ print_bold "Creating Anaconda environment"
 conda env create -f environment.yml
 
 print_bold "Compiling TEM"
-make -C tem/topic-evolution-model/ # make: g++: No such file or directory
+make -C tem/topic-evolution-model/
 
 print_bold "Installing CoreNLP"
 conda run -n unCover ./corenlp --no-run
