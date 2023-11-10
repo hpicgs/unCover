@@ -25,16 +25,16 @@ git clone --recurse-submodules https://github.com/hpicgs/unCover.git
 cd unCover
 
 print_bold "Creating Anaconda environment"
+conda init
 conda env create -f environment.yml
-conda activate unCover # conda: error: argument COMMAND: invalid choice: 'activate'
 
 print_bold "Compiling TEM"
-make -C tem/topic-evolution-model/
+make -C tem/topic-evolution-model/ # make: g++: No such file or directory
 
 print_bold "Installing CoreNLP"
-./corenlp --no-run
+conda run -n unCover ./corenlp --no-run
 
 print_bold "Downloading Models"
-./prepare_models
+conda run -n unCover ./prepare_models
 
 print_bold "Done!"
