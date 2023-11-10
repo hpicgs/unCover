@@ -10,10 +10,6 @@ if ! which conda 1>/dev/null 2>/dev/null; then
     exit 1
 fi
 
-print_bold "Creating Anaconda environment"
-conda env create -f environment.yml
-conda activate unCover
-
 if ! which java 1>/dev/null 2>/dev/null; then
     print_bold "Please ensure Java is installed and on your PATH."
     exit 1
@@ -27,6 +23,10 @@ fi
 print_bold "Cloning repository"
 git clone --recurse-submodules https://github.com/hpicgs/unCover.git
 cd unCover
+
+print_bold "Creating Anaconda environment"
+conda env create -f environment.yml
+conda activate unCover # conda: error: argument COMMAND: invalid choice: 'activate'
 
 print_bold "Compiling TEM"
 make -C tem/topic-evolution-model/
