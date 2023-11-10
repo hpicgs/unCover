@@ -46,6 +46,9 @@ all the information in `.env.example` and save it as `.env`. OpenAI-credentials 
 only required for generation, however, fine-tuning the confidence thresholds to the 
 used models will greatly benefit performance and is required to achieve good results.
 
+Alternatively if you are only interested as running the web interface you can use
+the provided Dockerfile for a quick deployment.
+
 ## Usage
 
 There are multiple ways to use unCover, depending on your use case.
