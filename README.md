@@ -9,7 +9,7 @@ Detailed information about unCover can be found in the following publication:
 ![Teaser](https://drive.google.com/uc?export=download&id=1i49F16U7TiHCS8-17lBv8ofPsnvd-RE0)
 
 An interactive example deployment of unCover can be found at 
-[uncover.streamlit.app](https://uncover.streamlit.app).
+[uncover.lucasliebe.de](https://uncover.lucasliebe.de).
 Our datasets and pre-trained models can be found in 
 [Google Drive](https://drive.google.com/drive/folders/1fMZgGC2Bnp5K-ZoANXB_S0AI02akye_c?usp=drive_link).
 Please note that for copyright reasons we removed the plain text of the scraped 
