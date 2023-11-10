@@ -25,7 +25,6 @@ git clone --recurse-submodules https://github.com/hpicgs/unCover.git
 cd unCover
 
 print_bold "Creating Anaconda environment"
-conda init
 conda env create -f environment.yml
 
 print_bold "Compiling TEM"

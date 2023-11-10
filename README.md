@@ -15,6 +15,14 @@ Our datasets and pre-trained models can be found in
 Please note that for copyright reasons we removed the plain text of the scraped 
 news articles and only left the metadata and the generated texts in the dataset files.
 
+## Prerequisites
+
+Before you can use the installation script as described below, please make sure
+you have the following packages installed and working on your machine:
+- Anaconda or Miniconda
+- Java (Runtime Environment is sufficient)
+- Make and g++
+
 ## Setup
 
 To set up this project to run on your own machine, run the following command
