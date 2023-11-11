@@ -124,9 +124,10 @@ if __name__ == '__main__':
     col1.title("Welcome at unCover")
     col2.image(Image.open("unCover.png"), width=100)
     st.write(
-        " \nHere you can analyze a news article on topics and writing style to get further insights on whether this text "
-        "might have been written by an AI. This system was developed at Hasso-Plattner-Institute. To start, please choose "
-        "the type of input and enter the url/text in the field below.")
+        " \nHere you can analyze a news article on topics and writing style to get further insights on whether this "
+        "text might have been written by an AI. This system was developed at Hasso-Plattner-Institute. For more "
+        "information and the associated paper visit https://github.com/hpicgs/unCover.")
+    st.write("To start, please choose the type of input and enter the url/text in the field below.")
     col3, col4 = st.columns(2)
     input_type = col3.selectbox("type of input", ('URL', 'Text'), label_visibility="collapsed")
     text = ""
