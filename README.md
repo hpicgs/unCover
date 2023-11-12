@@ -2,9 +2,11 @@
 
 Detailed information about unCover can be found in the following publication:
 
-> Liebe L, Baum J, Schutze T, Cech T, Scheibel W, and Dollner J (2023). UNCOVER:
-> Identifying AI Generated News Articles by Linguistic Analysis and
-> Visualization
+> Liebe, L.; Baum, J.; Schütze, T.; Cech, T.; Scheibel, W. and Döllner, J. (2023). 
+> UNCOVER: Identifying AI Generated News Articles by Linguistic Analysis and Visualization.  
+> In Proceedings of the 15th International Joint Conference on Knowledge Discovery, 
+> Knowledge Engineering and Knowledge Management - Volume 1: KDIR, ISBN 
+> 978-989-758-671-2, ISSN 2184-3228, pages 39-50.    
 
 ![Teaser](https://drive.google.com/uc?export=download&id=1i49F16U7TiHCS8-17lBv8ofPsnvd-RE0)
 
