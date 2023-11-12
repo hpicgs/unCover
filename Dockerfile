@@ -17,13 +17,13 @@ RUN make -C tem/topic-evolution-model/
 RUN conda run -n unCover ./corenlp --no-run && conda run -n unCover ./prepare_models
 
 # Final image
-FROM scratch
+FROM alpine:latest
 LABEL authors="lucasliebe"
 
 #RUN apt-get update -y && apt-get install default-jre
 COPY --from=builder /app/unCover /app/unCover
 ENV CONDA_DIR /opt/conda
-COPY --from=build $CONDA_DIR $CONDA_DIR
+COPY --from=builder $CONDA_DIR $CONDA_DIR
 ENV PATH=$CONDA_DIR/bin:$PATH
 
 WORKDIR /app/unCover
