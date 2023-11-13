@@ -8,7 +8,7 @@ Detailed information about unCover can be found in the following publication:
 > Knowledge Engineering and Knowledge Management - Volume 1: KDIR, ISBN 
 > 978-989-758-671-2, ISSN 2184-3228, pages 39-50.    
 
-![Teaser](https://drive.google.com/uc?export=download&id=1i49F16U7TiHCS8-17lBv8ofPsnvd-RE0)
+![Teaser](https://drive.google.com/uc?export=download&id=1DU9HwazIUGxoFdI5cJ-liW3Q_-a-QV6G)
 
 An interactive example deployment of unCover can be found at 
 [uncover.lucasliebe.de](https://uncover.lucasliebe.de).
@@ -49,7 +49,8 @@ only required for generation, however, fine-tuning the confidence thresholds to 
 used models will greatly benefit performance and is required to achieve good results.
 
 Alternatively if you are only interested as running the web interface you can use
-the provided Dockerfile for a quick deployment.
+the provided docker container for a quick deployment. It can be built yourself using 
+the Dockerfile or pulled from Docker Hub: `docker pull lucasliebe/uncover:latest`.
 
 ## Usage
 
