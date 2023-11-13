@@ -2,18 +2,28 @@
 
 Detailed information about unCover can be found in the following publication:
 
-> Liebe L, Baum J, Schutze T, Cech T, Scheibel W, and Dollner J (2023). UNCOVER:
-> Identifying AI Generated News Articles by Linguistic Analysis and
-> Visualization
+> Liebe, L.; Baum, J.; Schütze, T.; Cech, T.; Scheibel, W. and Döllner, J. (2023). 
+> UNCOVER: Identifying AI Generated News Articles by Linguistic Analysis and Visualization.  
+> In Proceedings of the 15th International Joint Conference on Knowledge Discovery, 
+> Knowledge Engineering and Knowledge Management - Volume 1: KDIR, ISBN 
+> 978-989-758-671-2, ISSN 2184-3228, pages 39-50.    
 
-![Teaser](https://drive.google.com/uc?export=download&id=1i49F16U7TiHCS8-17lBv8ofPsnvd-RE0)
+![Teaser](https://drive.google.com/uc?export=download&id=1DU9HwazIUGxoFdI5cJ-liW3Q_-a-QV6G)
 
 An interactive example deployment of unCover can be found at 
-[uncover.streamlit.app](https://uncover.streamlit.app).
+[uncover.lucasliebe.de](https://uncover.lucasliebe.de).
 Our datasets and pre-trained models can be found in 
 [Google Drive](https://drive.google.com/drive/folders/1fMZgGC2Bnp5K-ZoANXB_S0AI02akye_c?usp=drive_link).
 Please note that for copyright reasons we removed the plain text of the scraped 
 news articles and only left the metadata and the generated texts in the dataset files.
+
+## Prerequisites
+
+Before you can use the installation script as described below, please make sure
+you have the following packages installed and working on your machine:
+- Anaconda or Miniconda
+- Java (Runtime Environment is sufficient)
+- Make and g++
 
 ## Setup
 
@@ -33,10 +43,14 @@ activate the environment with
 conda activate unCover
 ```
 
-To take full advantage of all capabilities in this repository you should update 
-all the information in `.env`. OpenAI-credentials are
+To take full advantage of all capabilities in this repository you should fill out 
+all the information in `.env.example` and save it as `.env`. OpenAI-credentials are
 only required for generation, however, fine-tuning the confidence thresholds to the 
 used models will greatly benefit performance and is required to achieve good results.
+
+Alternatively if you are only interested as running the web interface you can use
+the provided docker container for a quick deployment. It can be built yourself using 
+the Dockerfile or pulled from Docker Hub: `docker pull lucasliebe/uncover:latest`.
 
 ## Usage
 
