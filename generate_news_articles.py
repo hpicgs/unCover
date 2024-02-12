@@ -2,7 +2,7 @@ import json
 
 from scraper.article_scraper import GoogleScraper
 from scraper.page_processor import PageProcessor
-from generator.gpt_generator import generate_gpt3_news_from, generate_gpt2_news_from
+from generator.gpt_generator import generate_gpt4_news_from, generate_gpt3_news_from, generate_gpt2_news_from
 from grover.sample.contextual_generate import generate_grover_news_from_original
 from database.mock_database import DatabaseGenArticles
 from definitions import MODELS_DIR
@@ -48,6 +48,8 @@ def phrase_generation(phrases, args):
             tmp = generate_gpt3_news_from(phrase)
             if tmp is not None:
                 DatabaseGenArticles.insert_article(tmp, phrase, "gpt3-phrase")
+        if args.gpt4:
+            DatabaseGenArticles.insert_article(generate_gpt4_news_from(phrase), phrase, "gpt4-phrase")
 
 
 if __name__ == '__main__':
@@ -55,6 +57,7 @@ if __name__ == '__main__':
     parser.add_argument("--narticles", action="store", type=int, default=5, required=False, help="maximum number of articles to scrape per query, that will then be used by each method to generate")
     parser.add_argument("--queries", action="store", type=str, required=False, help="scrape articles for a given query, insert multiple values comma separated")
     parser.add_argument("--phrases", action="store", type=str, required=False, help="generate an articles by comma separated phrases")
+    parser.add_argument("--gpt4", action="store_true", required=False, help="use gpt4 for text generation")
     parser.add_argument("--gpt3", action="store_true", required=False, help="use gpt3 for text generation")
     parser.add_argument("--gpt2", action="store_true", required=False, help="use gpt2 for text generation, only uses title or phrase not whole articles")
     parser.add_argument("--grover", action="store", type=str, required=False, help="use grover for text generation and mention model size, does not work with phrases")
@@ -65,10 +68,10 @@ if __name__ == '__main__':
     elif not args.queries and not args.phrases:
         parser.error("please provide at least one query or phrase")
     elif not args.queries and args.phrases:
-        if not args.gpt3 and not args.gpt2:
+        if not args.gpt4 and not args.gpt3 and not args.gpt2:
             parser.error("please provide at least one valid method for generating news with phrases")
         phrase_generation(args.phrases.split(","), args)
     elif args.queries and not args.phrases:
-        if not args.grover and not args.gpt3 and not args.gpt2:
+        if not args.grover and not args.gpt4 and not args.gpt3 and not args.gpt2:
             parser.error("please provide at least one method valid for generating news with queries")
         query_generation(args.queries.split(","), args)
