@@ -9,6 +9,7 @@ source_mapping = {
     "gpt2": 1,
     "gpt3": 1,
     "gpt4": 1,
+    "gemini": 1,
     "grover": 1
 }
 
