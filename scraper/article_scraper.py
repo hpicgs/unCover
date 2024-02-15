@@ -29,7 +29,7 @@ class GoogleScraper:
                 for btn in self.__driver.find_elements(
                     By.TAG_NAME, "button"
                 )
-                if "Ich stimme zu" in btn.get_attribute("innerHTML")
+                if "Alle akzeptieren" in btn.get_attribute("innerHTML")
             )
             agree_btn.click()
         except:
@@ -91,7 +91,7 @@ class GoogleScraper:
         fetch_results = lambda: [
             a_tag.get_attribute("href")
             for a_tag in self.__driver.find_elements(
-                By.XPATH, "//article/a"
+                By.XPATH, "//article/div/div/a"
             )
             if a_tag.is_displayed()
         ][:n_articles]

@@ -24,6 +24,9 @@ def query_generation(queries, args):
             processor = PageProcessor(page)
             print("fetched page")
             processed_page = re.sub(r"\s+", " ", processor.get_fulltext())
+            if len(processed_page) < 600:  # this is to filter out error messages and other scraping mistakes
+                print("original article is too short; -> skipping for consistency")
+                continue
             title = processor.get_title()
             print("start processing")
             if args.gpt2:

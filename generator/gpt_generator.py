@@ -5,16 +5,19 @@ from definitions import GPT_KEY, OPENAI_ORGA
 
 def generate_gpt3_news_from(doc, size=1000):
     print("Starting GPT3 Request")
-    openai.organization = OPENAI_ORGA
-    openai.api_key = GPT_KEY
+    client = openai.OpenAI(
+        api_key=GPT_KEY,
+        organization=OPENAI_ORGA
+    )
     doc += "\n\nWrite a long news article about this topic."
     response = None
     while response is None:
         try:
-            response = openai.Completion.create(model="text-davinci-003", prompt=doc, max_tokens=size, temperature=0.4)
-        except openai.error.APIConnectionError or openai.error.Timeout:
+            response = client.completions.create(model="gpt-3.5-turbo-instruct", prompt=doc, max_tokens=size,
+                                                 temperature=0.4)
+        except openai.APIConnectionError or openai.Timeout:
             continue
-        except openai.error.InvalidRequestError:
+        except openai.BadRequestError:
             break
 
     print("GPT3 finished")
@@ -23,20 +26,23 @@ def generate_gpt3_news_from(doc, size=1000):
 
 def generate_gpt4_news_from(doc, size=1000):
     print("Starting GPT 4 Request")
-    openai.organization = OPENAI_ORGA
-    openai.api_key = GPT_KEY
+    client = openai.OpenAI(
+        api_key=GPT_KEY,
+        organization=OPENAI_ORGA
+    )
     doc += "\n\nWrite a long news article about this topic."
     response = None
     while response is None:
         try:
-            response = openai.Completion.create(model="gpt-4", prompt=doc, max_tokens=size, temperature=0.4)
-        except openai.error.APIConnectionError or openai.error.Timeout:
+            response = client.chat.completions.create(model="gpt-4", messages=[{"role": "user", "content": doc}],
+                                                      max_tokens=size, temperature=0.4)
+        except openai.APIConnectionError or openai.Timeout:
             continue
-        except openai.error.InvalidRequestError:
+        except openai.BadRequestError:
             break
 
     print("GPT4 finished")
-    return response.choices[0].text if response else None
+    return response.choices[0].message.content if response else None
 
 
 def generate_gpt2_news_from(doc, size=1000):
@@ -48,4 +54,3 @@ def generate_gpt2_news_from(doc, size=1000):
     result = generator(doc, max_length=size, num_return_sequences=1)[0]["generated_text"]
     print("GPT2 Finished")
     return (result.rsplit(".", 1)[0] + ".").split(doc_prompt, 1)[1]
-
