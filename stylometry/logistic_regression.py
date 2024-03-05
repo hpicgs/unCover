@@ -12,8 +12,10 @@ from nltk.parse.corenlp import CoreNLPDependencyParser
 used_authors = {
     "gpt2":"ai",
     "gpt3":"ai",
+    "gpt4":"ai",
     "gpt3-phrase":"ai",
     "grover":"ai",
+    "gemini":"ai",
     "human1":"human",
     "human2":"human",
     "human3":"human",

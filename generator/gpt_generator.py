@@ -38,7 +38,7 @@ def generate_gpt4_news_from(doc, size=1000):
                                                       max_tokens=size, temperature=0.4)
         except openai.APIConnectionError or openai.Timeout:
             continue
-        except openai.BadRequestError:
+        except openai.RateLimitError:
             break
 
     print("GPT4 finished")

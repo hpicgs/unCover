@@ -73,8 +73,8 @@ if __name__ == '__main__':
                                                "domain": "www.com", "warc_date": "20190424064330", "status": "success",
                                                "split": "gen","inst_index": 0})
                     grover = generate_grover_news_from_original(grover_input, "base", MODELS_DIR)
-                except:
-                    print("article produces error for grover; -> skipping for consistency")
+                except Exception as e:
+                    print("article produces error for grover: " + str(e) + "; -> skipping for consistency")
                     continue
             if "gemini" in methods:
                 gemini = generate_gemini_news_from(processed_page)
@@ -93,7 +93,7 @@ if __name__ == '__main__':
             if "gpt4" in methods:
                 gpt4 = generate_gpt4_news_from(processed_page)
                 if gpt4 is None:
-                    print("article produced error at gpt4; -> skipping for consistency")
+                    print("article at this url too long for gpt4; -> skipping for consistency")
                     continue
 
             if gpt4:

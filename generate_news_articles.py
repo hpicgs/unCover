@@ -1,5 +1,4 @@
 import json
-
 from scraper.article_scraper import GoogleScraper
 from scraper.page_processor import PageProcessor
 from generator.gpt_generator import generate_gpt4_news_from, generate_gpt3_news_from, generate_gpt2_news_from
@@ -20,7 +19,11 @@ def query_generation(queries, args):
         for url in urls:
             print(f"Current URL Nr: {count} {url}")
             count += 1
-            page = requests.get(url).text
+            try:
+                page = requests.get(url).text
+            except Exception as e:
+                print("error fetching page: ", e)
+                continue
             processor = PageProcessor(page)
             print("fetched page")
             processed_page = re.sub(r"\s+", " ", processor.get_fulltext())
@@ -40,7 +43,10 @@ def query_generation(queries, args):
                 if tmp is not None:
                     DatabaseGenArticles.insert_article(tmp, url, "gpt4")
             if args.gemini:
-                DatabaseGenArticles.insert_article(generate_gemini_news_from(processed_page), url, "gemini")
+                try:
+                    DatabaseGenArticles.insert_article(generate_gemini_news_from(processed_page), url, "gemini")
+                except ValueError as e:
+                    print(f"Error while generating gemini article as none was generated: {e}")
             if args.grover:
                 grover_input = json.dumps({"url": url, "url_used": url, "title": title, "text": processed_page,
                                     "summary": "", "authors": [], "publish_date": "04-19-2023", "domain": "www.com",

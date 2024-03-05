@@ -7,4 +7,11 @@ def generate_gemini_news_from(doc):
     model = genai.GenerativeModel('gemini-pro')
     doc += "\n\nWrite a long news article about this topic."
     response = model.generate_content(doc)
-    return response.text
+    try:
+        return response.text
+    except ValueError as e:
+        print(f"Error while generating gemini article as none was generated: {e}")
+        print(response.prompt_feedback)
+        return None
+
+

@@ -39,14 +39,15 @@ if __name__ == '__main__':
         total_predictions = {-1: 0, 0: 0, 1: 0}
         for article in articles:
             total_count += 1
-            printProgressBar(total_count, 771)
+            printProgressBar(total_count, 1173)
             if len(article) > 120000:
                 article = article[:120000]
             try:
                 style_prediction = predict_author(article)
                 te = get_default_te(article)
                 te_prediction = predict_from_tem_metrics(te)
-            except AttributeError:  # some texts are still not working for tem
+            except AttributeError as e:  # some texts are still not working for tem
+                print("te error: ", e)
                 total_count -= 1
                 continue
             source_count += 1
