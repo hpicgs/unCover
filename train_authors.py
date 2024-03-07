@@ -34,16 +34,13 @@ if __name__ == "__main__":
     os.makedirs(STYLOMETRY_DIR, exist_ok=True)
 
     trainable_authors = []
-    i = 1
     for author in authors:
-        full_article_list = [(article["text"], "human" + str(i)) for article in
+        full_article_list = [(article["text"], author) for article in
                              DatabaseAuthorship.get_articles_by_author(author)]
         training_data += full_article_list[:int(len(full_article_list) * 0.8)]
-        author = "human" + str(i)
         if len(full_article_list) >= minarticles:
             print(f"chose author: {author}")
             trainable_authors.append(author)
-            i += 1
     trainable_machines = []
     for machine in machines:
         full_article_list = [(article["text"], machine) for article in

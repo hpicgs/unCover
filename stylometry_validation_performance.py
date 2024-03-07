@@ -39,16 +39,7 @@ def write_test_distributions():
     for author in authors:
         print(f"working on author {author}")
         if used_authors[author] == "human":
-            if author == "human1":
-                full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author("https://www.theguardian.com/profile/hannah-ellis-petersen")]
-            if author == "human2":
-                full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author("https://www.theguardian.com/profile/leyland-cecco")]
-            if author == "human3":
-                full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author("https://www.theguardian.com/profile/martin-chulov")]
-            if author == "human4":
-                full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author("https://www.theguardian.com/profile/julianborger")]
-            if author == "human5":
-                full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author("https://www.theguardian.com/profile/helen-sullivan")]
+            full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author(author)]
         elif used_authors[author] == "ai":
             full_article_list = [(article["text"], author) for article in DatabaseGenArticles.get_articles_by_method(author.replace("_", "/"))]
         test_data = full_article_list[int(len(full_article_list)*0.8):]
