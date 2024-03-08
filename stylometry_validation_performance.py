@@ -2,24 +2,10 @@ from definitions import STYLOMETRY_DIR, CHAR_MACHINE_CONFIDENCE, CHAR_HUMAN_CONF
 from database.mock_database import DatabaseAuthorship, DatabaseGenArticles
 from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams
-from stylometry.logistic_regression import fixed_trigram_distribution
+from stylometry.logistic_regression import fixed_trigram_distribution, used_authors
 from nltk.parse.corenlp import CoreNLPDependencyParser
 import pandas as pd
 import pickle, os, argparse
-
-used_authors = {
-    "gpt2":"ai",
-    "gpt3":"ai",
-    "gpt4":"ai",
-    "gpt3-phrase":"ai",
-    "grover":"ai",
-    "gemini":"ai",
-    "human1":"human",
-    "human2":"human",
-    "human3":"human",
-    "human4":"human",
-    "human5":"human"
-}
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--nfeatures", action="store", required=False, type=int, default=100, help="number of char trigram & semantic trigram features used in the distribution")
