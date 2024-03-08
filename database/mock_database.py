@@ -70,7 +70,7 @@ class DatabaseGenArticles:
     def get_articles_by_method(method):
         articles = DatabaseGenArticles.__db.get_data()
         return [article for article in articles if
-                method in article["method"].split(",") and article["text"] is not None]
+                method in article['method'].split(',') and article['text'] is not None]
 
     @staticmethod
     def insert_article(text, source, method):

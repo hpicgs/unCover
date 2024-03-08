@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv
-import streamlit as st
 
 load_dotenv()
 
@@ -24,6 +23,7 @@ DATABASE_TEST_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-test.yaml')
 
 GPT_KEY = os.getenv("GPT_KEY", "")
 OPENAI_ORGA = os.getenv("OPENAI_ORGA", "")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 
 CHAR_MACHINE_CONFIDENCE = float(os.getenv("CHAR_MACHINE_CONFIDENCE", ""))
 CHAR_HUMAN_CONFIDENCE = float(os.getenv("CHAR_HUMAN_CONFIDENCE", ""))

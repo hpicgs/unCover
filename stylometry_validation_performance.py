@@ -2,22 +2,10 @@ from definitions import STYLOMETRY_DIR, CHAR_MACHINE_CONFIDENCE, CHAR_HUMAN_CONF
 from database.mock_database import DatabaseAuthorship, DatabaseGenArticles
 from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams
-from stylometry.logistic_regression import fixed_trigram_distribution
+from stylometry.logistic_regression import fixed_trigram_distribution, used_authors
 from nltk.parse.corenlp import CoreNLPDependencyParser
 import pandas as pd
 import pickle, os, argparse
-
-used_authors = {
-    "gpt2":"ai",
-    "gpt3":"ai",
-    "gpt3-phrase":"ai",
-    "grover":"ai",
-    "human1":"human",
-    "human2":"human",
-    "human3":"human",
-    "human4":"human",
-    "human5":"human"
-}
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--nfeatures", action="store", required=False, type=int, default=100, help="number of char trigram & semantic trigram features used in the distribution")
@@ -37,9 +25,9 @@ def write_test_distributions():
     for author in authors:
         print(f"working on author {author}")
         if used_authors[author] == "human":
-            full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author(author.replace("_", "/"))]
+            full_article_list = [(article["text"], author) for article in DatabaseAuthorship.get_articles_by_author(author)]
         elif used_authors[author] == "ai":
-            full_article_list = [(article["text"], author) for article in DatabaseGenArticles.get_articles_by_author(author.replace("_", "/"))]
+            full_article_list = [(article["text"], author) for article in DatabaseGenArticles.get_articles_by_method(author.replace("_", "/"))]
         test_data = full_article_list[int(len(full_article_list)*0.8):]
         print("creating char trigrams")
         char_grams = [char_trigrams(article_tuple[0]) for article_tuple in test_data]
@@ -97,31 +85,23 @@ def model_prediction(inp, type):
 
 
 def performance():
-    correct_class = [[], []]
+    correct_class = [[]]
     char_test_dataframe = pd.read_csv(os.path.join(STYLOMETRY_DIR, f"test_char_distribution{nfeatures}.csv"))
     for i in range(char_test_dataframe.shape[0]):
         if used_authors[char_test_dataframe.iloc[i]["author"]] == "ai":
-            correct_class[0].append(1)
+            correct_class.append(1)
         elif used_authors[char_test_dataframe.iloc[i]["author"]] == "human":
-            correct_class[0].append(-1)
+            correct_class.append(-1)
         else:
-            correct_class[0].append(0)
+            correct_class.append(0)
     sem_test_dataframe = pd.read_csv(os.path.join(STYLOMETRY_DIR, f"test_sem_distribution{nfeatures}.csv"))
-    for i in range(sem_test_dataframe.shape[0]):
-        if used_authors[sem_test_dataframe.iloc[i]["author"]] == "ai":
-            correct_class[1].append(1)
-        elif used_authors[sem_test_dataframe.iloc[i]["author"]] == "human":
-            correct_class[1].append(-1)
-        else:
-            correct_class[1].append(0)
-    predictions = []
-    predictions[0] = model_prediction(char_test_dataframe.drop(["author", "Unnamed: 0"], axis=1), "char")
-    predictions[1] = model_prediction(sem_test_dataframe.drop(["author", "Unnamed: 0"], axis=1), "sem")
+    predictions = [model_prediction(char_test_dataframe.drop(["author", "Unnamed: 0"], axis=1), "char"),
+                   model_prediction(sem_test_dataframe.drop(["author", "Unnamed: 0"], axis=1), "sem")]
     for i, prediction in enumerate(predictions):
         print(prediction)
         accuracy = sum([1 if prediction == correct_class[i] else 0 for i, prediction in enumerate(prediction)]) / len(correct_class)
-        count_ai = max(correct_class[i].count(1), 1)
-        count_human = max(correct_class[i].count(-1), 1)
+        count_ai = max(correct_class.count(1), 1)
+        count_human = max(correct_class.count(-1), 1)
         true_ai = sum([1 if prediction == correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(prediction)]) / count_ai
         false_ai = sum([1 if prediction != correct_class[i] and prediction == 1 else 0 for i, prediction in enumerate(prediction)]) / count_human
         true_human = sum([1 if prediction == correct_class[i] and prediction == -1 else 0 for i, prediction in enumerate(prediction)]) / count_human
@@ -133,5 +113,5 @@ def performance():
         print({"accuracy":accuracy, "ai_true_positives":true_ai, "ai_false_positives":false_ai, "unsure":unsure_total})
 
 
-write_test_distributions()
+#write_test_distributions()
 performance()

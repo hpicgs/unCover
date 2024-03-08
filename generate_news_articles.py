@@ -1,8 +1,8 @@
 import json
-
 from scraper.article_scraper import GoogleScraper
 from scraper.page_processor import PageProcessor
-from generator.gpt_generator import generate_gpt3_news_from, generate_gpt2_news_from
+from generator.gpt_generator import generate_gpt4_news_from, generate_gpt3_news_from, generate_gpt2_news_from
+from generator.gemini_generator import generate_gemini_news_from
 from grover.sample.contextual_generate import generate_grover_news_from_original
 from database.mock_database import DatabaseGenArticles
 from definitions import MODELS_DIR
@@ -19,10 +19,17 @@ def query_generation(queries, args):
         for url in urls:
             print(f"Current URL Nr: {count} {url}")
             count += 1
-            page = requests.get(url).text
+            try:
+                page = requests.get(url).text
+            except Exception as e:
+                print("error fetching page: ", e)
+                continue
             processor = PageProcessor(page)
             print("fetched page")
             processed_page = re.sub(r"\s+", " ", processor.get_fulltext())
+            if len(processed_page) < 600:  # this is to filter out error messages and other scraping mistakes
+                print("original article is too short; -> skipping for consistency")
+                continue
             title = processor.get_title()
             print("start processing")
             if args.gpt2:
@@ -31,6 +38,15 @@ def query_generation(queries, args):
                 tmp = generate_gpt3_news_from(processed_page)
                 if tmp is not None:
                     DatabaseGenArticles.insert_article(tmp, url, "gpt3")
+            if args.gpt4:
+                tmp = generate_gpt4_news_from(processed_page)
+                if tmp is not None:
+                    DatabaseGenArticles.insert_article(tmp, url, "gpt4")
+            if args.gemini:
+                try:
+                    DatabaseGenArticles.insert_article(generate_gemini_news_from(processed_page), url, "gemini")
+                except ValueError as e:
+                    print(f"Error while generating gemini article as none was generated: {e}")
             if args.grover:
                 grover_input = json.dumps({"url": url, "url_used": url, "title": title, "text": processed_page,
                                     "summary": "", "authors": [], "publish_date": "04-19-2023", "domain": "www.com",
@@ -55,8 +71,10 @@ if __name__ == '__main__':
     parser.add_argument("--narticles", action="store", type=int, default=5, required=False, help="maximum number of articles to scrape per query, that will then be used by each method to generate")
     parser.add_argument("--queries", action="store", type=str, required=False, help="scrape articles for a given query, insert multiple values comma separated")
     parser.add_argument("--phrases", action="store", type=str, required=False, help="generate an articles by comma separated phrases")
+    parser.add_argument("--gpt4", action="store_true", required=False, help="use gpt4 for text generation, only implemented for whole articles")
     parser.add_argument("--gpt3", action="store_true", required=False, help="use gpt3 for text generation")
     parser.add_argument("--gpt2", action="store_true", required=False, help="use gpt2 for text generation, only uses title or phrase not whole articles")
+    parser.add_argument("--gemini", action="store_true", required=False, help="use gemini for text generation, only implemented for whole articles")
     parser.add_argument("--grover", action="store", type=str, required=False, help="use grover for text generation and mention model size, does not work with phrases")
 
     args = parser.parse_args()
@@ -69,6 +87,6 @@ if __name__ == '__main__':
             parser.error("please provide at least one valid method for generating news with phrases")
         phrase_generation(args.phrases.split(","), args)
     elif args.queries and not args.phrases:
-        if not args.grover and not args.gpt3 and not args.gpt2:
+        if not all([args.grover, args.gemin, args.gpt4, args.gpt3, args.gpt2]):
             parser.error("please provide at least one method valid for generating news with queries")
         query_generation(args.queries.split(","), args)
