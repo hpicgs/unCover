@@ -52,11 +52,9 @@ if __name__ == '__main__':
                 continue
             source_count += 1
             author = get_prediction(style_prediction, te_prediction)
-            sem_style_predictions.update({style_prediction[1]: sem_style_predictions.get(style_prediction[1]) + 1})
             char_style_predictions.update({style_prediction[0]: char_style_predictions.get(style_prediction[0]) + 1})
-            style_prediction = 0 if style_prediction[0] == -style_prediction[1] or style_prediction == [0, 0] else \
-                1 if style_prediction[0] == 1 or style_prediction[1] == 1 else -1
-            total_style_predictions.update({style_prediction: total_style_predictions.get(style_prediction) + 1})
+            sem_style_predictions.update({style_prediction[1]: sem_style_predictions.get(style_prediction[1]) + 1})
+            total_style_predictions.update({style_prediction[2]: char_style_predictions.get(style_prediction[2]) + 1})
             te_prediction = te_prediction[0]
             if te_prediction == 0:
                 te_prediction = -1
