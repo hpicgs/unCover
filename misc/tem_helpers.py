@@ -1,8 +1,10 @@
 import numpy as np
 import numpy.typing as npt
 
+from tem.script.model import TopicEvolution
 from tem.script.nlp import get_structured_corpus
 from tem.script.process import TEM
+from tem.script.visualization import graph
 
 
 tem_default_params = np.array([
@@ -20,3 +22,8 @@ def get_default_tecm(text: str) -> npt.NDArray[np.float64]:
     corpus = get_structured_corpus(text)
     model = TEM.from_param_list(tem_default_params, metrics=True)
     return model.get_metrics([corpus])[0]
+
+def get_default_te_graph(text: str):
+    corpus = get_structured_corpus(text)
+    model = TEM.from_param_list(tem_default_params)
+    return graph(TopicEvolution(model.get_outputs([corpus])[0]))
