@@ -1,4 +1,4 @@
-from database.mock_database import TestDatabase
+from misc.mock_database import TestDatabase
 from stylometry.logistic_regression import predict_author
 from main import get_prediction
 from tem.process import get_default_te

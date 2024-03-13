@@ -9,7 +9,7 @@ import os
 import streamlit as st
 import streamlit.components.v1 as components
 
-from entity_coherence.coreferences import coref_annotation, coref_diagram
+from misc.entity_coreferences import coref_annotation, coref_diagram
 from scraper.page_processor import PageProcessor
 from stylometry.corenlp import connect_corenlp
 from stylometry.logistic_regression import predict_author

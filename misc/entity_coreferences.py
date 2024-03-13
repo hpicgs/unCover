@@ -1,9 +1,9 @@
 from stanza.server import CoreNLPClient
 from stanza.server.client import StartServer
-from nlp.helpers import normalize_quotes
+from misc.nlp_helpers import normalize_quotes
 
 from stylometry.showcase.dep_colors import color_string
-from visualization.text_chart import stacked_bar
+from misc.text_chart_visualization import stacked_bar
 
 
 def coref_annotation(text: str):
