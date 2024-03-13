@@ -99,9 +99,9 @@ if __name__ == "__main__":
         model_results.append((char_results[i], sem_results[i]))
 
     features = pd.DataFrame([char for char, sem in model_results])
-    fit_model("char_final", features, truth_table, n_features)
+    fit_model("char_final", features.values, truth_table, n_features)
     features = pd.DataFrame([sem for char, sem in model_results])
-    fit_model("sem_final", features, truth_table, n_features)
+    fit_model("sem_final", features.values, truth_table, n_features)
     features = pd.DataFrame([char + sem for char, sem in model_results])
-    fit_model("style_final", features, truth_table, n_features)
+    fit_model("style_final", features.values, truth_table, n_features)
     print("TRAINING DONE!")

@@ -72,19 +72,13 @@ def model_prediction(inp, type):
             mini, maxi = json.loads(fp.read())
     for i, author in enumerate(authors):
         tmp = models[author].predict_proba(inp)
-        print(tmp[0])
         for t in tmp:
             t[1] = (t[1] - mini[i]) / (maxi[i] - mini[i])
-        print(tmp[0])
         confidence_values[author] = tmp
     final_predictions = []
     raw_predictions = []
     for i in range(inp.shape[0]):
         if type == "char":
-            # machine = any(confidence_values[author][i][1] > CHAR_MACHINE_CONFIDENCE for author in authors if
-            #               used_authors[author] == "ai")
-            # human = any(confidence_values[author][i][1] > CHAR_HUMAN_CONFIDENCE for author in authors if
-            #             used_authors[author] == "human")
             with open(os.path.join(STYLOMETRY_DIR, "char_final" + str(nfeatures) + ".pickle"), "rb") as fp:
                 char = pickle.load(fp).predict_proba(
                     np.array([confidence_values[author][i][1] for author in authors]).reshape(1, -1))[0]
@@ -92,25 +86,12 @@ def model_prediction(inp, type):
             final_predictions.append(
                 1 if char[1] > CHAR_MACHINE_CONFIDENCE else -1 if char[0] > CHAR_HUMAN_CONFIDENCE else 0)
         else:
-            # machine = any(confidence_values[author][i][1] > SEM_MACHINE_CONFIDENCE for author in authors if
-            #               used_authors[author] == "ai")
-            # human = any(confidence_values[author][i][1] > SEM_HUMAN_CONFIDENCE for author in authors if
-            #             used_authors[author] == "human")
             with open(os.path.join(STYLOMETRY_DIR, "sem_final" + str(nfeatures) + ".pickle"), "rb") as fp:
                 sem = pickle.load(fp).predict_proba(
                     np.array([confidence_values[author][i][1] for author in authors]).reshape(1, -1))[0]
             raw_predictions.append(sem)
             final_predictions.append(
                 1 if sem[1] > SEM_MACHINE_CONFIDENCE else -1 if sem[0] > SEM_HUMAN_CONFIDENCE else 0)
-        # if (machine and human) or (not human and not machine):
-        #     final_predictions.append(0)
-        # elif machine:
-        #     final_predictions.append(1)
-        # elif human:
-        #     final_predictions.append(-1)
-        # machine = max(confidence_values[author][i][1] for author in authors if used_authors[author] == "ai")
-        # human = max(confidence_values[author][i][1] for author in authors if used_authors[author] == "human")
-        # raw_predictions.append((machine, human))
 
     print(raw_predictions)
     return final_predictions

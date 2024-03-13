@@ -81,10 +81,10 @@ def predict_author(text: str, n_features: int = 100):
     for i, author in enumerate(authors):
         with open(os.path.join(STYLOMETRY_DIR, author + "_char" + str(n_features) + ".pickle"), "rb") as fp:
             char_confidence.append(
-                (pickle.load(fp).predict_proba(char_distribution)[0][1] - char_min[i] / (char_max[i] - char_min[i])))
+                (pickle.load(fp).predict_proba(char_distribution.values)[0][1]-char_min[i])/(char_max[i]-char_min[i]))
         with open(os.path.join(STYLOMETRY_DIR, author + "_sem" + str(n_features) + ".pickle"), "rb") as fp:
             sem_confidence.append(
-                (pickle.load(fp).predict_proba(sem_distribution)[0][1] - sem_min[i] / (sem_max[i] - sem_min[i])))
+                (pickle.load(fp).predict_proba(sem_distribution.values)[0][1]-sem_min[i])/(sem_max[i]-sem_min[i]))
 
     with open(os.path.join(STYLOMETRY_DIR, "char_final" + str(n_features) + ".pickle"), "rb") as fp:
         char = pickle.load(fp).predict_proba(np.array(char_confidence).reshape(1, -1))[0]
