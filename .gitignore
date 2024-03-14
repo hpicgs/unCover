@@ -1,7 +1,7 @@
 models
 .env
 .idea
-database/files
+.database
 out/
 samples/
 geckodriver.log
