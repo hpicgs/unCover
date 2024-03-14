@@ -1,10 +1,23 @@
 import os
+
 from dotenv import load_dotenv
+import numpy as np
 
 load_dotenv()
 
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 ENV_DIR = os.getenv("CONDA_PREFIX", os.getenv("HOME", '/'))
+
+TEM_PARAMS = np.array([
+    float(os.getenv('TEM_PARAM_C', '')),
+    float(os.getenv('TEM_PARAM_ALPHA', '')),
+    float(os.getenv('TEM_PARAM_BETA', '')),
+    float(os.getenv('TEM_PARAM_GAMMA', '')),
+    float(os.getenv('TEM_PARAM_DELTA', '')),
+    float(os.getenv('TEM_PARAM_THETA', '')),
+    float(os.getenv('TEM_PARAM_MERGE', '')),
+    float(os.getenv('TEM_PARAM_EVOLV', ''))
+])
 
 MODELS_DIR = os.path.join(ENV_DIR, 'models')
 STYLOMETRY_DIR = os.path.join(MODELS_DIR, 'stylometry')
