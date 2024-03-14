@@ -1,6 +1,6 @@
 from scraper.article_scraper import GoogleScraper
 from scraper.page_processor import PageProcessor
-from database.mock_database import DatabaseAuthorship
+from misc.mock_database import DatabaseAuthorship
 from bs4 import BeautifulSoup
 import re, requests, argparse, time
 

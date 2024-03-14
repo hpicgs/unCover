@@ -1,10 +1,23 @@
 import os
+
 from dotenv import load_dotenv
+import numpy as np
 
 load_dotenv()
 
 ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
 ENV_DIR = os.getenv("CONDA_PREFIX", os.getenv("HOME", '/'))
+
+TEM_PARAMS = np.array([
+    float(os.getenv('TEM_PARAM_C', '')),
+    float(os.getenv('TEM_PARAM_ALPHA', '')),
+    float(os.getenv('TEM_PARAM_BETA', '')),
+    float(os.getenv('TEM_PARAM_GAMMA', '')),
+    float(os.getenv('TEM_PARAM_DELTA', '')),
+    float(os.getenv('TEM_PARAM_THETA', '')),
+    float(os.getenv('TEM_PARAM_MERGE', '')),
+    float(os.getenv('TEM_PARAM_EVOLV', ''))
+])
 
 MODELS_DIR = os.path.join(ENV_DIR, 'models')
 STYLOMETRY_DIR = os.path.join(MODELS_DIR, 'stylometry')
@@ -16,10 +29,10 @@ STANFORD_JARS = (
 )
 NLTK_DATA = os.path.join(ENV_DIR, 'nltk_data')
 
-DATABASE_FILES_PATH = os.path.join(ROOT_DIR, 'database', 'files')
-DATABASE_AUTHORS_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-authors.yaml')
-DATABASE_GEN_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-gen.yaml')
-DATABASE_TEST_PATH = os.path.join(DATABASE_FILES_PATH, '.mock-test.yaml')
+DATABASE_FILES_PATH = os.path.join(ROOT_DIR, '.database')
+DATABASE_AUTHORS_PATH = os.path.join(DATABASE_FILES_PATH, 'authors.yaml')
+DATABASE_GEN_PATH = os.path.join(DATABASE_FILES_PATH, 'gen.yaml')
+DATABASE_TEST_PATH = os.path.join(DATABASE_FILES_PATH, 'test.yaml')
 
 GPT_KEY = os.getenv("GPT_KEY", "")
 OPENAI_ORGA = os.getenv("OPENAI_ORGA", "")

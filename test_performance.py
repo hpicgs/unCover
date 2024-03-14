@@ -1,8 +1,8 @@
-from database.mock_database import TestDatabase
+from misc.mock_database import TestDatabase
+from misc.tem_helpers import get_default_tecm
 from stylometry.logistic_regression import predict_author
 from main import get_prediction
-from tem.process import get_default_te
-from train_tem_metrics import predict_from_tem_metrics
+from train_tem_metrics import predict_from_tecm
 
 source_mapping = {
     "human": -1,
@@ -44,8 +44,8 @@ if __name__ == '__main__':
                 article = article[:120000]
             try:
                 style_prediction = predict_author(article)
-                te = get_default_te(article)
-                te_prediction = predict_from_tem_metrics(te)
+                tecm = get_default_tecm(article)
+                te_prediction = predict_from_tecm(tecm)
             except AttributeError as e:  # some texts are still not working for tem
                 print("te error: ", e)
                 total_count -= 1
