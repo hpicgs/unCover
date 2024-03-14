@@ -1,3 +1,10 @@
+import os
+import sys
+
+from definitions import ROOT_DIR
+
+sys.path.append(os.path.join(ROOT_DIR, 'tem', 'script'))
+
 import numpy as np
 import numpy.typing as npt
 
