@@ -15,6 +15,7 @@ if __name__ == '__main__':
                         help="maximum number of texts to store into database per method")
     parser.add_argument("--queries", action="store", type=str, required=False,
                         help="scrape articles for a given query, insert multiple values comma separated")
+    # humans can be either human-verified or human (unverified) as that depends on the url
     parser.add_argument("--methods", action="store", type=str, required=False, default="",
                         help="what data should be part of the test data, available are gpt2, gpt3, gpt4, gemini, grover, and human-verified or human")
 
@@ -80,7 +81,7 @@ if __name__ == '__main__':
                     grover_input = json.dumps({"url": url, "url_used": url, "title": title, "text": processed_page,
                                                "summary": "", "authors": [], "publish_date": "04-19-2023",
                                                "domain": "www.com", "warc_date": "20190424064330", "status": "success",
-                                               "split": "gen","inst_index": 0})
+                                               "split": "gen", "inst_index": 0})
                     grover = generate_grover_news_from_original(grover_input, "base", MODELS_DIR)
                 except Exception as e:
                     print("article produces error for grover: " + str(e) + "; -> skipping for consistency")
