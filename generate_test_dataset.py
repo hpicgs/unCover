@@ -1,4 +1,4 @@
-from database.mock_database import TestDatabase
+from misc.mock_database import TestDatabase
 import argparse, requests, re, json
 from scraper.page_processor import PageProcessor
 from scraper.article_scraper import GoogleScraper

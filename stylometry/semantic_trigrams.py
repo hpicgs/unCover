@@ -4,7 +4,7 @@ from nltk.parse.corenlp import CoreNLPDependencyParser, DependencyGraph
 from nltk.tree.tree import Tree
 from nltk.tokenize import sent_tokenize
 
-from nlp.helpers import handle_nltk_download, lower_alnum
+from misc.nlp_helpers import handle_nltk_download, lower_alnum
 
 
 def _dep_tree(graph: DependencyGraph):

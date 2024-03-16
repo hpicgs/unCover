@@ -9,12 +9,12 @@ import os
 import streamlit as st
 import streamlit.components.v1 as components
 
-from entity_coherence.coreferences import coref_annotation, coref_diagram
+from misc.entity_coreferences import coref_annotation, coref_diagram
 from scraper.page_processor import PageProcessor
 from stylometry.corenlp import connect_corenlp
 from stylometry.logistic_regression import predict_author
-from tem.process import get_default_te
-from train_tem_metrics import predict_from_tem_metrics
+from misc.tem_helpers import get_default_te_graph, get_default_tecm
+from train_tem_metrics import predict_from_tecm
 from definitions import ROOT_DIR
 
 def __models_thread():
@@ -46,8 +46,8 @@ def run_analysis(input_type, user_input):
         style_prediction = predict_author(content)
 
         try:
-            te = get_default_te(content)
-            te_prediction = predict_from_tem_metrics(te)
+            tecm = get_default_tecm(content)
+            te_prediction = predict_from_tecm(tecm)
         except AttributeError:  # some texts are not working for tem
             st.error("The input text is too short for the Topic Evolution Model to work. Please enter a different "
                      "text. If you are using a URL, please try to copy the text manually since some websites can block "
@@ -75,7 +75,7 @@ def run_analysis(input_type, user_input):
         "Please note that this estimation does not need to be correct and should be further supported by the in-depth "
         "analysis below.")
     st.subheader("Topic Evolution Analysis:")
-    image = te.graph().pipe(format='jpg')
+    image = get_default_te_graph(content).pipe(format='jpg')
     st.image(image, caption="Topic Evolution on Input Text")
     st.subheader("Entity Occurrences Analysis:")
     components.html(entity_html, height=1000, scrolling=True)

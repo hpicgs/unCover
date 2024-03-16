@@ -4,7 +4,7 @@ from scraper.page_processor import PageProcessor
 from generator.gpt_generator import generate_gpt4_news_from, generate_gpt3_news_from, generate_gpt2_news_from
 from generator.gemini_generator import generate_gemini_news_from
 from grover.sample.contextual_generate import generate_grover_news_from_original
-from database.mock_database import DatabaseGenArticles
+from misc.mock_database import DatabaseGenArticles
 from definitions import MODELS_DIR
 import re, requests, argparse
 

@@ -1,11 +1,11 @@
 import argparse
 import json
 import requests
-from database.mock_database import TestDatabase
+from misc.mock_database import TestDatabase
+from misc.tem_helpers import get_default_tecm
 from stylometry.logistic_regression import predict_author, used_authors
 from main import get_prediction
-from tem.process import get_default_te
-from train_tem_metrics import predict_from_tem_metrics
+from train_tem_metrics import predict_from_tecm
 from definitions import WINSTON_API_KEY
 
 source_mapping = {
@@ -30,7 +30,7 @@ def printProgressBar(iteration, total, decimals=1, fill='█', printEnd="\r"):
         print()
 
 
-def compare_sota(text):
+def predict_sota(text):
     payload = {
         "language": "en",
         "sentences": False,
@@ -85,14 +85,14 @@ if __name__ == '__main__':
             if args.compareSOTA:
                 if len(article) > 100000:
                     article = article[:100000]
-                sota = compare_sota(article)
+                sota = predict_sota(article)
                 sota_predictions.update({sota: sota_predictions.get(sota) + 1})
             if len(article) > 120000:
                 article = article[:120000]
             try:
                 style_prediction = predict_author(article)
-                te = get_default_te(article)
-                te_prediction = predict_from_tem_metrics(te)
+                tecm = get_default_tecm(article)
+                te_prediction = predict_from_tecm(tecm)
             except AttributeError as e:  # some texts are still not working for tem
                 print("te error: ", e)
                 total_count -= 1

@@ -1,16 +1,16 @@
-import csv
-
-from analyze_tem import te_analysis_data
 import argparse
+import csv
 import os
 import pickle
-from definitions import DATABASE_FILES_PATH, MODELS_DIR
-from numpy import mean
-from numpy import std
+
+import numpy as np
+import numpy.typing as npt
 import pandas as pd
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import RepeatedStratifiedKFold
-from sklearn.linear_model import LogisticRegression
+
+from definitions import DATABASE_FILES_PATH, MODELS_DIR
 
 author_mapping = {
     "gpt3":1,
@@ -39,14 +39,12 @@ def tem_metric_training(path):
     model = LogisticRegression(multi_class='multinomial', solver='lbfgs', random_state=42)
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=3, random_state=9732)
     n_scores = cross_val_score(model, X, labels, scoring='accuracy', cv=cv, n_jobs=-1)
-    print('Mean Accuracy: %.3f (%.3f)' % (mean(n_scores), std(n_scores)))
+    print('Mean Accuracy: %.3f (%.3f)' % (np.mean(n_scores), np.std(n_scores)))
     return model.fit(X, labels)
 
 
-def predict_from_tem_metrics(te):
-    data = te_analysis_data(te)
-    data.pop('median n_words per topic')
-    df = pd.DataFrame(data, index=[0])
+def predict_from_tecm(metrics: npt.NDArray[np.float64]):
+    df = pd.DataFrame(metrics, index=[0])
     with open(os.path.join(MODELS_DIR, "tem_metrics", 'metrics_model.pickle'), "rb") as f:
         model = pickle.load(f)
     prediction = model.predict_proba(df)
