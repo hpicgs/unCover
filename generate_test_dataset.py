@@ -16,15 +16,16 @@ if __name__ == '__main__':
     parser.add_argument("--queries", action="store", type=str, required=False,
                         help="scrape articles for a given query, insert multiple values comma separated")
     parser.add_argument("--methods", action="store", type=str, required=False, default="",
-                        help="what data should be part of the test data, available are human, gpt2, gpt3, gpt4, gemini, grover")
+                        help="what data should be part of the test data, available are gpt2, gpt3, gpt4, gemini, grover, and human-verified or human")
 
     args = parser.parse_args()
     methods = args.methods.split(",")
+    visited = []
     if not args.queries:
         parser.error("please provide at least one query")
     if len(methods) == 0:
         parser.error("please provide at least one method")
-    elif not ("human" in methods or "gpt4" in methods or "gpt3" in methods or "gpt2" in methods or "gemini" in methods or "grover" in methods):
+    elif set(methods) - {"human-verified", "human", "gpt4", "gpt3", "gpt2", "gemini", "grover"}:
         parser.error("the provided methods are not valid, please separate them by ','")
     count = 1
     for query in args.queries.split(","):
@@ -40,6 +41,9 @@ if __name__ == '__main__':
                 continue
         print(urls)
         for url in urls:
+            if url in visited:
+                continue
+            visited.append(url)
             print(f"Current URL Nr: {count} {url}")
             try:
                 page = requests.get(url, timeout=60).text
@@ -52,7 +56,12 @@ if __name__ == '__main__':
             title = processor.get_title()
             print("start processing")
             gpt4, gpt3, gpt2, gemini, grover, human = None, None, None, None, None, None
-            if "human" in methods:
+            if "human-verified" in methods:
+                human = processor.get_fulltext(separator="\n")
+                if len(human) < 600:  # this is to filter out error messages and other scraping mistakes
+                    print("original article is too short; -> skipping for consistency")
+                    continue
+            elif "human" in methods:
                 human = processor.get_fulltext(separator="\n")
                 if len(human) < 600:  # this is to filter out error messages and other scraping mistakes
                     print("original article is too short; -> skipping for consistency")
@@ -107,7 +116,10 @@ if __name__ == '__main__':
             if grover:
                 TestDatabase.insert_article(grover, url, "grover")
             if human:
-                TestDatabase.insert_article(human, url, "human")
+                if "human-verified" in methods:
+                    TestDatabase.insert_article(human, url, "human-verified")
+                else:
+                    TestDatabase.insert_article(human, url, "human")
 
             if count == args.max_amount:
                 break
