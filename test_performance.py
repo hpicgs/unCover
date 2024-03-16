@@ -25,7 +25,6 @@ def printProgressBar(iteration, total, decimals=1, fill='█', printEnd="\r"):
     filledLength = int(100 * iteration // total)
     bar = fill * filledLength + '-' * (100 - filledLength)
     print(f'\r |{bar}| {percent}% ', end=printEnd)
-    # Print New Line on Complete
     if iteration == total:
         print()
 
@@ -162,8 +161,8 @@ if __name__ == '__main__':
             continue
         print("\n" + p + " accuracy: ", str(round(metrics["total"][1][p] / total_count * 100, 2)),
               "%")
-        precision = metrics["ai"][1][p] / (metrics["ai"][1][p] + metrics["ai"][-1][p])
+        precision = metrics["ai"][1][p] / (metrics["ai"][1][p] + metrics["ai"][-1][p] + 0.5 * metrics["ai"][0][p])
         recall = metrics["ai"][1][p] / (
-                0.7 * metrics["ai"][1][p] + 1.5 * metrics["human"][1][p] + 0.5 * metrics["ai"][0][p])
+                metrics["ai"][1][p] + 1.5 * metrics["human"][1][p] + 0.5 * metrics["ai"][0][p])
         f1 = 2 * precision * recall / (precision + recall)
-        print(p + " f1: ", str(round(f1 * 100, 2)), "%")
+        print(p + " weighted f1: ", str(round(f1 * 100, 2)), "%")
