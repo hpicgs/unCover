@@ -51,13 +51,20 @@ def predict_sota(text):
         return 0
 
 
-def calculate_metrics(predictions, source):
-    true = predictions[source_mapping[source]]
+def _initial_metrics(keys=None):
+    if keys is None:
+        keys = [-1, 0, 1]
+    predictions = ["char_style", "sem_style", "total_style", "te", "total", "sota"]
+    return {key: {pred: 0 for pred in predictions} for key in keys}
+
+
+def calculate_metrics(predictions, src, total):
+    true = predictions[source_mapping[src]]
     unsure = predictions[0]
-    false = predictions[-source_mapping[source]]
-    print(prediction, " true: ", str(round(true / count * 100, 2)), "%")
-    print(prediction, " unsure: ", str(round(unsure / count * 100, 2)), "%")
-    print(prediction, " false: ", str(round(false / count * 100, 2)), "%\n")
+    false = predictions[-source_mapping[src]]
+    print(prediction, " true: ", str(round(true / total * 100, 2)), "%")
+    print(prediction, " unsure: ", str(round(unsure / total * 100, 2)), "%")
+    print(prediction, " false: ", str(round(false / total * 100, 2)), "%\n")
     return true, unsure, false
 
 
@@ -122,15 +129,10 @@ if __name__ == '__main__':
     print("total Number of articles analyzed: ", str(total_count))
     # print(predictions_per_author)
     metrics = {
-        "total": {1: {"char_style": 0, "sem_style": 0, "total_style": 0, "te": 0, "total": 0, "sota": 0}},
-        "human": {
-            -1: {"char_style": 0, "sem_style": 0, "total_style": 0, "te": 0, "total": 0, "sota": 0},
-            0: {"char_style": 0, "sem_style": 0, "total_style": 0, "te": 0, "total": 0, "sota": 0},
-            1: {"char_style": 0, "sem_style": 0, "total_style": 0, "te": 0, "total": 0, "sota": 0}},
-        "ai": {
-            1: {"char_style": 0, "sem_style": 0, "total_style": 0, "te": 0, "total": 0, "sota": 0},
-            0: {"char_style": 0, "sem_style": 0, "total_style": 0, "te": 0, "total": 0, "sota": 0},
-            -1: {"char_style": 0, "sem_style": 0, "total_style": 0, "te": 0, "total": 0, "sota": 0}}}
+        "total": _initial_metrics(keys=[1]),
+        "human": _initial_metrics(),
+        "ai": _initial_metrics()
+    }
     for source in predictions_per_author:
         print("\nStarting for Source: ", source)
         count = predictions_per_author[source]["count"]
@@ -140,22 +142,9 @@ if __name__ == '__main__':
             (metrics[used_authors[source]][source_mapping[source]][prediction],
              metrics[used_authors[source]][0][prediction],
              metrics[used_authors[source]][-source_mapping[source]][prediction]) = (
-                calculate_metrics(predictions_per_author[source][prediction], source))
+                calculate_metrics(predictions_per_author[source][prediction], source, count))
             metrics["total"][1][prediction] += metrics[used_authors[source]][source_mapping[source]][prediction]
 
-    for source in predictions_per_author:
-        print("\nStarting for Source: ", source)
-        count = predictions_per_author[source]["count"]
-        for prediction in predictions_per_author[source]:
-            if prediction == "count":
-                continue
-            print(prediction, " true: ", str(round(predictions_per_author[source][prediction][source_mapping[source]] /
-                                                   count * 100, 2)), "%")
-            print(prediction, " unsure: ", str(round(predictions_per_author[source][prediction][0] /
-                                                     count * 100, 2)), "%")
-            print(prediction, " false: ",
-                  str(round(predictions_per_author[source][prediction][-source_mapping[source]] /
-                            count * 100, 2)), "%\n")
     for p in predictions_per_author["human"]:  # using human just to access prediction types
         if p == "count":
             continue

@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     methods = args.methods.split(",")
-    visited = []
+    visited = {}
     if not args.queries:
         parser.error("please provide at least one query")
     if len(methods) == 0:
