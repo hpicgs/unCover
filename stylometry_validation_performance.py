@@ -1,8 +1,7 @@
 import json
-
 from definitions import STYLOMETRY_DIR, CHAR_MACHINE_CONFIDENCE, CHAR_HUMAN_CONFIDENCE, SEM_MACHINE_CONFIDENCE, \
     SEM_HUMAN_CONFIDENCE
-from database.mock_database import DatabaseAuthorship, DatabaseGenArticles
+from misc.mock_database import DatabaseAuthorship, DatabaseGenArticles
 from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams
 from stylometry.logistic_regression import fixed_trigram_distribution, used_authors

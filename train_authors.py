@@ -5,7 +5,7 @@ from definitions import STYLOMETRY_DIR, DATABASE_AUTHORS_PATH, DATABASE_GEN_PATH
 from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams
 from stylometry.logistic_regression import trigram_distribution, logistic_regression, used_authors
-from database.mock_database import DatabaseAuthorship, DatabaseGenArticles
+from misc.mock_database import DatabaseAuthorship, DatabaseGenArticles
 import os, sys, pickle, argparse, json
 
 

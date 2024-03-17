@@ -1,4 +1,4 @@
-from database.mock_database import TestDatabase
+from misc.mock_database import TestDatabase
 import argparse, requests, re, json
 from scraper.page_processor import PageProcessor
 from scraper.article_scraper import GoogleScraper
@@ -15,16 +15,18 @@ if __name__ == '__main__':
                         help="maximum number of texts to store into database per method")
     parser.add_argument("--queries", action="store", type=str, required=False,
                         help="scrape articles for a given query, insert multiple values comma separated")
+    # humans can be either human-verified or human (unverified) as that depends on the url
     parser.add_argument("--methods", action="store", type=str, required=False, default="",
-                        help="what data should be part of the test data, available are human, gpt2, gpt3, gpt4, gemini, grover")
+                        help="what data should be part of the test data, available are gpt2, gpt3, gpt4, gemini, grover, and human-verified or human")
 
     args = parser.parse_args()
     methods = args.methods.split(",")
+    visited = {}
     if not args.queries:
         parser.error("please provide at least one query")
     if len(methods) == 0:
         parser.error("please provide at least one method")
-    elif not ("human" in methods or "gpt4" in methods or "gpt3" in methods or "gpt2" in methods or "gemini" in methods or "grover" in methods):
+    elif set(methods) - {"human-verified", "human", "gpt4", "gpt3", "gpt2", "gemini", "grover"}:
         parser.error("the provided methods are not valid, please separate them by ','")
     count = 1
     for query in args.queries.split(","):
@@ -40,6 +42,9 @@ if __name__ == '__main__':
                 continue
         print(urls)
         for url in urls:
+            if url in visited:
+                continue
+            visited.append(url)
             print(f"Current URL Nr: {count} {url}")
             try:
                 page = requests.get(url, timeout=60).text
@@ -52,7 +57,12 @@ if __name__ == '__main__':
             title = processor.get_title()
             print("start processing")
             gpt4, gpt3, gpt2, gemini, grover, human = None, None, None, None, None, None
-            if "human" in methods:
+            if "human-verified" in methods:
+                human = processor.get_fulltext(separator="\n")
+                if len(human) < 600:  # this is to filter out error messages and other scraping mistakes
+                    print("original article is too short; -> skipping for consistency")
+                    continue
+            elif "human" in methods:
                 human = processor.get_fulltext(separator="\n")
                 if len(human) < 600:  # this is to filter out error messages and other scraping mistakes
                     print("original article is too short; -> skipping for consistency")
@@ -71,7 +81,7 @@ if __name__ == '__main__':
                     grover_input = json.dumps({"url": url, "url_used": url, "title": title, "text": processed_page,
                                                "summary": "", "authors": [], "publish_date": "04-19-2023",
                                                "domain": "www.com", "warc_date": "20190424064330", "status": "success",
-                                               "split": "gen","inst_index": 0})
+                                               "split": "gen", "inst_index": 0})
                     grover = generate_grover_news_from_original(grover_input, "base", MODELS_DIR)
                 except Exception as e:
                     print("article produces error for grover: " + str(e) + "; -> skipping for consistency")
@@ -107,7 +117,10 @@ if __name__ == '__main__':
             if grover:
                 TestDatabase.insert_article(grover, url, "grover")
             if human:
-                TestDatabase.insert_article(human, url, "human")
+                if "human-verified" in methods:
+                    TestDatabase.insert_article(human, url, "human-verified")
+                else:
+                    TestDatabase.insert_article(human, url, "human")
 
             if count == args.max_amount:
                 break
