@@ -55,7 +55,7 @@ def fixed_trigram_distribution(trigram_lists, features):
 def logistic_regression(dataframe: pd.DataFrame, truth_labels: list()):
     if len(dataframe) <= 1:
         return
-    regression = LogisticRegression(solver='liblinear', max_iter=100, random_state=42)
+    regression = LogisticRegression(solver='liblinear', max_iter=100, random_state=42, C=0.9)
     reg = regression.fit(dataframe, truth_labels)
     print("regression score: " + str(reg.score(dataframe, truth_labels)))
     return reg
