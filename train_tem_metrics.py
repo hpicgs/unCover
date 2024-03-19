@@ -1,7 +1,6 @@
 import os
 import pickle
 import numpy as np
-import numpy.typing as npt
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
@@ -9,6 +8,7 @@ from sklearn.model_selection import RepeatedStratifiedKFold
 from definitions import MODELS_DIR
 from misc.mock_database import DatabaseAuthorship, DatabaseGenArticles
 from misc.tem_helpers import get_default_tecm
+from misc.nlp_helpers import handle_nltk_download
 
 author_mapping = {
     "gpt3":1,
@@ -23,7 +23,11 @@ author_mapping = {
 def prepare_train_data(database, training_data, label):
     for author in database.get_authors():
         articles = [article["text"] for article in database.get_articles_by_author(author)]
-        training_data += [get_default_tecm(article) for article in articles]
+        try: # check if nltk is installed and download if it is not
+            training_data += [get_default_tecm(article) for article in articles]
+        except LookupError as e:
+            handle_nltk_download(e)
+            training_data += [get_default_tecm(article) for article in articles]
         label += [author_mapping[author]] * len(articles)
 
 def tem_metric_training():
@@ -51,5 +55,6 @@ def predict_from_tecm(metrics: npt.NDArray[np.float64]):
 
 
 if __name__ == '__main__':
+    os.create_dir(MODELS_DIR, "tem_metrics", exist_ok=True)
     with open(os.path.join(MODELS_DIR, "tem_metrics", 'metrics_model.pickle'), 'wb') as f:
         pickle.dump(tem_metric_training(), f)
