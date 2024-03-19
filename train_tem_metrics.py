@@ -1,41 +1,37 @@
-import argparse
-import csv
 import os
 import pickle
-
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import RepeatedStratifiedKFold
-
-from definitions import DATABASE_FILES_PATH, MODELS_DIR
+from definitions import MODELS_DIR
+from misc.mock_database import DatabaseAuthorship, DatabaseGenArticles
+from misc.tem_helpers import get_default_tecm
 
 author_mapping = {
     "gpt3":1,
     "gpt2":2,
-    "gpt3-phrase":3,
-    "grover":4,
+    "gpt4":3,
+    "gpt3-phrase":4,
+    "grover":5,
+    "gemini":6,
     "human":0
 }
 
+def prepare_train_data(database, training_data, label):
+    for author in database.get_authors():
+        articles = [article["text"] for article in database.get_articles_by_author(author)]
+        training_data += [get_default_tecm(article) for article in articles]
+        label += [author_mapping[author]] * len(articles)
 
-def tem_metric_training(path):
-    classes = [f.path for f in os.scandir(path) if f.is_dir()]
-    feature_names = []
+def tem_metric_training():
     features = []
     labels = []
-    for c in classes:
-        with open(os.path.join(c, "_stats.csv"), 'r' ) as file:
-            reader = csv.reader(file)
-            for i,line in enumerate(reader):
-                if i == 0:
-                    feature_names = line[1:-1]
-                    continue
-                features.append(line[1:-1])
-                labels.append(author_mapping[os.path.basename(c)])
-    X = pd.DataFrame(features,columns=feature_names)
+    prepare_train_data(DatabaseAuthorship, features, labels)
+    prepare_train_data(DatabaseGenArticles, features, labels)
+    X = pd.DataFrame(features)
     model = LogisticRegression(multi_class='multinomial', solver='lbfgs', random_state=42)
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=3, random_state=9732)
     n_scores = cross_val_score(model, X, labels, scoring='accuracy', cv=cv, n_jobs=-1)
@@ -55,10 +51,5 @@ def predict_from_tecm(metrics: npt.NDArray[np.float64]):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--path', action="store", required=False,
-                        default=os.path.join(DATABASE_FILES_PATH, "tem_stats"),
-                        help='directory where the training data is located')
-    args = parser.parse_args()
     with open(os.path.join(MODELS_DIR, "tem_metrics", 'metrics_model.pickle'), 'wb') as f:
-        pickle.dump(tem_metric_training(args.path), f)
+        pickle.dump(tem_metric_training(), f)
