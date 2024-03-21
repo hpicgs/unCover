@@ -8,6 +8,7 @@ from definitions import STYLOMETRY_DIR, CHAR_MACHINE_CONFIDENCE, CHAR_HUMAN_CONF
 from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams
 from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import cross_val_score, RepeatedStratifiedKFold
 from nltk.parse.corenlp import CoreNLPDependencyParser
 
 used_authors = {
@@ -56,8 +57,11 @@ def logistic_regression(dataframe: pd.DataFrame, truth_labels: list()):
     if len(dataframe) <= 1:
         return
     regression = LogisticRegression(solver='liblinear', max_iter=100, random_state=42, C=0.9)
+    cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=3, random_state=9732)
+    n_scores = cross_val_score(regression, dataframe, truth_labels, scoring='accuracy', cv=cv, n_jobs=-1)
+    print('Mean Accuracy: %.3f (%.3f)' % (np.mean(n_scores), np.std(n_scores)))
     reg = regression.fit(dataframe, truth_labels)
-    print("regression score: " + str(reg.score(dataframe, truth_labels)))
+    print("final regression score: " + str(reg.score(dataframe, truth_labels)))
     return reg
 
 
