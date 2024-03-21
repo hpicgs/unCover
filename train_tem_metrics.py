@@ -4,10 +4,9 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import RepeatedStratifiedKFold
+from sklearn.model_selection import cross_val_score, RepeatedStratifiedKFold
 from definitions import MODELS_DIR
-from test_performance import printProgressBar
+from misc.logger import printProgressBar
 from misc.mock_database import DatabaseAuthorship, DatabaseGenArticles
 from misc.tem_helpers import get_default_tecm
 from misc.nlp_helpers import handle_nltk_download

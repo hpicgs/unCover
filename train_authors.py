@@ -6,6 +6,7 @@ from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams
 from stylometry.logistic_regression import trigram_distribution, logistic_regression, used_authors
 from misc.mock_database import DatabaseAuthorship, DatabaseGenArticles
+from misc.logger import printProgressBar
 import os, sys, pickle, argparse, json
 
 
@@ -80,7 +81,8 @@ if __name__ == "__main__":
     print("Distributions Done\n\n")
 
     char, sem = [], []
-    for author in used_authors.keys():
+    for i, author in enumerate(used_authors.keys()):
+        printProgressBar(i, len(used_authors.keys()) - 1)
         truth_table = [1 if author == article_tuple[1] else 0 for article_tuple in training_data]
         char.append(fit_model(f"{author.replace('/', '_')}_char", character_distribution.values, truth_table, n_features))
         sem.append(fit_model(f"{author.replace('/', '_')}_sem", semantic_distribution.values, truth_table, n_features))

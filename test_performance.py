@@ -3,6 +3,7 @@ import json
 import requests
 from misc.mock_database import TestDatabase
 from misc.tem_helpers import get_default_tecm
+from misc.logger import printProgressBar
 from stylometry.logistic_regression import predict_author, used_authors
 from main import get_prediction
 from train_tem_metrics import predict_from_tecm
@@ -17,17 +18,6 @@ source_mapping = {
     "gemini": 1,
     "grover": 1
 }
-
-
-# Print iterations progress
-def printProgressBar(iteration, total, decimals=1, fill='█', printEnd="\r"):
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(100 * iteration // total)
-    bar = fill * filledLength + '-' * (100 - filledLength)
-    print(f'\r |{bar}| {percent}% ', end=printEnd)
-    if iteration == total:
-        print()
-
 
 def predict_sota(text):
     payload = {
