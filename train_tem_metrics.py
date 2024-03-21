@@ -47,9 +47,9 @@ def run_tem(data):
 def prepare_train_data(database, training_data, label):
     for author in database.get_authors():
         print("working on author: " + author + "...")
-        articles = [article["text"] for article in database.get_articles_by_author(author)]
-        training_data += run_tem(articles)
-        label += [author_mapping[author]] * len(articles)
+        tmp = run_tem([article["text"] for article in database.get_articles_by_author(author)])
+        training_data += tmp
+        label += [author_mapping[author]] * len(tmp)
 
 
 def tem_metric_training():
