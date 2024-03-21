@@ -76,6 +76,7 @@ if __name__ == '__main__':
     data = TestDatabase.get_all_articles_sorted_by_methods()
     predictions_per_author = {}
     total_count = 0
+    num_articles = len(data) * 200
     for source in data:
         source_count = 0
         articles = data[source]
@@ -87,7 +88,7 @@ if __name__ == '__main__':
         sota_predictions = {-1: 0, 0: 0, 1: 0}
         for article in articles:
             total_count += 1
-            printProgressBar(total_count, 1373)
+            printProgressBar(total_count, num_articles)
             if args.compareSOTA:
                 if len(article) > 100000:
                     article = article[:100000]
@@ -99,9 +100,10 @@ if __name__ == '__main__':
                 style_prediction = predict_author(article)
                 tecm = get_default_tecm(article)
                 te_prediction = predict_from_tecm(tecm)
-            except AttributeError as e:  # some texts are still not working for tem
+            except Exception as e:  # some texts are still not working for tem
                 print("te error: ", e)
                 total_count -= 1
+                num_articles -= 1
                 continue
             source_count += 1
             author = get_prediction(style_prediction, te_prediction)
