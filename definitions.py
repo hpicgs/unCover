@@ -21,6 +21,7 @@ TEM_PARAMS = np.array([
 
 MODELS_DIR = os.path.join(ENV_DIR, 'models')
 STYLOMETRY_DIR = os.path.join(MODELS_DIR, 'stylometry')
+TEMMETRICS_DIR = os.path.join(MODELS_DIR, 'tem_metrics')
 # also adjust existing stanford dir to use new variable
 STANFORD_DIR = os.path.join(MODELS_DIR, 'stanford-corenlp-4.5.1')
 STANFORD_JARS = (

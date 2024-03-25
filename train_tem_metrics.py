@@ -1,11 +1,12 @@
 import os
 import pickle
+import argparse
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score, RepeatedStratifiedKFold
-from definitions import MODELS_DIR
+from definitions import TEMMETRICS_DIR
 from misc.logger import printProgressBar
 from misc.mock_database import DatabaseAuthorship, DatabaseGenArticles
 from misc.tem_helpers import get_default_tecm
@@ -26,7 +27,7 @@ author_mapping = {
     "": 0
 }
 
-model_pickle = os.path.join(MODELS_DIR, "tem_metrics", 'metrics_model.pickle')
+model_pickle = os.path.join(TEMMETRICS_DIR, 'model.pickle')
 
 
 def run_tem(data):
@@ -38,6 +39,8 @@ def run_tem(data):
                 result.append(get_default_tecm(article))
             except ValueError:
                 continue
+            except Exception as e:
+                print("Error while processing article: ", e)
         return result
     except LookupError as e:
         handle_nltk_download(e)
@@ -52,11 +55,20 @@ def prepare_train_data(database, training_data, label):
         label += [author_mapping[author]] * len(tmp)
 
 
-def tem_metric_training():
+def tem_metric_training(use_stored=False):
     features = []
     labels = []
-    prepare_train_data(DatabaseAuthorship, features, labels)
-    prepare_train_data(DatabaseGenArticles, features, labels)
+    feature_file = os.path.join(TEMMETRICS_DIR, 'features.pickle')
+    label_file = os.path.join(TEMMETRICS_DIR, 'labels.pickle')
+    if use_stored & os.path.exists(feature_file) & os.path.exists(label_file):
+        print("Loading existing training data...")
+        features = pickle.load(open(feature_file, 'rb'))
+        labels = pickle.load(open(label_file, 'rb'))
+    else:
+        prepare_train_data(DatabaseAuthorship, features, labels)
+        prepare_train_data(DatabaseGenArticles, features, labels)
+        pickle.dump(features, open(feature_file, 'wb'))
+        pickle.dump(labels, open(label_file, 'wb'))
     X = pd.DataFrame(features)
     model = LogisticRegression(multi_class='multinomial', solver='lbfgs', random_state=42)
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=3, random_state=9732)
@@ -77,8 +89,12 @@ def predict_from_tecm(metrics: npt.NDArray[np.float64]):
 
 
 if __name__ == '__main__':
-    os.makedirs(os.path.join(MODELS_DIR, "tem_metrics"), exist_ok=True)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--use_stored", action="store_true", required=False,
+                        help="rerun the TEM model to generate train data, and ignore existing data")
+    args = parser.parse_args()
+    os.makedirs(TEMMETRICS_DIR, exist_ok=True)
     with open(model_pickle, 'wb') as f:
-        model = tem_metric_training()
+        model = tem_metric_training(args.use_stored)
         pickle.dump(model, f)
     print("TRAINING DONE!")
