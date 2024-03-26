@@ -24,19 +24,22 @@ def get_listed_articles(url, source):
                     'article' in article_link.get('href') and 'mediathek' not in article_link.get('href')])
 
 
-def find_authors_articles(n, url, source):
-    pagenum = 1
-    result = []
-    while len(result) < n:
-        time.sleep(0.2)
-        print(f"{url}{pagenum}")
-        urls = get_listed_articles(f"{url}{pagenum}", source)
-        if urls and not any(link in result for link in urls):
-            result += urls
-        else:
-            break
-        pagenum += 1
-    return result
+def find_authors_articles(n, source, author):
+    if source == "theguardian":
+        pagenum = 1
+        result = []
+        while len(result) < n:
+            time.sleep(0.2)
+            urls = get_listed_articles(f"https://theguardian.com/profile/{author}?page=", source)
+            if urls and not any(link in result for link in urls):
+                result += urls
+            else:
+                break
+            pagenum += 1
+        return result
+    elif source == "ntv":
+        return get_listed_articles(f"https://www.n-tv.de/autoren/{author}.html", source)
+    return []
 
 def preprocess_article(doc):
     paragraph = re.sub("[ \t\r\f]+", ' ', doc)  # \s without \n
@@ -50,17 +53,19 @@ def generate_author_dataset(site, author, narticles=10):
     # only works for theguardian.com and n-tv.de
     if "theguardian.com" in site:
         database = DatabaseAuthorship
-        article_urls = find_authors_articles(narticles, f"{site}/profile/{author}?page=", "theguardian")
+        article_urls = find_authors_articles(narticles, "theguardian", author)
     elif "n-tv.de" in site:
         database = GermanDatabase
-        article_urls = find_authors_articles(narticles, f"{site}/autoren/{author}.html?", "ntv")
-    for article_url in article_urls[:narticles]:
+        article_urls = find_authors_articles(narticles, "ntv", author)
+    if narticles != 0:
+        article_urls = article_urls[:narticles]
+    for article_url in article_urls:
         time.sleep(0.2)
         print(article_url)
         page = requests.get(article_url).text
         processor = PageProcessor(page)
         processed_page = preprocess_article(processor.get_fulltext(separator="\n"))
-        author = processor.get_author()
+        author = processor.get_author().replace(" ", "")
         database.insert_article(processed_page, article_url, author)
 
 
