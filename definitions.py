@@ -34,6 +34,8 @@ DATABASE_FILES_PATH = os.path.join(ROOT_DIR, '.database')
 DATABASE_AUTHORS_PATH = os.path.join(DATABASE_FILES_PATH, 'authors.yaml')
 DATABASE_GEN_PATH = os.path.join(DATABASE_FILES_PATH, 'gen.yaml')
 DATABASE_TEST_PATH = os.path.join(DATABASE_FILES_PATH, 'test.yaml')
+DATABASE_GERMAN_PATH = os.path.join(DATABASE_FILES_PATH, 'german.yaml')
+DATABASE_GERMAN_TEST_PATH = os.path.join(DATABASE_FILES_PATH, 'german-test.yaml')
 
 GPT_KEY = os.getenv('GPT_KEY', '')
 OPENAI_ORGA = os.getenv('OPENAI_ORGA', '')
