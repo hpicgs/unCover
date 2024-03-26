@@ -60,7 +60,7 @@ def tem_metric_training(use_stored=False):
     labels = []
     feature_file = os.path.join(TEMMETRICS_DIR, 'features.pickle')
     label_file = os.path.join(TEMMETRICS_DIR, 'labels.pickle')
-    if use_stored & os.path.exists(feature_file) & os.path.exists(label_file):
+    if use_stored and os.path.exists(feature_file) and os.path.exists(label_file):
         print("Loading existing training data...")
         features = pickle.load(open(feature_file, 'rb'))
         labels = pickle.load(open(label_file, 'rb'))
@@ -78,7 +78,7 @@ def tem_metric_training(use_stored=False):
 
 
 def predict_from_tecm(metrics: npt.NDArray[np.float64]):
-    df = pd.DataFrame(metrics, index=[0])
+    df = pd.DataFrame(metrics.reshape(1, -1))
     with open(model_pickle, "rb") as f:
         model = pickle.load(f)
     prediction = model.predict_proba(df)
