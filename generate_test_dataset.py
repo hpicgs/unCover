@@ -1,4 +1,4 @@
-from misc.mock_database import TestDatabase
+from misc.mock_database import TestDatabase, GermanTestDatabase
 import argparse, requests, re, json
 from scraper.page_processor import PageProcessor
 from scraper.article_scraper import GoogleScraper
@@ -18,10 +18,12 @@ if __name__ == '__main__':
     # humans can be either human-verified or human (unverified) as that depends on the url
     parser.add_argument("--methods", action="store", type=str, required=False, default="",
                         help="what data should be part of the test data, available are gpt2, gpt3, gpt4, gemini, grover, and human-verified or human")
+    parser.add_argument("--german", action="store_true", required=False, default=False,
+                        help="use the german test database instead of the english one")
 
     args = parser.parse_args()
     methods = args.methods.split(",")
-    visited = {}
+    visited = set()
     if not args.queries:
         parser.error("please provide at least one query")
     if len(methods) == 0:
@@ -29,14 +31,17 @@ if __name__ == '__main__':
     elif set(methods) - {"human-verified", "human", "gpt4", "gpt3", "gpt2", "gemini", "grover"}:
         parser.error("the provided methods are not valid, please separate them by ','")
     count = 1
+    database = TestDatabase
+    if args.german:
+        database = GermanTestDatabase
     for query in args.queries.split(","):
         print("Round starting for " + query)
         scraper = GoogleScraper(verbose=True)
         try:
-            urls = scraper.find_news_urls_for_query(query, args.narticles)
+            urls = scraper.find_news_urls_for_query(query, args.narticles, args.german)
         except:
             try:
-                urls = scraper.find_news_urls_for_query(query, args.narticles)
+                urls = scraper.find_news_urls_for_query(query, args.narticles, args.german)
             except:
                 print("error fetching urls")
                 continue
@@ -44,7 +49,7 @@ if __name__ == '__main__':
         for url in urls:
             if url in visited:
                 continue
-            visited.append(url)
+            visited.add(url)
             print(f"Current URL Nr: {count} {url}")
             try:
                 page = requests.get(url, timeout=60).text
@@ -101,26 +106,26 @@ if __name__ == '__main__':
                     print("article at this url too long for gpt3; -> skipping for consistency")
                     continue
             if "gpt4" in methods:
-                gpt4 = generate_gpt4_news_from(processed_page)
+                gpt4 = generate_gpt4_news_from(processed_page, args.german)
                 if gpt4 is None:
                     print("article at this url too long for gpt4; -> skipping for consistency")
                     continue
 
             if gpt4:
-                TestDatabase.insert_article(gpt4, url, "gpt4")
+                database.insert_article(gpt4, url, "gpt4")
             if gpt3:
-                TestDatabase.insert_article(gpt3, url, "gpt3")
+                database.insert_article(gpt3, url, "gpt3")
             if gpt2:
-                TestDatabase.insert_article(gpt2, url, "gpt2")
+                database.insert_article(gpt2, url, "gpt2")
             if gemini:
-                TestDatabase.insert_article(gemini, url, "gemini")
+                database.insert_article(gemini, url, "gemini")
             if grover:
-                TestDatabase.insert_article(grover, url, "grover")
+                database.insert_article(grover, url, "grover")
             if human:
                 if "human-verified" in methods:
-                    TestDatabase.insert_article(human, url, "human-verified")
+                    database.insert_article(human, url, "human-verified")
                 else:
-                    TestDatabase.insert_article(human, url, "human")
+                    database.insert_article(human, url, "human")
 
             if count == args.max_amount:
                 break
