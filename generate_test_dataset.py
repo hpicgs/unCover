@@ -18,7 +18,7 @@ if __name__ == '__main__':
     # humans can be either human-verified or human (unverified) as that depends on the url
     parser.add_argument("--methods", action="store", type=str, required=False, default="",
                         help="what data should be part of the test data, available are gpt2, gpt3, gpt4, gemini, grover, and human-verified or human")
-    parser.add_argument("--german", action="store_true", required=False, default=False,
+    parser.add_argument("--german", action="store_true", required=False,
                         help="use the german test database instead of the english one")
 
     args = parser.parse_args()
@@ -92,7 +92,7 @@ if __name__ == '__main__':
                     print("article produces error for grover: " + str(e) + "; -> skipping for consistency")
                     continue
             if "gemini" in methods:
-                gemini = generate_gemini_news_from(processed_page)
+                gemini = generate_gemini_news_from(processed_page, args.german)
                 if len(gemini) < 600:
                     print("gemini article is too short; -> skipping for consistency")
                     continue
