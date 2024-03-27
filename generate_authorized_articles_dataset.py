@@ -29,8 +29,9 @@ def find_authors_articles(n, source, author):
         pagenum = 1
         result = []
         while len(result) < n:
+            print(f"Fetching guardian page {pagenum}...")
             time.sleep(0.2)
-            urls = get_listed_articles(f"https://theguardian.com/profile/{author}?page=", source)
+            urls = get_listed_articles(f"https://theguardian.com/profile/{author}?page={pagenum}", source)
             if urls and not any(link in result for link in urls):
                 result += urls
             else:
