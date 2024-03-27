@@ -24,13 +24,16 @@ def generate_gpt3_news_from(doc, size=1000):
     return response.choices[0].text if response else None
 
 
-def generate_gpt4_news_from(doc, size=1000):
+def generate_gpt4_news_from(doc, german=False, size=1000):
     print("Starting GPT 4 Request")
     client = openai.OpenAI(
         api_key=GPT_KEY,
         organization=OPENAI_ORGA
     )
-    doc += "\n\nWrite a long news article about this topic."
+    if not german:
+        doc += "\n\nWrite a long news article about this topic."
+    else:
+        doc += "\n\nSchreibe einen langen Nachrichten Artikel über das Thema."
     response = None
     while response is None:
         try:
