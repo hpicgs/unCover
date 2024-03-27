@@ -32,7 +32,11 @@ def predict_sota(text):
     }
 
     response = requests.request("POST", "https://api.gowinston.ai/functions/v1/predict", json=payload, headers=headers)
-    case = json.loads(response.text)["score"]
+    try:
+        case = json.loads(response.text)["score"]
+    except Exception as e:
+        print("\nError while fetching sota: ", e)
+        return 0
     if case <= 40:
         return 1
     elif case >= 60:
@@ -67,6 +71,7 @@ if __name__ == '__main__':
     predictions_per_author = {}
     total_count = 0
     num_articles = len(data) * 200
+    used_authors = {**used_authors, **{"human-verified": "human", "human": "human"}}
     for source in data:
         source_count = 0
         articles = data[source]
@@ -91,7 +96,7 @@ if __name__ == '__main__':
                 tecm = get_default_tecm(article)
                 te_prediction = predict_from_tecm(tecm)
             except Exception as e:  # some texts are still not working for tem
-                print("te error: ", e)
+                print("\nte error: ", e)
                 total_count -= 1
                 num_articles -= 1
                 continue
@@ -140,6 +145,6 @@ if __name__ == '__main__':
               "%")
         precision = metrics["ai"][1][p] / (metrics["ai"][1][p] + metrics["ai"][-1][p] + 0.5 * metrics["ai"][0][p])
         recall = metrics["ai"][1][p] / (
-                metrics["ai"][1][p] + 1.5 * metrics["human"][1][p] + 0.5 * metrics["ai"][0][p])
+                metrics["ai"][1][p] + 1.5 * metrics["human"][1][p] + 0.5 * metrics["human"][0][p])
         f1 = 2 * precision * recall / (precision + recall)
         print(p + " weighted f1: ", str(round(f1 * 100, 2)), "%")
