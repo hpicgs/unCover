@@ -16,7 +16,7 @@ from tem.script.visualization import graph
 
 def get_default_tecm(text: str, tem_params: npt.NDArray) -> npt.NDArray[np.float64]:
     corpus = get_structured_corpus(text)
-    if not tem_params:
+    if tem_params is None:
         model = TEM.from_param_list(TEM_PARAMS, metrics=True)
     else:
         model = TEM.from_param_list(tem_params, metrics=True)

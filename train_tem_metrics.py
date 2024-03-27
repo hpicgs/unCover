@@ -16,9 +16,9 @@ author_mapping = {
     "gpt3": 1,
     "gpt2": 2,
     "gpt4": 3,
-    "gpt3-phrase": 4,
-    "grover": 5,
-    "gemini": 6,
+    "gpt3-phrase": 1,
+    "grover": 4,
+    "gemini": 5,
     "human1": 0,
     "human2": 0,
     "human3": 0,
@@ -51,7 +51,13 @@ def prepare_train_data(database, training_data, label, portion, tem_params):
     for author in database.get_authors():
         print("working on author: " + author + "...")
         tmp = [article["text"] for article in database.get_articles_by_author(author)]
-        tmp = run_tem(tmp[:int(len(tmp) * portion)], tem_params)
+        print("articles: " + str(len(tmp)))
+        print(tmp[0])
+        # reduce size to 30% of the original
+        tmp = tmp[:int(len(tmp) * portion)]
+        print("articles: " + str(len(tmp)))
+        print(tmp[0])
+        tmp = run_tem(tmp, tem_params)
         training_data += tmp
         label += [author_mapping[author]] * len(tmp)
 
@@ -71,7 +77,7 @@ def tem_metric_training(portion=1.0, params=None):
     prepare_train_data(DatabaseGenArticles, sample, truth, portion, params)
     pickle.dump(sample, open(feature_file, 'wb'))
     pickle.dump(truth, open(label_file, 'wb'))
-    return fit_model(sample, labels)
+    return fit_model(sample, truth)
 
 
 def optimize_tem():
