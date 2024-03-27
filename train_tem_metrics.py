@@ -51,13 +51,7 @@ def prepare_train_data(database, training_data, label, portion, tem_params):
     for author in database.get_authors():
         print("working on author: " + author + "...")
         tmp = [article["text"] for article in database.get_articles_by_author(author)]
-        print("articles: " + str(len(tmp)))
-        print(tmp[0])
-        # reduce size to 30% of the original
-        tmp = tmp[:int(len(tmp) * portion)]
-        print("articles: " + str(len(tmp)))
-        print(tmp[0])
-        tmp = run_tem(tmp, tem_params)
+        tmp = run_tem(tmp[:int(len(tmp) * portion)], tem_params)
         training_data += tmp
         label += [author_mapping[author]] * len(tmp)
 
