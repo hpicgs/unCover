@@ -2,7 +2,7 @@ import argparse
 import json
 import requests
 from misc.mock_database import TestDatabase
-from misc.tem_helpers import get_default_tecm
+from misc.tem_helpers import get_tecm
 from misc.logger import printProgressBar
 from stylometry.logistic_regression import predict_author, used_authors
 from main import get_prediction
@@ -93,9 +93,9 @@ if __name__ == '__main__':
                 article = article[:120000]
             try:
                 style_prediction = predict_author(article)
-                tecm = get_default_tecm(article)
+                tecm = get_tecm([article])
                 te_prediction = predict_from_tecm(tecm)
-            except Exception as e:  # some texts are still not working for tem
+            except Exception as e:  # some sources contain too short samples for tem
                 print("\nte error: ", e)
                 total_count -= 1
                 num_articles -= 1

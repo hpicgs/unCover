@@ -9,7 +9,7 @@ from sklearn.model_selection import cross_val_score, RepeatedStratifiedKFold
 from definitions import TEMMETRICS_DIR, TEM_PARAMS
 from misc.logger import printProgressBar
 from misc.mock_database import DatabaseAuthorship, DatabaseGenArticles
-from misc.tem_helpers import get_default_tecm
+from misc.tem_helpers import get_tecm
 from misc.nlp_helpers import handle_nltk_download
 
 author_mapping = {
@@ -37,16 +37,16 @@ data_save = {
 
 def run_tem(articles, tem_params):
     try:  # check if nltk is installed and download if it is not
-        result = []
-        for i, article in enumerate(articles):
-            printProgressBar(i, len(articles) - 1)
-            try:
-                result.append(get_default_tecm(article, tem_params))
-            except ValueError:
-                continue
-            except Exception as e:
-                print("Error while processing article: ", e)
-        return result
+        return get_tecm(articles, tem_params)
+        #for i, article in enumerate(articles):
+        #    printProgressBar(i, len(articles) - 1)
+        #    try:
+        #        result.append(get_default_tecm(article, tem_params))
+        #    except ValueError:
+        #        continue
+        #    except Exception as e:
+        #        print("Error while processing article: ", e)
+        #return result
     except LookupError as e:
         handle_nltk_download(e)
         return run_tem(articles, tem_params)  # recursive call to deal with multiple downloads
