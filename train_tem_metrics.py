@@ -29,12 +29,17 @@ author_mapping = {
 
 model_pickle = os.path.join(TEMMETRICS_DIR, 'model.pickle')
 
+data_save = {
+    "initialized": False,
+    "portion": 1.0
+}
 
-def run_tem(data, tem_params):
+
+def run_tem(articles, tem_params):
     try:  # check if nltk is installed and download if it is not
         result = []
-        for i, article in enumerate(data):
-            printProgressBar(i, len(data) - 1)
+        for i, article in enumerate(articles):
+            printProgressBar(i, len(articles) - 1)
             try:
                 result.append(get_default_tecm(article, tem_params))
             except ValueError:
@@ -44,14 +49,24 @@ def run_tem(data, tem_params):
         return result
     except LookupError as e:
         handle_nltk_download(e)
-        return run_tem(data, tem_params)  # recursive call to deal with multiple downloads
+        return run_tem(articles, tem_params)  # recursive call to deal with multiple downloads
 
 
 def prepare_train_data(database, training_data, label, portion, tem_params):
-    for author in database.get_authors():
+    if data_save["initialized"]:
+        for author in data_save[database]:
+            training_data += run_tem(data_save[author], tem_params)
+            label += [author_mapping[author]] * len(data_save[author])
+        return
+    data_save["portion"] = portion
+    authors = database.get_authors()
+    data_save[database] = authors
+    for author in authors:
         print("working on author: " + author + "...")
         tmp = [article["text"] for article in database.get_articles_by_author(author)]
-        tmp = run_tem(tmp[:int(len(tmp) * portion)], tem_params)
+        tmp = tmp[:int(len(tmp) * portion)]
+        data_save[author] = tmp
+        tmp = run_tem(tmp, tem_params)
         training_data += tmp
         label += [author_mapping[author]] * len(tmp)
 
@@ -69,6 +84,8 @@ def tem_metric_training(portion=1.0, params=None):
     sample, truth = [], []
     prepare_train_data(DatabaseAuthorship, sample, truth, portion, params)
     prepare_train_data(DatabaseGenArticles, sample, truth, portion, params)
+    if not data_save["initialized"]:
+        data_save["initialized"] = True
     pickle.dump(sample, open(feature_file, 'wb'))
     pickle.dump(truth, open(label_file, 'wb'))
     return fit_model(sample, truth)
@@ -95,6 +112,8 @@ def optimize_tem():
                                             best_params = params
                                         else:
                                             print("Worse performance, skipping...")
+    print("Best parameters: ", best_params)
+    data_save["initialized"] = False
     return tem_metric_training(1.0, best_params)
 
 
