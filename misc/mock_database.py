@@ -60,14 +60,14 @@ class DatabaseGenArticles:
     __db = MockDatabase(DATABASE_GEN_PATH)
 
     @staticmethod
-    def get_methods():
+    def get_authors():
         articles = DatabaseGenArticles.__db.get_data()
         return {
             method for article in articles
             for method in article['method'].split(',') if article['text'] is not None}
 
     @staticmethod
-    def get_articles_by_method(method):
+    def get_articles_by_author(method):
         articles = DatabaseGenArticles.__db.get_data()
         return [article for article in articles if
                 method in article['method'].split(',') and article['text'] is not None]

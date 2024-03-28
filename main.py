@@ -46,7 +46,7 @@ def run_analysis(input_type, user_input):
         style_prediction = predict_author(content)
 
         try:
-            tecm = get_default_tecm(content)
+            tecm = get_default_tecm([content], None)
             te_prediction = predict_from_tecm(tecm)
         except AttributeError:  # some texts are not working for tem
             st.error("The input text is too short for the Topic Evolution Model to work. Please enter a different "

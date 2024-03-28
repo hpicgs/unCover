@@ -2,11 +2,11 @@
 
 Detailed information about unCover can be found in the following publication:
 
-> Liebe, L.; Baum, J.; Schütze, T.; Cech, T.; Scheibel, W. and Döllner, J. (2023). 
+> Liebe L., Baum J., Schütze T., Cech T., Scheibel W. and Döllner J. (2023).  
 > UNCOVER: Identifying AI Generated News Articles by Linguistic Analysis and Visualization.  
 > In Proceedings of the 15th International Joint Conference on Knowledge Discovery, 
-> Knowledge Engineering and Knowledge Management - Volume 1: KDIR, ISBN 
-> 978-989-758-671-2, ISSN 2184-3228, pages 39-50.    
+> Knowledge Engineering and Knowledge Management - Volume 1: KDIR; ISBN
+> 978-989-758-671-2, SciTePress, pages 39-50. DOI: 10.5220/0012163300003598   
 
 ![Teaser](https://drive.google.com/uc?export=download&id=1DU9HwazIUGxoFdI5cJ-liW3Q_-a-QV6G)
 
@@ -131,4 +131,22 @@ the test dataset including both human authors and AI models as text sources.
 
 After creating this test dataset or using the provided dataset, 
 `test_performance.py` can be used to create test results and a performance summary.
+
+## Citation
+
+If you use unCover in your research, please cite our paper:
+
+```bibtex
+@inproceedings{kdir23uncover,
+    author={Lucas Liebe and Jannis Baum and Tilman Schütze and Tim Cech and Willy Scheibel and Jürgen Döllner},
+    title={UNCOVER: Identifying AI Generated News Articles by Linguistic Analysis and Visualization},
+    booktitle={Proceedings of the 15th International Joint Conference on Knowledge Discovery, Knowledge Engineering and Knowledge Management - Volume 1: KDIR},
+    year={2023},
+    pages={39-50},
+    publisher={SciTePress},
+    organization={INSTICC},
+    doi={10.5220/0012163300003598},
+    isbn={978-989-758-671-2},
+}
+```
 

@@ -3,6 +3,7 @@ import json
 import requests
 from misc.mock_database import TestDatabase
 from misc.tem_helpers import get_default_tecm
+from misc.logger import printProgressBar
 from stylometry.logistic_regression import predict_author, used_authors
 from main import get_prediction
 from train_tem_metrics import predict_from_tecm
@@ -18,17 +19,6 @@ source_mapping = {
     "grover": 1
 }
 
-
-# Print iterations progress
-def printProgressBar(iteration, total, decimals=1, fill='█', printEnd="\r"):
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(100 * iteration // total)
-    bar = fill * filledLength + '-' * (100 - filledLength)
-    print(f'\r |{bar}| {percent}% ', end=printEnd)
-    if iteration == total:
-        print()
-
-
 def predict_sota(text):
     payload = {
         "language": "en",
@@ -42,7 +32,11 @@ def predict_sota(text):
     }
 
     response = requests.request("POST", "https://api.gowinston.ai/functions/v1/predict", json=payload, headers=headers)
-    case = json.loads(response.text)["score"]
+    try:
+        case = json.loads(response.text)["score"]
+    except Exception as e:
+        print("\nError while fetching sota: ", e)
+        return 0
     if case <= 40:
         return 1
     elif case >= 60:
@@ -76,6 +70,8 @@ if __name__ == '__main__':
     data = TestDatabase.get_all_articles_sorted_by_methods()
     predictions_per_author = {}
     total_count = 0
+    num_articles = len(data) * 200
+    used_authors = {**used_authors, **{"human-verified": "human", "human": "human"}}
     for source in data:
         source_count = 0
         articles = data[source]
@@ -87,7 +83,7 @@ if __name__ == '__main__':
         sota_predictions = {-1: 0, 0: 0, 1: 0}
         for article in articles:
             total_count += 1
-            printProgressBar(total_count, 1373)
+            printProgressBar(total_count, num_articles)
             if args.compareSOTA:
                 if len(article) > 100000:
                     article = article[:100000]
@@ -97,22 +93,19 @@ if __name__ == '__main__':
                 article = article[:120000]
             try:
                 style_prediction = predict_author(article)
-                tecm = get_default_tecm(article)
+                tecm = get_default_tecm([article], None)
                 te_prediction = predict_from_tecm(tecm)
-            except AttributeError as e:  # some texts are still not working for tem
-                print("te error: ", e)
+            except Exception as e:  # some sources contain too short samples for tem
+                print("\nte error: ", e)
                 total_count -= 1
+                num_articles -= 1
                 continue
             source_count += 1
             author = get_prediction(style_prediction, te_prediction)
-            sem_style_predictions.update({style_prediction[1]: sem_style_predictions.get(style_prediction[1]) + 1})
             char_style_predictions.update({style_prediction[0]: char_style_predictions.get(style_prediction[0]) + 1})
-            style_prediction = 0 if style_prediction[0] == -style_prediction[1] or style_prediction == [0, 0] else \
-                1 if style_prediction[0] == 1 or style_prediction[1] == 1 else -1
-            total_style_predictions.update({style_prediction: total_style_predictions.get(style_prediction) + 1})
-            if te_prediction[1] < 0.6:
-                te_prediction = 0
-            elif te_prediction[0] == 0:
+            sem_style_predictions.update({style_prediction[1]: sem_style_predictions.get(style_prediction[1]) + 1})
+            total_style_predictions.update({style_prediction[2]: char_style_predictions.get(style_prediction[2]) + 1})
+            if te_prediction == 0:
                 te_prediction = -1
             else:
                 te_prediction = 1
@@ -152,6 +145,6 @@ if __name__ == '__main__':
               "%")
         precision = metrics["ai"][1][p] / (metrics["ai"][1][p] + metrics["ai"][-1][p] + 0.5 * metrics["ai"][0][p])
         recall = metrics["ai"][1][p] / (
-                metrics["ai"][1][p] + 1.5 * metrics["human"][1][p] + 0.5 * metrics["ai"][0][p])
+                metrics["ai"][1][p] + 1.5 * metrics["human"][1][p] + 0.5 * metrics["human"][0][p])
         f1 = 2 * precision * recall / (precision + recall)
         print(p + " weighted f1: ", str(round(f1 * 100, 2)), "%")

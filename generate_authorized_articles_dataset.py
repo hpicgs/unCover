@@ -6,7 +6,7 @@ import re, requests, argparse, time
 
 
 def preprocess_article(doc):
-    paragraph = re.sub("\s+", " ", doc)
+    paragraph = re.sub("[ \t\r\f]+", " ", doc) # \s without \n
     return paragraph
 
 
@@ -17,7 +17,8 @@ def generate_author_dataset(site, author, narticles=10):
         def get_listed_articles(url):
             try:
                 page = requests.get(url).text
-            except:
+            except Exception as e:
+                print(f"Error fetching page: {e}")
                 return None
             soup = BeautifulSoup(page, features="html.parser")
             article_links = soup.find_all("a")
@@ -38,7 +39,6 @@ def generate_author_dataset(site, author, narticles=10):
         page = requests.get(article_url).text
         processor = PageProcessor(page)
         processed_page = preprocess_article(processor.get_fulltext(separator="\n"))
-        print(len(processed_page.split("\n")))
         author = processor.get_author()
         DatabaseAuthorship.insert_article(processed_page, article_url, author)
 

@@ -21,6 +21,7 @@ TEM_PARAMS = np.array([
 
 MODELS_DIR = os.path.join(ENV_DIR, 'models')
 STYLOMETRY_DIR = os.path.join(MODELS_DIR, 'stylometry')
+TEMMETRICS_DIR = os.path.join(MODELS_DIR, 'tem_metrics')
 # also adjust existing stanford dir to use new variable
 STANFORD_DIR = os.path.join(MODELS_DIR, 'stanford-corenlp-4.5.1')
 STANFORD_JARS = (
@@ -43,3 +44,5 @@ CHAR_MACHINE_CONFIDENCE = float(os.getenv("CHAR_MACHINE_CONFIDENCE", ""))
 CHAR_HUMAN_CONFIDENCE = float(os.getenv("CHAR_HUMAN_CONFIDENCE", ""))
 SEM_MACHINE_CONFIDENCE = float(os.getenv("SEM_MACHINE_CONFIDENCE", ""))
 SEM_HUMAN_CONFIDENCE = float(os.getenv("SEM_HUMAN_CONFIDENCE", ""))
+STYLE_MACHINE_CONFIDENCE = float(os.getenv("STYLE_MACHINE_CONFIDENCE", ""))
+STYLE_HUMAN_CONFIDENCE = float(os.getenv("STYLE_HUMAN_CONFIDENCE", ""))

@@ -87,6 +87,6 @@ if __name__ == '__main__':
             parser.error("please provide at least one valid method for generating news with phrases")
         phrase_generation(args.phrases.split(","), args)
     elif args.queries and not args.phrases:
-        if not all([args.grover, args.gemin, args.gpt4, args.gpt3, args.gpt2]):
+        if all([args.grover, args.gemini, args.gpt4, args.gpt3, args.gpt2]):
             parser.error("please provide at least one method valid for generating news with queries")
         query_generation(args.queries.split(","), args)
