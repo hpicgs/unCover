@@ -16,15 +16,21 @@ from tem.script.visualization import graph
 def _params(params: npt.NDArray | None = None):
     return TEM_PARAMS if params is None else params
 
-def get_tecm(texts: list[str], tem_params: npt.NDArray | None = None) -> npt.NDArray[np.float64]:
-    corpus = []
+def get_tecm(texts: list[str], tem_params: npt.NDArray | None = None, drop_invalids = True) -> npt.NDArray[np.float64]:
+    corpus = list[str | None]()
     for text in texts:
         try:
             corpus.append(get_structured_corpus(text))
         except ValueError:
-            continue
+            corpus.append(None)
+
     model = TEM.from_param_list(_params(tem_params), metrics=True)
-    return model.get_metrics(corpus)
+    metrics = model.get_metrics(corpus)
+
+    if drop_invalids:
+        mask = np.all(np.isnan(metrics), axis=1)
+        return metrics[~mask]
+    return metrics
 
 
 def get_te_graph(text: str, tem_params: npt.NDArray | None = None):
