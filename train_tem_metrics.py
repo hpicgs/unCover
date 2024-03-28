@@ -37,16 +37,16 @@ data_save = {
 
 def run_tem(articles, tem_params):
     try:  # check if nltk is installed and download if it is not
-        result = []
-        for i, article in enumerate(articles):
-            printProgressBar(i, len(articles) - 1)
-            try:
-                result.append(get_default_tecm(article, tem_params))
-            except ValueError:
-                continue
-            except Exception as e:
-                print("Error while processing article: ", e)
-        return result
+        return get_default_tecm(articles, tem_params)
+        #for i, article in enumerate(articles):
+        #    printProgressBar(i, len(articles) - 1)
+        #    try:
+        #        result.append(get_default_tecm(article, tem_params))
+        #    except ValueError:
+        #        continue
+        #    except Exception as e:
+        #        print("Error while processing article: ", e)
+        #return result
     except LookupError as e:
         handle_nltk_download(e)
         return run_tem(articles, tem_params)  # recursive call to deal with multiple downloads

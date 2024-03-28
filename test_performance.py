@@ -93,9 +93,9 @@ if __name__ == '__main__':
                 article = article[:120000]
             try:
                 style_prediction = predict_author(article)
-                tecm = get_default_tecm(article)
+                tecm = get_default_tecm([article], None)
                 te_prediction = predict_from_tecm(tecm)
-            except Exception as e:  # some texts are still not working for tem
+            except Exception as e:  # some sources contain too short samples for tem
                 print("\nte error: ", e)
                 total_count -= 1
                 num_articles -= 1
