@@ -7,7 +7,6 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score, RepeatedStratifiedKFold
 from definitions import TEMMETRICS_DIR, TEM_PARAMS
-from misc.logger import printProgressBar
 from misc.mock_database import DatabaseAuthorship, DatabaseGenArticles
 from misc.tem_helpers import get_tecm
 from misc.nlp_helpers import handle_nltk_download
@@ -30,23 +29,13 @@ author_mapping = {
 model_pickle = os.path.join(TEMMETRICS_DIR, 'model.pickle')
 
 data_save = {
-    "initialized": False,
-    "portion": 1.0
+    "initialized": False
 }
 
 
 def run_tem(articles, tem_params):
     try:  # check if nltk is installed and download if it is not
         return get_tecm(articles, tem_params)
-        #for i, article in enumerate(articles):
-        #    printProgressBar(i, len(articles) - 1)
-        #    try:
-        #        result.append(get_default_tecm(article, tem_params))
-        #    except ValueError:
-        #        continue
-        #    except Exception as e:
-        #        print("Error while processing article: ", e)
-        #return result
     except LookupError as e:
         handle_nltk_download(e)
         return run_tem(articles, tem_params)  # recursive call to deal with multiple downloads
@@ -55,8 +44,10 @@ def run_tem(articles, tem_params):
 def prepare_train_data(database, training_data, label, portion, tem_params):
     if data_save["initialized"]:
         for author in data_save[database]:
-            training_data += run_tem(data_save[author], tem_params)
-            label += [author_mapping[author]] * len(data_save[author])
+            print("working on author: " + author + "...")
+            tmp = run_tem(data_save[author], tem_params)
+            training_data.extend(tmp)
+            label += [author_mapping[author]] * len(tmp)
         return
     data_save["portion"] = portion
     authors = database.get_authors()
@@ -67,7 +58,7 @@ def prepare_train_data(database, training_data, label, portion, tem_params):
         tmp = tmp[:int(len(tmp) * portion)]
         data_save[author] = tmp
         tmp = run_tem(tmp, tem_params)
-        training_data += tmp
+        training_data.extend(tmp)
         label += [author_mapping[author]] * len(tmp)
 
 
