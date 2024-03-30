@@ -27,16 +27,39 @@ if test -f $DOWNLOAD_FILE; then
 fi
 
 # download stanford parser if not there
-PARSER_DIR=`ls | grep 'stanford-corenlp-4.5' | tail -1`
+PARSER_DIR=`ls | grep 'stanford-corenlp-4.5.6' | tail -1`
 if [ -z "$PARSER_DIR" ]; then
-    curl -o $DOWNLOAD_FILE https://downloads.cs.stanford.edu/nlp/software/stanford-corenlp-4.5.5.zip
+    curl -o $DOWNLOAD_FILE https://downloads.cs.stanford.edu/nlp/software/stanford-corenlp-4.5.6.zip
     unzip $DOWNLOAD_FILE
+    PARSER_DIR="stanford-corenlp-4.5.6"
+    (
+      cd "$PARSER_DIR"
+      curl -o stanford-corenlp-4.5.6-models-german.jar https://downloads.cs.stanford.edu/nlp/software/stanford-corenlp-4.5.6-models-german.jar
+    )
     rm $DOWNLOAD_FILE
-    PARSER_DIR="stanford-corenlp-4.5.5"
 fi
+
+# Function to handle INT
+handle_int() {
+    echo "Terminating StanfordCoreNLPServers"
+    kill -TERM "$PID1"
+    if [ "$PID2" ]; then
+      kill -TERM "$PID2"
+    fi
+}
+
+# Set up trap
+trap handle_int INT
 
 if [ "$1" != "--no-run" ]; then
     # run parser
     cd "$PARSER_DIR"
-    java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 150000
+      java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 150000 &
+      PID1=$!
+      if [ "$1" = "--german" ]; then
+        java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -props "german" -port 9001 -timeout 150000 &
+        PID2=$!
+      fi
 fi
+
+wait
