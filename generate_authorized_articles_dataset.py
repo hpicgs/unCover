@@ -6,7 +6,7 @@ import re, requests, argparse, time
 
 
 def preprocess_article(doc):
-    paragraph = re.sub("[ \t\r\f]+", " ", doc) # \s without \n
+    paragraph = re.sub("[ \t\r\f]+", ' ', doc) # \s without \n
     return paragraph
 
 
@@ -20,9 +20,9 @@ def generate_author_dataset(site, author, narticles=10):
             except Exception as e:
                 print(f"Error fetching page: {e}")
                 return None
-            soup = BeautifulSoup(page, features="html.parser")
-            article_links = soup.find_all("a")
-            return [article_link.get("href") for article_link in article_links if article_link.get("data-link-name") == "article"][::2]
+            soup = BeautifulSoup(page, features='html.parser')
+            article_links = soup.find_all('a')
+            return [article_link.get('href') for article_link in article_links if article_link.get('data-link-name') == 'article'][::2]
         pagenum = 1
         while len(article_urls) < narticles:
             time.sleep(0.2)
@@ -45,11 +45,11 @@ def generate_author_dataset(site, author, narticles=10):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--dataset", action="store_true", required=False, help="scrape articles in dataset creation mode, without google news")
-    parser.add_argument("--publication", action="store", type=str, required=False, help="url to the news publication used in dataset mode")
-    parser.add_argument("--author", action="store", type=str, required=False, help="url to the chosen author's page on the publication")
-    parser.add_argument("--narticles", action="store", type=int, default=10, required=False, help="maximum number of articles to scrape")
-    parser.add_argument("--query", action="store", type=str, required=False, help="scrape articles in query mode, using the parameter from this argument")
+    parser.add_argument('--dataset', action='store_true', required=False, help="scrape articles in dataset creation mode, without google news")
+    parser.add_argument('--publication', action='store', type=str, required=False, help="url to the news publication used in dataset mode")
+    parser.add_argument('--author', action='store', type=str, required=False, help="url to the chosen author's page on the publication")
+    parser.add_argument('--narticles', action='store', type=int, default=10, required=False, help="maximum number of articles to scrape")
+    parser.add_argument('--query', action='store', type=str, required=False, help="scrape articles in query mode, using the parameter from this argument")
 
     args = parser.parse_args()
     if args.dataset:

@@ -8,12 +8,12 @@ class MockDatabase:
 
     def write_data(self, data):
         os.makedirs(DATABASE_FILES_PATH, exist_ok=True)
-        with open(self.path, "w") as mock_db:
+        with open(self.path, 'w') as mock_db:
             yaml.dump(data, mock_db, default_flow_style=False)
 
     def get_data(self):
         try:
-            with open(self.path, "r") as mock_db:
+            with open(self.path, 'r') as mock_db:
                 return yaml.safe_load(mock_db.read())
         except:
             return list()
@@ -27,8 +27,8 @@ class DatabaseAuthorship:
         articles = DatabaseAuthorship.__db.get_data()
         authors = list()
         for article in articles:
-            for author in article["author"].split(","):
-                if author not in authors and article["text"] is not None:
+            for author in article['author'].split(','):
+                if author not in authors and article['text'] is not None:
                     authors.append(author)
         return authors
 
@@ -37,11 +37,11 @@ class DatabaseAuthorship:
         articles = DatabaseAuthorship.__db.get_data()
         return [
             {
-                "author" : article["author"].split(","),
-                "source" : article["source"],
-                "text" : article["text"]
+                'author' : article['author'].split(','),
+                'source' : article['source'],
+                'text' : article['text']
             }
-            for article in articles if author in article["author"].split(",") and article["text"] is not None
+            for article in articles if author in article['author'].split(',') and article['text'] is not None
             ]
 
     @staticmethod
@@ -49,10 +49,10 @@ class DatabaseAuthorship:
         data = DatabaseAuthorship.__db.get_data()
         if data == [] or data is None:
             data = []
-            data.append({"source": source, "text": text, "author": author})
+            data.append({'source': source, 'text': text, 'author': author})
             DatabaseAuthorship.__db.write_data(data)
-        elif not any([source == article["source"] for article in data]):
-            data.append({"source": source, "text": text, "author": author})
+        elif not any([source == article['source'] for article in data]):
+            data.append({'source': source, 'text': text, 'author': author})
             DatabaseAuthorship.__db.write_data(data)
 
 
@@ -77,7 +77,7 @@ class DatabaseGenArticles:
         data = DatabaseGenArticles.__db.get_data()
         if data == [] or data is None:
             data = []
-        data.append({"source": source, "text": text, "method": method})
+        data.append({'source': source, 'text': text, 'method': method})
         DatabaseGenArticles.__db.write_data(data)
 
 
@@ -88,7 +88,7 @@ class TestDatabase:
     def get_all_articles_sorted_by_methods():
         articles = TestDatabase.__db.get_data()
         return {label: [article['text'] for article in articles if
-                        label in article["label"].split(",") and article["text"] is not None]
+                        label in article['label'].split(',') and article['text'] is not None]
                 for label in [l for a in articles for l in a['label'].split(',')]
                 }
 
@@ -97,5 +97,5 @@ class TestDatabase:
         data = TestDatabase.__db.get_data()
         if data == [] or data is None:
             data = []
-        data.append({"source": source, "text": text, "label": label})
+        data.append({'source': source, 'text': text, 'label': label})
         TestDatabase.__db.write_data(data)

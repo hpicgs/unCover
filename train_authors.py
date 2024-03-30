@@ -19,7 +19,7 @@ def normalize(type, f):
             f[j][i] = (f[j][i] - mi) / (ma - mi)
         maxi.append(ma)
         mini.append(mi)
-    with open(os.path.join(STYLOMETRY_DIR, f"{type}_normalization.json"), "w") as fp:
+    with open(os.path.join(STYLOMETRY_DIR, f"{type}_normalization.json"), 'w') as fp:
         json.dump([mini, maxi], fp)
     return f
 
@@ -30,7 +30,7 @@ def get_training_samples(type, min_articles, training_data, database):
     print(authors)
     trainable = []
     for author in authors:
-        full_article_list = [(article["text"], author) for article in
+        full_article_list = [(article['text'], author) for article in
                              database.get_articles_by_author(author)]
         training_data += full_article_list[:int(len(full_article_list) * 0.8)]
         if len(full_article_list) >= min_articles:
@@ -43,17 +43,17 @@ def get_training_samples(type, min_articles, training_data, database):
 
 def fit_model(name, features, truth_table, n):
     print(f"Training {name}...")
-    with open(os.path.join(STYLOMETRY_DIR, f"{name}{n}.pickle"), "wb") as f:
+    with open(os.path.join(STYLOMETRY_DIR, f"{name}{n}.pickle"), 'wb') as f:
         model = logistic_regression(features, truth_table)
         pickle.dump(model, f)
     return model
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--nfeatures", action="store", required=False, type=int, default=100,
+    parser.add_argument('--nfeatures', action='store', required=False, type=int, default=100,
                         help="number of char trigram & semantic trigram features used in the distribution")
-    parser.add_argument("--minarticles", action="store", required=False, type=int, default=50,
+    parser.add_argument('--minarticles', action='store', required=False, type=int, default=50,
                         help="minimum number of articles required for training on a specific author/model")
     args = parser.parse_args()
     n_features = args.nfeatures
@@ -67,9 +67,9 @@ if __name__ == "__main__":
 
     os.makedirs(STYLOMETRY_DIR, exist_ok=True)
     training_data = []
-    training_data = get_training_samples("Human", args.minarticles, training_data, DatabaseAuthorship)
-    training_data = get_training_samples("Machine", args.minarticles, training_data, DatabaseGenArticles)
-    print("number of training articles:", len(training_data))
+    training_data = get_training_samples('Human', args.minarticles, training_data, DatabaseAuthorship)
+    training_data = get_training_samples('Machine', args.minarticles, training_data, DatabaseGenArticles)
+    print(f"number of training articles:{len(training_data)}")
 
     parser = CoreNLPDependencyParser(url="http://localhost:9000")
     char_grams = [char_trigrams(article_tuple[0]) for article_tuple in training_data]
@@ -86,7 +86,7 @@ if __name__ == "__main__":
         truth_table = [1 if author == article_tuple[1] else 0 for article_tuple in training_data]
         char.append(fit_model(f"{author.replace('/', '_')}_char", character_distribution.values, truth_table, n_features))
         sem.append(fit_model(f"{author.replace('/', '_')}_sem", semantic_distribution.values, truth_table, n_features))
-    truth_table = [1 if article_tuple[1] != '' and used_authors[article_tuple[1]] == "ai" else 0 for article_tuple in
+    truth_table = [1 if used_authors[article_tuple[1]] == 'ai' else 0 for article_tuple in
                    training_data]
     char_results, sem_results = [], []
     for iterrow in character_distribution.iterrows():
@@ -94,16 +94,16 @@ if __name__ == "__main__":
     for iterrow in semantic_distribution.iterrows():
         sem_results.append([s.predict_proba(iterrow[1].values.reshape(1, -1))[0][1] for s in sem])
 
-    char_results = normalize("char", char_results)
-    sem_results = normalize("sem", sem_results)
+    char_results = normalize('char', char_results)
+    sem_results = normalize('sem', sem_results)
     model_results = []
     for i in range(len(training_data)):
         model_results.append((char_results[i], sem_results[i]))
 
     features = pd.DataFrame([char for char, sem in model_results])
-    fit_model("char_final", features.values, truth_table, n_features)
+    fit_model('char_final', features.values, truth_table, n_features)
     features = pd.DataFrame([sem for char, sem in model_results])
-    fit_model("sem_final", features.values, truth_table, n_features)
+    fit_model('sem_final', features.values, truth_table, n_features)
     features = pd.DataFrame([char + sem for char, sem in model_results])
-    fit_model("style_final", features.values, truth_table, n_features)
+    fit_model('style_final', features.values, truth_table, n_features)
     print("TRAINING DONE!")

@@ -12,24 +12,23 @@ from misc.tem_helpers import get_tecm
 from misc.nlp_helpers import handle_nltk_download
 
 author_mapping = {
-    "gpt3": 1,
-    "gpt2": 2,
-    "gpt4": 3,
-    "gpt3-phrase": 1,
-    "grover": 4,
-    "gemini": 5,
-    "human1": 0,
-    "human2": 0,
-    "human3": 0,
-    "human4": 0,
-    "human5": 0,
-    "": 0
+    'gpt3': 1,
+    'gpt2': 2,
+    'gpt4': 3,
+    'gpt3-phrase': 1,
+    'grover': 4,
+    'gemini': 5,
+    'human1': 0,
+    'human2': 0,
+    'human3': 0,
+    'human4': 0,
+    'human5': 0
 }
 
 model_pickle = os.path.join(TEMMETRICS_DIR, 'model.pickle')
 
 data_save = {
-    "initialized": False
+    'initialized': False
 }
 
 
@@ -42,19 +41,19 @@ def run_tem(articles, tem_params):
 
 
 def prepare_train_data(database, training_data, label, portion, tem_params):
-    if data_save["initialized"]:
+    if data_save['initialized']:
         for author in data_save[database]:
-            print("working on author: " + author + "...")
+            print(f"working on author: {author}...")
             tmp = run_tem(data_save[author], tem_params)
             training_data.extend(tmp)
             label += [author_mapping[author]] * len(tmp)
         return
-    data_save["portion"] = portion
+    data_save['portion'] = portion
     authors = database.get_authors()
     data_save[database] = authors
     for author in authors:
-        print("working on author: " + author + "...")
-        tmp = [article["text"] for article in database.get_articles_by_author(author)]
+        print(f"working on author: {author}...")
+        tmp = [article['text'] for article in database.get_articles_by_author(author)]
         tmp = tmp[:int(len(tmp) * portion)]
         data_save[author] = tmp
         tmp = run_tem(tmp, tem_params)
@@ -75,8 +74,8 @@ def tem_metric_training(portion=1.0, params=None):
     sample, truth = [], []
     prepare_train_data(DatabaseAuthorship, sample, truth, portion, params)
     prepare_train_data(DatabaseGenArticles, sample, truth, portion, params)
-    if not data_save["initialized"]:
-        data_save["initialized"] = True
+    if not data_save['initialized']:
+        data_save['initialized'] = True
     pickle.dump(sample, open(feature_file, 'wb'))
     pickle.dump(truth, open(label_file, 'wb'))
     return fit_model(sample, truth)
@@ -103,14 +102,14 @@ def optimize_tem():
                                             best_params = params
                                         else:
                                             print("Worse performance, skipping...")
-    print("Best parameters: ", best_params)
-    data_save["initialized"] = False
+    print(f"Best parameters: {best_params}")
+    data_save['initialized'] = False
     return tem_metric_training(1.0, best_params)
 
 
 def predict_from_tecm(metrics: npt.NDArray[np.float64]):
     df = pd.DataFrame(metrics.reshape(1, -1))
-    with open(model_pickle, "rb") as f:
+    with open(model_pickle, 'rb') as f:
         model = pickle.load(f)
     prediction = model.predict_proba(df)
     argmax = prediction[0].argmax()
@@ -121,9 +120,9 @@ def predict_from_tecm(metrics: npt.NDArray[np.float64]):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--use_stored", action="store_true", required=False,
+    parser.add_argument('--use_store', action='store_true', required=False,
                         help="rerun the TEM model to generate train data, and ignore existing data")
-    parser.add_argument("--optimize_tem", action="store_true", required=False,
+    parser.add_argument('--optimize_tem', action='store_true', required=False,
                         help="optimize the parameters of the TEM model through Grid Search")
     args = parser.parse_args()
     os.makedirs(TEMMETRICS_DIR, exist_ok=True)
