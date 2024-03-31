@@ -6,7 +6,7 @@ import time
 from urllib import request
 import urllib.error
 
-from definitions import ROOT_DIR
+from misc.definitions import ROOT_DIR
 
 def __corenlp_thread():
     proc = subprocess.run([os.path.join(ROOT_DIR, 'corenlp')], capture_output=True)

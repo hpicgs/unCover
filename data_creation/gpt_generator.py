@@ -1,6 +1,6 @@
 import openai
 from transformers import pipeline, set_seed
-from definitions import GPT_KEY, OPENAI_ORGA
+from misc.definitions import GPT_KEY, OPENAI_ORGA
 
 
 def generate_gpt3_news_from(doc, size=1000):

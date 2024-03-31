@@ -1,11 +1,11 @@
 from misc.mock_database import TestDatabase, GermanTestDatabase
 import argparse, requests, re, json
-from scraper.page_processor import PageProcessor
-from scraper.article_scraper import GoogleScraper
-from generator.gpt_generator import generate_gpt4_news_from, generate_gpt3_news_from, generate_gpt2_news_from
-from generator.gemini_generator import generate_gemini_news_from
+from data_creation.page_processor import PageProcessor
+from data_creation.article_scraper import GoogleScraper
+from data_creation.gpt_generator import generate_gpt4_news_from, generate_gpt3_news_from, generate_gpt2_news_from
+from data_creation.gemini_generator import generate_gemini_news_from
 from grover.sample.contextual_generate import generate_grover_news_from_original
-from definitions import MODELS_DIR
+from misc.definitions import MODELS_DIR
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

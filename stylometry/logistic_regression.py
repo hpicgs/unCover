@@ -3,7 +3,7 @@ import json
 import pickle
 import numpy as np
 import pandas as pd
-from definitions import STYLOMETRY_DIR, CHAR_MACHINE_CONFIDENCE, CHAR_HUMAN_CONFIDENCE, SEM_MACHINE_CONFIDENCE, \
+from misc.definitions import STYLOMETRY_DIR, CHAR_MACHINE_CONFIDENCE, CHAR_HUMAN_CONFIDENCE, SEM_MACHINE_CONFIDENCE, \
     SEM_HUMAN_CONFIDENCE, STYLE_MACHINE_CONFIDENCE, STYLE_HUMAN_CONFIDENCE
 from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams

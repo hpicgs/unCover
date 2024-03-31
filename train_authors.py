@@ -5,7 +5,7 @@ import json
 import pandas as pd
 from nltk.parse.corenlp import CoreNLPDependencyParser
 
-from definitions import STYLOMETRY_DIR
+from misc.definitions import STYLOMETRY_DIR
 from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams
 from stylometry.logistic_regression import trigram_distribution, logistic_regression, used_authors

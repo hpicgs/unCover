@@ -2,7 +2,7 @@ import os
 import sys
 import numpy as np
 import numpy.typing as npt
-from definitions import ROOT_DIR, TEM_PARAMS
+from misc.definitions import ROOT_DIR, TEM_PARAMS
 from misc.logger import printProgressBar
 
 sys.path.append(os.path.join(ROOT_DIR, 'tem', 'script'))

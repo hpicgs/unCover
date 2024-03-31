@@ -1,11 +1,11 @@
 import json
-from scraper.article_scraper import GoogleScraper
-from scraper.page_processor import PageProcessor
-from generator.gpt_generator import generate_gpt4_news_from, generate_gpt3_news_from, generate_gpt2_news_from
-from generator.gemini_generator import generate_gemini_news_from
+from data_creation.article_scraper import GoogleScraper
+from data_creation.page_processor import PageProcessor
+from data_creation.gpt_generator import generate_gpt4_news_from, generate_gpt3_news_from, generate_gpt2_news_from
+from data_creation.gemini_generator import generate_gemini_news_from
 from grover.sample.contextual_generate import generate_grover_news_from_original
 from misc.mock_database import DatabaseGenArticles, GermanDatabase
-from definitions import MODELS_DIR
+from misc.definitions import MODELS_DIR
 import re, requests, argparse
 
 

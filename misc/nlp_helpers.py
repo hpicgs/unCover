@@ -5,7 +5,7 @@ from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
 
-from definitions import NLTK_DATA
+from misc.definitions import NLTK_DATA
 
 
 def handle_nltk_download(e: LookupError):

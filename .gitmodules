@@ -1,5 +1,5 @@
 [submodule "grover"]
-	path = grover
+	path = data_creation/grover
 	url = https://github.com/lucasliebe/grover-module
 [submodule "tem/topic-evolution-model"]
 	path = tem

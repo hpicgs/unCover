@@ -10,12 +10,12 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from misc.entity_coreferences import coref_annotation, coref_diagram
-from scraper.page_processor import PageProcessor
+from data_creation.page_processor import PageProcessor
 from stylometry.corenlp import connect_corenlp
 from stylometry.logistic_regression import predict_author
 from misc.tem_helpers import get_te_graph, get_tecm
 from train_tem_metrics import predict_from_tecm
-from definitions import ROOT_DIR
+from misc.definitions import ROOT_DIR
 
 def __models_thread():
     proc = subprocess.run([os.path.join(ROOT_DIR, 'prepare_models')], capture_output=True)

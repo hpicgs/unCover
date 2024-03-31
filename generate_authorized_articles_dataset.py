@@ -3,8 +3,8 @@ import requests
 import argparse
 import time
 from bs4 import BeautifulSoup
-from scraper.article_scraper import GoogleScraper
-from scraper.page_processor import PageProcessor
+from data_creation.article_scraper import GoogleScraper
+from data_creation.page_processor import PageProcessor
 from misc.mock_database import DatabaseAuthorship, GermanDatabase
 
 
