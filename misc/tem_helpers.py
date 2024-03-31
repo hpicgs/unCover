@@ -16,7 +16,8 @@ def _params(params: npt.NDArray | None = None):
     return TEM_PARAMS if params is None else params
 
 
-def get_tecm(texts: list[str], tem_params: npt.NDArray | None = None, drop_invalids = True) -> npt.NDArray[np.float64]:
+def get_tecm(texts: list[str], tem_params: npt.NDArray | None = None, drop_invalids=True, german=False) \
+        -> npt.NDArray[np.float64]:
     corpus = list[str | None]()
     for i, text in enumerate(texts):
         printProgressBar(i, len(texts), fill='█')
@@ -25,7 +26,7 @@ def get_tecm(texts: list[str], tem_params: npt.NDArray | None = None, drop_inval
         except ValueError:
             corpus.append("")
     print("running tem...")
-    model = TEM.from_param_list(_params(tem_params), metrics=True)
+    model = TEM.from_param_list(_params(tem_params), metrics=True, german=german)
     metrics = model.get_metrics(corpus)
 
     if drop_invalids:
