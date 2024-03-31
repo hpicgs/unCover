@@ -37,7 +37,7 @@ def _most_common_trigrams(trigram_lists: list[dict], max_features: int):
     return [key for key, _ in items[:max_features]]
 
 
-def trigram_distribution(trigram_lists: list[dict], max_features: int = 10):
+def trigram_distribution(trigram_lists: list[dict], max_features: int = 100):
     features = _most_common_trigrams(trigram_lists, max_features)
     return fixed_trigram_distribution(trigram_lists, features)
 
@@ -53,7 +53,7 @@ def fixed_trigram_distribution(trigram_lists, features):
     return pd.DataFrame(values, columns=features)
 
 
-def logistic_regression(dataframe: pd.DataFrame, truth_labels: list()):
+def logistic_regression(dataframe: pd.DataFrame, truth_labels: list[int]):
     if len(dataframe) <= 1:
         return
     regression = LogisticRegression(solver='liblinear', max_iter=100, random_state=42, C=0.9)
@@ -65,36 +65,42 @@ def logistic_regression(dataframe: pd.DataFrame, truth_labels: list()):
     return reg
 
 
-def predict_author(text: str, n_features: int = 100):
-    parser = CoreNLPDependencyParser(url="http://localhost:9000")
+def predict_author(text: str, n_features: int = 100, file_appendix: str = '') -> list[int]:
+    if file_appendix == '':
+        parser = CoreNLPDependencyParser(url="http://localhost:9000")
+        sem_grams = sem_trigrams(text, parser)
+    elif file_appendix == '_german':
+        parser = CoreNLPDependencyParser(url="http://localhost:9001")
+        sem_grams = sem_trigrams(text, parser, 'german')
+    else:
+        raise ValueError("file_appendix must be either '' or '_german'")
     char_features = list(
-        pd.read_csv(os.path.join(STYLOMETRY_DIR, f"char_distribution{n_features}.csv")).columns)[1:]
+        pd.read_csv(os.path.join(STYLOMETRY_DIR, f"char_distribution{n_features}{file_appendix}.csv")).columns)[1:]
     sem_features = [eval(feature) for feature in list(
-        pd.read_csv(os.path.join(STYLOMETRY_DIR, f"sem_distribution{n_features}.csv")).columns)[1:]]
+        pd.read_csv(os.path.join(STYLOMETRY_DIR, f"sem_distribution{n_features}{file_appendix}.csv")).columns)[1:]]
     char_grams = char_trigrams(text)
-    sem_grams = sem_trigrams(text, parser)
     char_distribution = fixed_trigram_distribution([char_grams], char_features)
     sem_distribution = fixed_trigram_distribution([sem_grams], sem_features)
     char_confidence = []
     sem_confidence = []
     authors = used_authors.keys()
-    with open(os.path.join(STYLOMETRY_DIR, "char_normalization.json"), 'rb') as fp:
+    with open(os.path.join(STYLOMETRY_DIR, f"char{file_appendix}_normalization.json"), 'rb') as fp:
         char_min, char_max = json.loads(fp.read())
-    with open(os.path.join(STYLOMETRY_DIR, "sem_normalization.json"), 'rb') as fp:
+    with open(os.path.join(STYLOMETRY_DIR, f"sem{file_appendix}_normalization.json"), 'rb') as fp:
         sem_min, sem_max = json.loads(fp.read())
     for i, author in enumerate(authors):
-        with open(os.path.join(STYLOMETRY_DIR, author + f"_char{n_features}.pickle"), 'rb') as fp:
+        with open(os.path.join(STYLOMETRY_DIR, author + f"_char{n_features}{file_appendix}.pickle"), 'rb') as fp:
             char_confidence.append(
                 (pickle.load(fp).predict_proba(char_distribution.values)[0][1]-char_min[i])/(char_max[i]-char_min[i]))
-        with open(os.path.join(STYLOMETRY_DIR, author + f"_sem{n_features}.pickle"), 'rb') as fp:
+        with open(os.path.join(STYLOMETRY_DIR, author + f"_sem{n_features}{file_appendix}.pickle"), 'rb') as fp:
             sem_confidence.append(
                 (pickle.load(fp).predict_proba(sem_distribution.values)[0][1]-sem_min[i])/(sem_max[i]-sem_min[i]))
 
-    with open(os.path.join(STYLOMETRY_DIR, f"char_final{n_features}.pickle"), 'rb') as fp:
+    with open(os.path.join(STYLOMETRY_DIR, f"char_final{n_features}{file_appendix}.pickle"), 'rb') as fp:
         char = pickle.load(fp).predict_proba(np.array(char_confidence).reshape(1, -1))[0]
-    with open(os.path.join(STYLOMETRY_DIR, f"sem_final{n_features}.pickle"), 'rb') as fp:
+    with open(os.path.join(STYLOMETRY_DIR, f"sem_final{n_features}{file_appendix}.pickle"), 'rb') as fp:
         sem = pickle.load(fp).predict_proba(np.array(sem_confidence).reshape(1, -1))[0]
-    with open(os.path.join(STYLOMETRY_DIR, f"style_final{n_features}.pickle"), 'rb') as fp:
+    with open(os.path.join(STYLOMETRY_DIR, f"style_final{n_features}{file_appendix}.pickle"), 'rb') as fp:
         style = pickle.load(fp).predict_proba(np.array((char_confidence + sem_confidence)).reshape(1, -1))[0]
 
     char = 1 if char[1] > CHAR_MACHINE_CONFIDENCE else -1 if char[0] > CHAR_HUMAN_CONFIDENCE else 0

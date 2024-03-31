@@ -1,7 +1,7 @@
 import argparse
 import json
 import requests
-from misc.mock_database import TestDatabase
+from misc.mock_database import TestDatabase, GermanTestDatabase
 from misc.tem_helpers import get_tecm
 from misc.logger import printProgressBar
 from stylometry.logistic_regression import predict_author, used_authors
@@ -19,9 +19,10 @@ source_mapping = {
     'grover': 1
 }
 
-def predict_sota(text):
+
+def predict_sota(text, german):
     payload = {
-        'language': 'en',
+        'language': 'de' if german else 'en',
         'sentences': False,
         'text': text,
         'version': 'latest'
@@ -66,8 +67,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--compareSOTA', action='store_true', required=False,
                         help="If true, generate the performance on winston.ai as SOTA")
+    parser.add_argument('--german', action='store_true', required=False,
+                        help="use the german test database instead of the english one")
     args = parser.parse_args()
-    data = TestDatabase.get_all_articles_sorted_by_methods()
+    if args.german:
+        data = GermanTestDatabase.get_all_articles_sorted_by_methods()
+    else:
+        data = TestDatabase.get_all_articles_sorted_by_methods()
     predictions_per_author = {}
     total_count = 0
     num_articles = len(data) * 200
@@ -87,14 +93,14 @@ if __name__ == '__main__':
             if args.compareSOTA:
                 if len(article) > 100000:
                     article = article[:100000]
-                sota = predict_sota(article)
+                sota = predict_sota(article, args.german)
                 sota_predictions.update({sota: sota_predictions.get(sota) + 1})
             if len(article) > 120000:
                 article = article[:120000]
             try:
-                style_prediction = predict_author(article)
-                tecm = get_tecm([article])
-                te_prediction = predict_from_tecm(tecm)
+                style_prediction = predict_author(article, file_appendix='_german' if args.german else '')
+                tecm = get_tecm([article], german=args.german)
+                te_prediction = predict_from_tecm(tecm, model_prefix='german' if args.german else '')
             except Exception as e:  # some sources contain too short samples for tem
                 print("\nte error: ", e)
                 total_count -= 1
