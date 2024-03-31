@@ -1,12 +1,18 @@
 import json
+import os
+import sys
+import re
+import requests
+import argparse
 from data_creation.article_scraper import GoogleScraper
 from data_creation.page_processor import PageProcessor
 from data_creation.gpt_generator import generate_gpt4_news_from, generate_gpt3_news_from, generate_gpt2_news_from
 from data_creation.gemini_generator import generate_gemini_news_from
-from grover.sample.contextual_generate import generate_grover_news_from_original
 from misc.mock_database import DatabaseGenArticles, GermanDatabase
-from misc.definitions import MODELS_DIR
-import re, requests, argparse
+from misc.definitions import ROOT_DIR, MODELS_DIR
+
+sys.path.append(os.path.join(ROOT_DIR, 'data_creation', 'grover'))
+from data_creation.grover.sample.contextual_generate import generate_grover_news_from_original
 
 
 def query_generation(queries, args):
@@ -59,8 +65,10 @@ def query_generation(queries, args):
                     print(f"Error while generating gemini article as none was generated: {e}")
             if args.grover:
                 grover_input = json.dumps({'url': url, 'url_used': url, 'title': title, 'text': processed_page,
-                                    'summary': '', 'authors': [], 'publish_date': '04-19-2023', 'domain': 'www.com',
-                                    'warc_date':'20190424064330', 'status': 'success', 'split': 'gen', 'inst_index': 0})
+                                           'summary': '', 'authors': [], 'publish_date': '04-19-2023',
+                                           'domain': 'www.com',
+                                           'warc_date': '20190424064330', 'status': 'success', 'split': 'gen',
+                                           'inst_index': 0})
                 database.insert_article(
                     generate_grover_news_from_original(grover_input, args.grover, MODELS_DIR), url, 'grover')
 
