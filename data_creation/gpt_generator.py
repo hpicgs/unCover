@@ -3,17 +3,20 @@ from transformers import pipeline, set_seed
 from misc.definitions import GPT_KEY, OPENAI_ORGA
 
 
-def generate_gpt3_news_from(doc, size=1000):
+def generate_gpt3_news_from(doc, german=False, size=1000):
     print("Starting GPT3 Request")
     client = openai.OpenAI(
         api_key=GPT_KEY,
         organization=OPENAI_ORGA
     )
-    doc += "\n\nWrite a long news article about this topic."
+    if not german:
+        doc += "\n\nWrite a long news article about this topic."
+    else:
+        doc += "\n\nSchreibe einen langen Nachrichten Artikel über das Thema."
     response = None
     while response is None:
         try:
-            response = client.completions.create(model="gpt-3.5-turbo-instruct", prompt=doc, max_tokens=size,
+            response = client.completions.create(model='gpt-3.5-turbo-instruct', prompt=doc, max_tokens=size,
                                                  temperature=0.4)
         except openai.APIConnectionError or openai.Timeout:
             continue
@@ -37,7 +40,7 @@ def generate_gpt4_news_from(doc, german=False, size=1000):
     response = None
     while response is None:
         try:
-            response = client.chat.completions.create(model="gpt-4", messages=[{"role": "user", "content": doc}],
+            response = client.chat.completions.create(model='gpt-4', messages=[{'role': 'user', 'content': doc}],
                                                       max_tokens=size, temperature=0.4)
         except openai.APIConnectionError or openai.Timeout:
             continue
@@ -53,7 +56,7 @@ def generate_gpt2_news_from(doc, size=1000):
     doc_prompt = "I would write a news article about the topic like this:"
     generator = pipeline('text-generation', model='gpt2-large')
     set_seed(42)
-    doc += ". " + doc_prompt
-    result = generator(doc, max_length=size, num_return_sequences=1)[0]["generated_text"]
+    doc += f". {doc_prompt}"
+    result = generator(doc, max_length=size, num_return_sequences=1)[0]['generated_text']
     print("GPT2 Finished")
-    return (result.rsplit(".", 1)[0] + ".").split(doc_prompt, 1)[1]
+    return (result.rsplit('.', 1)[0] + '.').split(doc_prompt, 1)[1]

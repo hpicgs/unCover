@@ -66,7 +66,7 @@ def generate_author_dataset(site, author, narticles=10):
         page = requests.get(article_url).text
         processor = PageProcessor(page)
         processed_page = preprocess_article(processor.get_fulltext(separator="\n"))
-        author = processor.get_author().replace(" ", "")
+        author = processor.get_author().replace(' ', '')
         database.insert_article(processed_page, article_url, author)
 
 

@@ -19,7 +19,7 @@ class GoogleScraper:
 
     def __log(self, message, last=False):
         if self.__verbose:
-            print(f"\r\033[K{self.__log_prefix}{message}", end="\n" if last else "")
+            print(f"\r\033[K{self.__log_prefix}{message}", end="\n" if last else '')
 
     def find_news_urls_for_query(self, query, n_articles=10, german=False):
         self.__log(f"scraping for query {query}")
@@ -27,16 +27,16 @@ class GoogleScraper:
             self.__driver.get("https://news.google.com")
         else:
             self.__driver.get("https://news.google.de")
-        self.__log(f"received news.google.com page")
+        self.__log("received news.google.com page")
         time.sleep(3)
         try:
             agree_btn = next(
                 btn
                 for btn in self.__driver.find_elements(
-                    By.TAG_NAME, "button"
+                    By.TAG_NAME, 'button'
                 )
-                if "Accept all" in btn.get_attribute("innerHTML") or
-                "Alle akzeptieren" in btn.get_attribute("innerHTML")
+                if "Accept all" in btn.get_attribute('innerHTML') or
+                "Alle akzeptieren" in btn.get_attribute('innerHTML')
             )
             agree_btn.click()
             self.__log("agreed to google's data collection")
@@ -63,7 +63,7 @@ class GoogleScraper:
 
         time.sleep(3)
         fetch_results = lambda: [
-                                    a_tag.get_attribute("href")
+                                    a_tag.get_attribute('href')
                                     for a_tag in self.__driver.find_elements(
                 By.XPATH, "//article/div/div/a"
             )
@@ -87,7 +87,7 @@ class GoogleScraper:
             self.__driver.get(url)
             while (
                     self.__driver.current_url == url
-                    or self.__driver.current_url == "about:blank"
+                    or self.__driver.current_url == 'about:blank'
             ):
                 time.sleep(0.2)
             urls.append(self.__driver.current_url)

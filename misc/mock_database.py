@@ -120,10 +120,10 @@ class GermanDatabase:
     def insert_article(text, source, label):
         data = GermanDatabase.__db.get_data()
         if data == [] or data is None:
-            data = [{"source": source, "text": text, "label": label}]
+            data = [{'source': source, 'text': text, 'label': label}]
             GermanDatabase.__db.write_data(data)
-        elif not any([source == article["source"] for article in data]):
-            data.append({"source": source, "text": text, "label": label})
+        elif not any([source == article['source'] for article in data]):
+            data.append({'source': source, 'text': text, 'label': label})
             GermanDatabase.__db.write_data(data)
 
 
@@ -134,7 +134,7 @@ class GermanTestDatabase:
     def get_all_articles_sorted_by_methods():
         articles = GermanTestDatabase.__db.get_data()
         return {label: [article['text'] for article in articles if
-                        label in article["label"].split(",") and article["text"] is not None]
+                        label in article['label'].split(',') and article['text'] is not None]
                 for label in [l for a in articles for l in a['label'].split(',')]
                 }
 
@@ -143,5 +143,5 @@ class GermanTestDatabase:
         data = GermanTestDatabase.__db.get_data()
         if data == [] or data is None:
             data = []
-        data.append({"source": source, "text": text, "label": label})
+        data.append({'source': source, 'text': text, 'label': label})
         GermanTestDatabase.__db.write_data(data)
