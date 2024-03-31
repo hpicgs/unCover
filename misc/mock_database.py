@@ -111,12 +111,10 @@ class GermanDatabase:
             for label in article['label'].split(',') if article['text'] is not None}
 
     @staticmethod
-    def get_all_articles_sorted_by_methods():
+    def get_articles_by_author(label):
         articles = GermanDatabase.__db.get_data()
-        return {label: [article['text'] for article in articles if
-                        label in article["label"].split(",") and article["text"] is not None]
-                for label in [l for a in articles for l in a['label'].split(',')]
-                }
+        return [article for article in articles if
+                label in article['label'].split(',') and article['text'] is not None]
 
     @staticmethod
     def insert_article(text, source, label):

@@ -25,7 +25,7 @@ def get_listed_articles(url, source):
 
 
 def find_authors_articles(n, source, author):
-    if source == "theguardian":
+    if source == 'theguardian':
         pagenum = 1
         result = []
         while len(result) < n:
@@ -38,7 +38,7 @@ def find_authors_articles(n, source, author):
                 break
             pagenum += 1
         return result
-    elif source == "ntv":
+    elif source == 'ntv':
         return get_listed_articles(f"https://www.n-tv.de/autoren/{author}.html", source)
     return []
 
@@ -54,10 +54,10 @@ def generate_author_dataset(site, author, narticles=10):
     # only works for theguardian.com and n-tv.de
     if "theguardian.com" in site:
         database = DatabaseAuthorship
-        article_urls = find_authors_articles(narticles, "theguardian", author)
+        article_urls = find_authors_articles(narticles, 'theguardian', author)
     elif "n-tv.de" in site:
         database = GermanDatabase
-        article_urls = find_authors_articles(narticles, "ntv", author)
+        article_urls = find_authors_articles(narticles, 'ntv', author)
     if narticles != 0:
         article_urls = article_urls[:narticles]
     for article_url in article_urls:
