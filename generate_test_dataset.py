@@ -9,7 +9,7 @@ from data_creation.page_processor import PageProcessor
 from data_creation.article_scraper import GoogleScraper
 from data_creation.gpt_generator import generate_gpt4_news_from, generate_gpt3_news_from, generate_gpt2_news_from
 from data_creation.gemini_generator import generate_gemini_news_from
-from misc.definitions import ROOT_DIR, MODELS_DIR
+from definitions import ROOT_DIR, MODELS_DIR
 
 sys.path.append(os.path.join(ROOT_DIR, 'data_creation', 'grover'))
 from data_creation.grover.sample.contextual_generate import generate_grover_news_from_original

@@ -1,4 +1,4 @@
-from misc.definitions import GOOGLE_API_KEY
+from definitions import GOOGLE_API_KEY
 import google.generativeai as genai
 
 

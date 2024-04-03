@@ -7,7 +7,7 @@ from misc.logger import printProgressBar
 from stylometry.logistic_regression import predict_author, used_authors
 from main import get_prediction
 from train_tem_metrics import predict_from_tecm
-from misc.definitions import WINSTON_API_KEY
+from definitions import WINSTON_API_KEY
 
 source_mapping = {
     'human-verified': -1,
