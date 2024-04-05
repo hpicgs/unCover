@@ -13,7 +13,7 @@ from misc.entity_coreferences import coref_annotation, coref_diagram
 from scraper.page_processor import PageProcessor
 from stylometry.corenlp import connect_corenlp
 from stylometry.logistic_regression import predict_author
-from misc.tem_helpers import get_default_te_graph, get_default_tecm
+from misc.tem_helpers import get_te_graph, get_tecm
 from train_tem_metrics import predict_from_tecm
 from definitions import ROOT_DIR
 
@@ -46,7 +46,7 @@ def run_analysis(input_type, user_input):
         style_prediction = predict_author(content)
 
         try:
-            tecm = get_default_tecm(content)
+            tecm = get_tecm([content])
             te_prediction = predict_from_tecm(tecm)
         except AttributeError:  # some texts are not working for tem
             st.error("The input text is too short for the Topic Evolution Model to work. Please enter a different "
@@ -64,18 +64,18 @@ def run_analysis(input_type, user_input):
     elif author == 0:
         st.subheader("We are not sure if this text was written by a machine or a human.")
     st.write(
-        "Stylometry indicated that the text " + ("author could not be identified" if sum(style_prediction) == 0
-                                               else "was written by a " + ("machine" if sum(style_prediction) > 0
-                                                                           else "human")) + ".")
+        "Stylometry indicated that the text " + ("author could not be identified." if sum(style_prediction) == 0
+                                               else "was written by a " + ("machine." if sum(style_prediction) > 0
+                                                                           else "human.")))
     st.write(
         "Metrics on the Topic Graph indicated that the text was written by a " + ("machine, " if te_prediction[0] == 1
                                                                                   else "human, ")
-        + "with a confidence of " + str(round(te_prediction[1] * 100, 2)) + "%.")
+        + f"with a confidence of {round(te_prediction[1] * 100, 2)}%.")
     st.write(
         "Please note that this estimation does not need to be correct and should be further supported by the in-depth "
         "analysis below.")
     st.subheader("Topic Evolution Analysis:")
-    image = get_default_te_graph(content).pipe(format='jpg')
+    image = get_te_graph(content).pipe(format='jpg')
     st.image(image, caption="Topic Evolution on Input Text")
     st.subheader("Entity Occurrences Analysis:")
     components.html(entity_html, height=1000, scrolling=True)
@@ -122,17 +122,17 @@ if __name__ == '__main__':
 
     col1, col2 = st.columns([3, 1])
     col1.title("Welcome at unCover")
-    col2.image(Image.open("unCover.png"), width=100)
+    col2.image(Image.open('unCover.png'), width=100)
     st.write(
         " \nHere you can analyze a news article on topics and writing style to get further insights on whether this "
         "text might have been written by an AI. This system was developed at Hasso-Plattner-Institute. For more "
         "information and the associated paper visit https://github.com/hpicgs/unCover.")
     st.write("To start, please choose the type of input and enter the url/text in the field below.")
     col3, col4 = st.columns(2)
-    input_type = col3.selectbox("type of input", ('URL', 'Text'), label_visibility="collapsed")
-    text = ""
+    input_type = col3.selectbox("type of input", ('URL', 'Text'), label_visibility='collapsed')
+    text = ''
     if input_type == 'URL':
-        text = st.text_input("URL to analyze:", "")
+        text = st.text_input("URL to analyze:", '')
     else:
         text = st.text_area("Full text to analyze:", height=300)
     if col4.button("Compute Results"):
