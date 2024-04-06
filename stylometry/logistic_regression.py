@@ -3,8 +3,7 @@ import json
 import pickle
 import numpy as np
 import pandas as pd
-from definitions import STYLOMETRY_DIR, CHAR_MACHINE_CONFIDENCE, CHAR_HUMAN_CONFIDENCE, SEM_MACHINE_CONFIDENCE, \
-    SEM_HUMAN_CONFIDENCE, STYLE_MACHINE_CONFIDENCE, STYLE_HUMAN_CONFIDENCE
+from definitions import STYLOMETRY_DIR, STYLE_MACHINE_CONFIDENCE, STYLE_HUMAN_CONFIDENCE
 from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams
 from sklearn.linear_model import LogisticRegression
@@ -103,8 +102,8 @@ def predict_author(text: str, n_features: int = 100, file_appendix: str = '') ->
     with open(os.path.join(STYLOMETRY_DIR, f"style_final{n_features}{file_appendix}.pickle"), 'rb') as fp:
         style = pickle.load(fp).predict_proba(np.array((char_confidence + sem_confidence)).reshape(1, -1))[0]
 
-    char = 1 if char[1] > CHAR_MACHINE_CONFIDENCE else -1 if char[0] > CHAR_HUMAN_CONFIDENCE else 0
-    sem = 1 if sem[1] > SEM_MACHINE_CONFIDENCE else -1 if sem[0] > SEM_HUMAN_CONFIDENCE else 0
+    char = 1 if char[1] > STYLE_MACHINE_CONFIDENCE else -1 if char[0] > STYLE_HUMAN_CONFIDENCE else 0
+    sem = 1 if sem[1] > STYLE_MACHINE_CONFIDENCE else -1 if sem[0] > STYLE_HUMAN_CONFIDENCE else 0
     style = 1 if style[1] > STYLE_MACHINE_CONFIDENCE else -1 if style[0] > STYLE_HUMAN_CONFIDENCE else 0
 
     return [char, sem, style]
