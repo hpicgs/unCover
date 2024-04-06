@@ -30,7 +30,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     methods = args.methods.split(',')
-    visited = set()
     if not args.queries:
         parser.error("please provide at least one query")
     if len(methods) == 0:
@@ -41,6 +40,8 @@ if __name__ == '__main__':
     database = TestDatabase
     if args.german:
         database = GermanTestDatabase
+    visited = set()
+    visited.update(database.get_all_sources_sorted_by_methods()['human'])
     for query in args.queries.split(','):
         print(f"Round starting for {query}")
         scraper = GoogleScraper(verbose=True)
@@ -100,7 +101,7 @@ if __name__ == '__main__':
                     continue
             if 'gemini' in methods:
                 gemini = generate_gemini_news_from(processed_page, args.german)
-                if len(gemini) < 600:
+                if gemini is None or len(gemini) < 600:
                     print("gemini article is too short; -> skipping for consistency")
                     continue
             if 'gpt3' in methods:

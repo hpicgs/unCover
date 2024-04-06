@@ -92,6 +92,14 @@ class TestDatabase:
                 }
 
     @staticmethod
+    def get_all_sources_sorted_by_methods():
+        articles = TestDatabase.__db.get_data()
+        return {label: [article['source'] for article in articles if
+                        label in article['label'].split(',') and article['source'] is not None]
+                for label in [l for a in articles for l in a['label'].split(',')]
+                }
+
+    @staticmethod
     def insert_article(text, source, label):
         data = TestDatabase.__db.get_data()
         if data == [] or data is None:
@@ -135,6 +143,14 @@ class GermanTestDatabase:
         articles = GermanTestDatabase.__db.get_data()
         return {label: [article['text'] for article in articles if
                         label in article['label'].split(',') and article['text'] is not None]
+                for label in [l for a in articles for l in a['label'].split(',')]
+                }
+
+    @staticmethod
+    def get_all_sources_sorted_by_methods():
+        articles = GermanTestDatabase.__db.get_data()
+        return {label: [article['source'] for article in articles if
+                        label in article['label'].split(',') and article['source'] is not None]
                 for label in [l for a in articles for l in a['label'].split(',')]
                 }
 

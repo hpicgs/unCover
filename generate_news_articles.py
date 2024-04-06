@@ -16,6 +16,7 @@ from data_creation.grover.sample.contextual_generate import generate_grover_news
 
 
 def query_generation(queries, args):
+    visited = set()
     database = DatabaseGenArticles
     if args.german:
         database = GermanDatabase
@@ -33,6 +34,9 @@ def query_generation(queries, args):
                 continue
         print(urls)
         for url in urls:
+            if url in visited:
+                continue
+            visited.add(url)
             print(f"Current URL Nr: {count} {url}")
             count += 1
             try:
@@ -59,10 +63,9 @@ def query_generation(queries, args):
                 if tmp is not None:
                     database.insert_article(tmp, url, 'gpt4')
             if args.gemini:
-                try:
-                    database.insert_article(generate_gemini_news_from(processed_page, args.german), url, 'gemini')
-                except ValueError as e:
-                    print(f"Error while generating gemini article as none was generated: {e}")
+                tmp = generate_gemini_news_from(processed_page, args.german)
+                if tmp is not None:
+                    database.insert_article(tmp, url, 'gemini')
             if args.grover:
                 grover_input = json.dumps({'url': url, 'url_used': url, 'title': title, 'text': processed_page,
                                            'summary': '', 'authors': [], 'publish_date': '04-19-2023',
