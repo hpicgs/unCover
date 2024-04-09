@@ -22,7 +22,9 @@ author_mapping = {
     'human2': 0,
     'human3': 0,
     'human4': 0,
-    'human5': 0
+    'human5': 0,
+    'human6': 0,
+    'human7': 0
 }
 
 data_save = {
@@ -69,7 +71,7 @@ def fit_model(features, truth_table):
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=3, random_state=9732)
     n_scores = cross_val_score(model, df, truth_table, scoring='accuracy', cv=cv, n_jobs=-1)
     print('Mean Accuracy: %.3f (%.3f)' % (np.mean(n_scores), np.std(n_scores)))
-    return model.fit(df, truth_table), np.mean(n_scores)
+    return model.fit(df, truth_table), np.mean(n_scores), np.std(n_scores)
 
 
 def tem_metric_training(portion=1.0, params=None, german=False):
@@ -88,9 +90,9 @@ def tem_metric_training(portion=1.0, params=None, german=False):
 
 def optimize_tem():
     best_params = TEM_PARAMS
-    _, mean_score = tem_metric_training(0.33, best_params)
+    _, mean_score, d = tem_metric_training(0.33, best_params)
     with open(os.path.join(TEMMETRICS_DIR, 'hyperparameters.txt'), 'w') as f:
-        f.write(f"Parameters: {best_params} mean score: {mean_score}\n")
+        f.write(f"{best_params}/{mean_score}/{d}\n")
         for c in np.arange(0.0, 1.0, 0.05):
             for alpha in np.arange(0.0, 1.0, 0.2):
                 for beta in np.arange(0.0, 1.0, 0.2):
@@ -100,9 +102,10 @@ def optimize_tem():
                                 for merge in np.arange(0.0, 1.0, 0.05):
                                     for evolv in np.arange(0.0, 1.0, 0.05):
                                         params = np.array([c, alpha, beta, gamma, delta, theta, merge, evolv])
-                                        _, s = tem_metric_training(0.33, params)
+                                        _, s, d = tem_metric_training(0.33, params)
+                                        f.write(f"{params}/{s}/{d}\n")
                                         if s > mean_score:
-                                            f.write(f"Parameters: {params} mean score: {s}\n")
+                                            print(f"Better performance on: {params}, mean score: {s}({d})")
                                             mean_score = s
                                             best_params = params
                                         else:
@@ -142,14 +145,14 @@ if __name__ == '__main__':
                 # print error and exit
                 parser.error("Optimization is not supported for the german database")
             print("Optimizing TEM model...")
-            model, score = optimize_tem()
+            model, score, deviation = optimize_tem()
         elif args.use_stored and os.path.exists(feature_file) and os.path.exists(label_file):
             print("Loading existing training data...")
             features = pickle.load(open(feature_file, 'rb'))
             labels = pickle.load(open(label_file, 'rb'))
-            model, score = fit_model(features, labels)
+            model, score, deviation = fit_model(features, labels)
         else:
-            model, score = tem_metric_training()
+            model, score, deviation = tem_metric_training()
         print(f"Saving model with mean score: {score}")
         pickle.dump(model, f)
     print("TRAINING DONE!")

@@ -36,7 +36,7 @@ def get_training_samples(type, min_articles, database):
     for author in authors:
         full_article_list = [(article['text'], author) for article in
                              database.get_articles_by_author(author)]
-        result += full_article_list[:int(len(full_article_list) * 0.8)]
+        result += full_article_list[:len(full_article_list)]
         if len(full_article_list) >= min_articles:
             print(f"chose author: {author}")
             trainable.append(author)

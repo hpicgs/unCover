@@ -21,7 +21,9 @@ used_authors = {
     'human2': 'human',
     'human3': 'human',
     'human4': 'human',
-    'human5': 'human'
+    'human5': 'human',
+    'human6': 'human',
+    'human7': 'human'
 }
 
 
