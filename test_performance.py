@@ -99,7 +99,7 @@ if __name__ == '__main__':
                 article = article[:120000]
             try:
                 style_prediction = predict_author(article, file_appendix='_german' if args.german else '')
-                tecm = get_tecm([article], german=args.german)
+                tecm = get_tecm([article])
                 te_prediction = predict_from_tecm(tecm, model_prefix='german' if args.german else '')
             except Exception as e:  # some sources contain too short samples for tem
                 print("\nte error: ", e)

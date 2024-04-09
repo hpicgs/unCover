@@ -38,7 +38,7 @@ def model_pickle(pre):
 
 def run_tem(articles, tem_params, german):
     try:  # check if nltk is installed and download if it is not
-        return get_tecm(articles, tem_params, german=german)
+        return get_tecm(articles, tem_params)
     except LookupError as e:
         handle_nltk_download(e)
         return run_tem(articles, tem_params, german)  # recursive call to deal with multiple downloads
@@ -128,7 +128,7 @@ def predict_from_tecm(metrics: npt.NDArray[np.float64], model_prefix=''):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--use_store', action='store_true', required=False,
+    parser.add_argument('--use_stored', action='store_true', required=False,
                         help="rerun the TEM model to generate train data, and ignore existing data")
     parser.add_argument('--optimize_tem', action='store_true', required=False,
                         help="optimize the parameters of the TEM model through Grid Search")
