@@ -1,13 +1,17 @@
 import argparse
 import json
+import csv
+import os.path
+
 import requests
+import numpy as np
 from misc.mock_database import TestDatabase, GermanTestDatabase
 from misc.tem_helpers import get_tecm
 from misc.logger import printProgressBar
 from stylometry.logistic_regression import predict_author, used_authors
 from main import get_prediction
 from train_tem_metrics import predict_from_tecm
-from definitions import WINSTON_API_KEY
+from definitions import WINSTON_API_KEY, DATABASE_FILES_PATH
 
 source_mapping = {
     'human-verified': -1,
@@ -18,6 +22,30 @@ source_mapping = {
     'gemini': 1,
     'grover': 1
 }
+
+
+def eval_argugpt():
+    with open(os.path.join(DATABASE_FILES_PATH, 'argugpt-test.csv'), 'r') as file:
+        #structure: id,prompt_id,prompt,text,model,temperature,exam_type,score,score_level
+        reader = csv.reader(file)
+        data = list(reader)
+    total = 0
+    correct = 0
+    for row in data:
+        if row[0] == 'id':
+            continue
+        total += 1
+        style = predict_author(row[3])
+        tecm = get_tecm([row[3]], drop_invalids=False)[0]
+        if np.all(np.isnan(tecm)):
+            print("\nTEM processing error, skipping...")
+            total -= 1
+            continue
+        te = predict_from_tecm(tecm)
+        prediction = get_prediction(style, te)
+        if prediction == int(row[4]):
+            correct += 1
+    print(f"Accuracy: {round(correct / total * 100, 2)}%")
 
 
 def predict_sota(text, german):
@@ -69,6 +97,8 @@ if __name__ == '__main__':
                         help="If true, generate the performance on winston.ai as SOTA")
     parser.add_argument('--german', action='store_true', required=False,
                         help="use the german test database instead of the english one")
+    parser.add_argument('--evalArguGPT' , action='store_true', required=False,
+                        help="Íf true, evaluate the performance on ArguGPT data")
     args = parser.parse_args()
     if args.german:
         data = GermanTestDatabase.get_all_articles_sorted_by_methods()
@@ -97,15 +127,14 @@ if __name__ == '__main__':
                 sota_predictions.update({sota: sota_predictions.get(sota) + 1})
             if len(article) > 120000:
                 article = article[:120000]
-            try:
-                style_prediction = predict_author(article, file_appendix='_german' if args.german else '')
-                tecm = get_tecm([article])
-                te_prediction = predict_from_tecm(tecm, model_prefix='german' if args.german else '')
-            except Exception as e:  # some sources contain too short samples for tem
-                print("\nte error: ", e)
+            style_prediction = predict_author(article, file_appendix='_german' if args.german else '')
+            tecm = get_tecm([article], drop_invalids=False)[0]
+            if np.all(np.isnan(tecm)):
+                print("\nTEM processing error, skipping...")
                 total_count -= 1
                 num_articles -= 1
                 continue
+            te_prediction = predict_from_tecm(tecm, model_prefix='german' if args.german else '')
             source_count += 1
             author = get_prediction(style_prediction, te_prediction)
             char_style_predictions.update({style_prediction[0]: char_style_predictions.get(style_prediction[0]) + 1})

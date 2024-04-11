@@ -1,0 +1,12 @@
+#!/bin/sh
+# read 8 arguments as ints
+
+if [ $# -ne 8 ]; then
+    echo "Usage: $0 <float> <float> <float> <float> <float> <float> <float> <float>"
+    exit 1
+fi
+
+cd tem/term-distance && ./run.sh & sleep 1
+sleep 10 # wait until server is up
+python3 -m run_training --tem_params "$1,$2,$3,$4,$5,$6,$7,$8"
+

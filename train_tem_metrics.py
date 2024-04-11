@@ -134,6 +134,8 @@ if __name__ == '__main__':
                         help="optimize the parameters of the TEM model through Grid Search")
     parser.add_argument('--german' , action='store_true', required=False,
                         help="use the german test database instead of the english one")
+    parser.add_argument('--tem_params', type=str, required=False,
+                        help='specify the parameters for the TEM model as a string of 8 floats separated by commas')
     args = parser.parse_args()
     os.makedirs(TEMMETRICS_DIR, exist_ok=True)
     prefix = 'german' if args.german else ''
@@ -152,7 +154,11 @@ if __name__ == '__main__':
             labels = pickle.load(open(label_file, 'rb'))
             model, score, deviation = fit_model(features, labels)
         else:
-            model, score, deviation = tem_metric_training()
+            if args.tem_params:
+                params = np.array([float(x) for x in args.tem_params.split(',')])
+                model, score, deviation = tem_metric_training(1.0, params)
+            else:
+                model, score, deviation = tem_metric_training()
         print(f"Saving model with mean score: {score}")
         pickle.dump(model, f)
     print("TRAINING DONE!")

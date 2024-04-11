@@ -1,0 +1,24 @@
+FROM continuumio/miniconda3 as builder
+
+RUN apt-get update -y && apt-get install snap make wget curl unzip build-essential -y
+RUN snap install cmake --classic
+
+WORKDIR /app
+RUN git clone --recurse-submodules https://github.com/hpicgs/unCover.git
+
+WORKDIR /app/unCover
+COPY ./.database /app/uncover/.database
+RUN git checkout --recurse-submodules issue/52-add-german-language
+RUN conda update conda --yes
+RUN conda env create -f environment.yml
+RUN cp -n .env.example .env
+RUN mkdir tem/build/ && cd tem/build/ && cmake .. && make
+RUN pip install -r tem/script/requirements.txt
+RUN python3 -m nltk.download punkt && python -m spacy download en_core_web_md && python -m spacy download de_core_news_md
+
+WORKDIR /app/unCover/tem/term-distance
+RUN pip install gensim>=4.3.2
+RUN pip install -r requirements.txt
+RUN --mount=type=cache,target=/root/gensim-data python model.py
+
+WORKDIR /app/unCover
