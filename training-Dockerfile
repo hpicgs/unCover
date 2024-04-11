@@ -2,20 +2,27 @@ FROM continuumio/miniconda3
 
 RUN apt-get update -y && apt-get install cmake make wget curl unzip build-essential -y
 
+# repo setup
 WORKDIR /app
 RUN git clone --branch issue/52-add-german-language --single-branch --recurse-submodules https://github.com/hpicgs/unCover.git
-
 WORKDIR /app/unCover
+
+# database
 COPY ./.database /app/unCover/.database
+
+# conda env
 RUN conda update conda --yes
 RUN conda env create -f environment.yml
-RUN cp -n .env.example .env
-RUN mkdir tem/build/ && cd tem/build/ && cmake .. && make
-RUN pip install -r tem/script/requirements.txt
-RUN python3 -m nltk.download punkt && python -m spacy download en_core_web_md && python -m spacy download de_core_news_md
+RUN conda run -n unCover pip install -r tem/script/requirements.txt
+RUN conda run -n unCover pip install -r tem/term-distance/requirements.txt
 
-WORKDIR /app/unCover/tem/term-distance
-RUN pip install -r requirements.txt
-RUN --mount=type=cache,target=/root/gensim-data python model.py
+# TEM build & additional setup
+RUN mkdir tem/build/ && cd tem/build/ && cmake .. && make
+RUN conda run -n unCover python -m nltk.download punkt
+RUN conda run -n unCover python -m spacy download en_core_web_md
+RUN conda run -n unCover python -m spacy download de_core_news_md
+RUN --mount=type=cache,target=/root/gensim-data conda run -n unCover python tem/term-distance/model.py
+
+RUN cp -n .env.example .env
 
 WORKDIR /app/unCover
