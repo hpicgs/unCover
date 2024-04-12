@@ -14,8 +14,6 @@ from misc.tem_helpers import get_tecm, preprocess
 from misc.nlp_helpers import handle_nltk_download
 from misc.logger import printProgressBar
 
-tmp_log_dir = os.path.join(ROOT_DIR, "logs")
-
 author_mapping = {
     'gpt3': 1,
     'gpt2': 2,
@@ -35,6 +33,10 @@ author_mapping = {
 data_save = {
     'initialized': False
 }
+
+
+def tmp_log_dir(params):
+    return os.path.join(ROOT_DIR, "logs", f"tem_metrics_{params[0]}_{params[1]}_{params[2]}_{params[3]}_{params[4]}_{params[5]}_{params[6]}_{params[7]}")
 
 
 def model_pickle(pre):
@@ -70,28 +72,29 @@ def prepare_train_data(database, training_data, label, portion, tem_params, germ
         label += [author_mapping[author]] * len(tmp)
 
 
-def fit_model(features, truth_table):
-    with open(os.path.join(tmp_log_dir, 'results.log'), 'w') as f:
-        f.write("Fitting TEGM Classifier...\n")
+def fit_model(params, features, truth_table):
+    os.makedirs(tmp_log_dir(params), exist_ok=True)
+    with open(os.path.join(tmp_log_dir(params), 'results.log'), 'w') as log:
+        log.write("Fitting TEGM Classifier...\n")
         # logistic regression
         df = pd.DataFrame(features)
         logreg = LogisticRegression(multi_class='multinomial', solver='lbfgs', random_state=42)
         cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=3, random_state=9732)
         logreg_n_scores = cross_val_score(logreg, df, truth_table, scoring='accuracy', cv=cv, n_jobs=-1)
-        f.write('Logistic Regression Mean Accuracy: %.3f (%.3f)' % (np.mean(logreg_n_scores), np.std(logreg_n_scores)))
-        with open(os.path.join(tmp_log_dir, 'logreg.pickle'), 'wb') as m:
+        log.write('Logistic Regression Mean Accuracy: %.3f (%.3f)' % (np.mean(logreg_n_scores), np.std(logreg_n_scores)))
+        with open(os.path.join(tmp_log_dir(params), 'logreg.pickle'), 'wb') as m:
             pickle.dump(logreg.fit(df, truth_table), m)
         # random forest
         forest = RandomForestClassifier(random_state=42)
         forest_n_scores = cross_val_score(forest, df, truth_table, scoring='accuracy', cv=cv, n_jobs=-1)
-        f.write('Random Forest Mean Accuracy: %.3f (%.3f)' % (np.mean(forest_n_scores), np.std(forest_n_scores)))
-        with open(os.path.join(tmp_log_dir, 'forest.pickle'), 'wb') as m:
+        log.write('Random Forest Mean Accuracy: %.3f (%.3f)' % (np.mean(forest_n_scores), np.std(forest_n_scores)))
+        with open(os.path.join(tmp_log_dir(params), 'forest.pickle'), 'wb') as m:
             pickle.dump(forest.fit(df, truth_table), m)
         # SVM
         svm = SVC(kernel='poly', degree=8, random_state=42)
         svm_n_scores = cross_val_score(svm, df, truth_table, scoring='accuracy', cv=cv, n_jobs=-1)
-        f.write('SVM Mean Accuracy: %.3f (%.3f)' % (np.mean(svm_n_scores), np.std(svm_n_scores)))
-        with open(os.path.join(tmp_log_dir, 'svm.pickle'), 'wb') as m:
+        log.write('SVM Mean Accuracy: %.3f (%.3f)' % (np.mean(svm_n_scores), np.std(svm_n_scores)))
+        with open(os.path.join(tmp_log_dir(params), 'svm.pickle'), 'wb') as m:
             pickle.dump(svm.fit(df, truth_table), m)
         # pick best model
         n_scores = [logreg_n_scores, forest_n_scores, svm_n_scores]
@@ -111,31 +114,25 @@ def tem_metric_training(portion=1.0, params=None, german=False, preprocessed=Fal
         data_save['initialized'] = True
     pickle.dump(sample, open(feature_file, 'wb'))
     pickle.dump(truth, open(label_file, 'wb'))
-    return fit_model(sample, truth)
+    return fit_model(params, sample, truth)
 
 
-def optimize_tem():
+def optimize_tem(c, theta):
     best_params = TEM_PARAMS
     _, mean_score, d = tem_metric_training(0.33, best_params)
     with open(os.path.join(TEMMETRICS_DIR, 'hyperparameters.txt'), 'w') as f:
         f.write(f"{best_params}/{mean_score}/{d}\n")
-        for c in np.arange(0.0, 1.0, 0.05):
-            for alpha in np.arange(0.0, 1.0, 0.2):
-                for beta in np.arange(0.0, 1.0, 0.2):
-                    for gamma in np.arange(0.0, 1.0, 0.2):
-                        for delta in np.arange(0.0, 1.0, 0.2):
-                            for theta in np.arange(0.0, 1.0, 0.05):
-                                for merge in np.arange(0.0, 1.0, 0.05):
-                                    for evolv in np.arange(0.0, 1.0, 0.05):
-                                        params = np.array([c, alpha, beta, gamma, delta, theta, merge, evolv])
-                                        _, s, d = tem_metric_training(0.33, params)
-                                        f.write(f"{params}/{s}/{d}\n")
-                                        if s > mean_score:
-                                            print(f"Better performance on: {params}, mean score: {s}({d})")
-                                            mean_score = s
-                                            best_params = params
-                                        else:
-                                            print("Worse performance, skipping...")
+        for merge in np.arange(0.3, 1.0, 0.1625):
+            for evolv in np.arange(0.3, 1.0, 0.1625):
+                params = np.array([c, 0, 0, 0, 1, theta, merge, evolv])
+                _, s, d = tem_metric_training(0.33, params)
+                f.write(f"{params}/{s}/{d}\n")
+                if s > mean_score:
+                    print(f"Better performance on: {params}, mean score: {s}({d})")
+                    mean_score = s
+                    best_params = params
+                else:
+                    print("Worse performance, skipping...")
     print(f"Best parameters: {best_params}")
     data_save['initialized'] = False
     return tem_metric_training(1.0, best_params)
@@ -173,7 +170,7 @@ if __name__ == '__main__':
     parser.add_argument('--german' , action='store_true', required=False,
                         help="use the german test database instead of the english one")
     parser.add_argument('--tem_params', type=str, required=False,
-                        help='specify the parameters for the TEM model as a string of 8 floats separated by commas')
+                        help='specify the parameters for the TEM model as a string of 2 floats separated by commas')
     parser.add_argument('--preprocessed', action='store_true', required=False,
                         help='specifies that the db holds already preprocessed data')
     parser.add_argument('--preprocess', action='store_true', required=False,
@@ -195,18 +192,15 @@ if __name__ == '__main__':
                 # print error and exit
                 parser.error("Optimization is not supported for the german database")
             print("Optimizing TEM model...")
-            model, score, deviation = optimize_tem()
+            params = np.array([float(x) for x in args.tem_params.split(',')])
+            model, score, deviation = optimize_tem(params[0], params[1])
         elif args.use_stored and os.path.exists(feature_file) and os.path.exists(label_file):
             print("Loading existing training data...")
             features = pickle.load(open(feature_file, 'rb'))
             labels = pickle.load(open(label_file, 'rb'))
-            model, score, deviation = fit_model(features, labels)
+            model, score, deviation = fit_model(TEM_PARAMS, features, labels)
         else:
-            if args.tem_params:
-                params = np.array([float(x) for x in args.tem_params.split(',')])
-                model, score, deviation = tem_metric_training(1.0, params, args.german, args.preprocessed)
-            else:
-                model, score, deviation = tem_metric_training()
+            model, score, deviation = tem_metric_training()
         print(f"Saving model with mean score: {score}")
         pickle.dump(model, f)
     print("TRAINING DONE!")
