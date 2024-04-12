@@ -85,7 +85,7 @@ class DatabaseGenArticles:
 
     @staticmethod
     def replace_data(data):
-        DatabaseAuthorship.__db.write_data(data)
+        DatabaseGenArticles.__db.write_data(data)
 
 
 class TestDatabase:
