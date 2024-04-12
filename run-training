@@ -2,7 +2,7 @@
 # read 2 arguments as floats
 
 if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 <float> <float>"
+    echo "Usage: $0 <float> <float>" > /app/unCover/logs/errorfile.txt
     exit 1
 fi
 

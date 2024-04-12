@@ -62,6 +62,7 @@ def prepare_train_data(database, training_data, label, portion, tem_params, germ
     data_save['portion'] = portion
     authors = database.get_authors()
     data_save[database] = authors
+
     for author in authors:
         print(f"working on author: {author}...")
         tmp = [article['text'] for article in database.get_articles_by_author(author)]
@@ -97,10 +98,15 @@ def fit_model(params, features, truth_table):
         with open(os.path.join(tmp_log_dir(params), 'svm.pickle'), 'wb') as m:
             pickle.dump(svm.fit(df, truth_table), m)
         # pick best model
-        n_scores = [logreg_n_scores, forest_n_scores, svm_n_scores]
-        model = logreg if np.mean(logreg_n_scores) > np.mean(forest_n_scores) else forest if \
-            np.mean(forest_n_scores) > np.mean(svm_n_scores) else svm
-    return model.fit(df, truth_table), np.mean(n_scores), np.std(n_scores)
+        if np.mean(logreg_n_scores) > np.mean(forest_n_scores):
+            if np.mean(logreg_n_scores) > np.mean(svm_n_scores):
+                return logreg.fit(df, truth_table), np.mean(logreg_n_scores), np.std(logreg_n_scores)
+            else:
+                return svm.fit(df, truth_table), np.mean(svm_n_scores), np.std(svm_n_scores)
+        elif np.mean(forest_n_scores) > np.mean(svm_n_scores):
+            return forest.fit(df, truth_table), np.mean(forest_n_scores), np.std(forest_n_scores)
+        else:
+            return svm.fit(df, truth_table), np.mean(svm_n_scores), np.std(svm_n_scores)
 
 
 def tem_metric_training(portion=1.0, params=None, german=False, preprocessed=False):
@@ -112,30 +118,32 @@ def tem_metric_training(portion=1.0, params=None, german=False, preprocessed=Fal
         prepare_train_data(DatabaseGenArticles, sample, truth, portion, params, german, preprocessed)
     if not data_save['initialized']:
         data_save['initialized'] = True
-    pickle.dump(sample, open(feature_file, 'wb'))
-    pickle.dump(truth, open(label_file, 'wb'))
+    pickle.dump(sample, open(os.path.join(tmp_log_dir(params), 'features.pickle'), 'wb'))
+    pickle.dump(truth, open(os.path.join(tmp_log_dir(params), 'labels.pickle'), 'wb'))
     return fit_model(params, sample, truth)
 
 
-def optimize_tem(c, theta):
+def optimize_tem(c, theta, p):
     best_params = TEM_PARAMS
-    _, mean_score, d = tem_metric_training(0.33, best_params)
+    best_model = None
+    # _, mean_score, d = tem_metric_training(1.0, best_params, preprocessed=p)
+    mean_score, d = 0.0, 0.0
     with open(os.path.join(TEMMETRICS_DIR, 'hyperparameters.txt'), 'w') as f:
-        f.write(f"{best_params}/{mean_score}/{d}\n")
+        # f.write(f"{best_params}/{mean_score}/{d}\n")
         for merge in np.arange(0.3, 1.0, 0.1625):
             for evolv in np.arange(0.3, 1.0, 0.1625):
                 params = np.array([c, 0, 0, 0, 1, theta, merge, evolv])
-                _, s, d = tem_metric_training(0.33, params)
+                m, s, d = tem_metric_training(1.0, params, preprocessed=p)
                 f.write(f"{params}/{s}/{d}\n")
                 if s > mean_score:
                     print(f"Better performance on: {params}, mean score: {s}({d})")
                     mean_score = s
                     best_params = params
+                    best_model = m
                 else:
                     print("Worse performance, skipping...")
-    print(f"Best parameters: {best_params}")
-    data_save['initialized'] = False
-    return tem_metric_training(1.0, best_params)
+    print(f"Best parameters: {best_params}, mean score: {mean_score}")
+    return best_model
 
 
 def preprocess_data(database):
@@ -147,6 +155,7 @@ def preprocess_data(database):
     for i, article in enumerate(articles):
         printProgressBar(i, len(articles)-1, fill='█')
         article['text'] = preprocess(article['text'])
+        article['author'] = article['author'][0]
     database.replace_data(articles)
 
 
@@ -193,7 +202,7 @@ if __name__ == '__main__':
                 parser.error("Optimization is not supported for the german database")
             print("Optimizing TEM model...")
             params = np.array([float(x) for x in args.tem_params.split(',')])
-            model, score, deviation = optimize_tem(params[0], params[1])
+            model, score, deviation = optimize_tem(params[0], params[1], args.preprocessed)
         elif args.use_stored and os.path.exists(feature_file) and os.path.exists(label_file):
             print("Loading existing training data...")
             features = pickle.load(open(feature_file, 'rb'))
