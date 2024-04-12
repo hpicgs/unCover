@@ -8,4 +8,4 @@ fi
 
 cd tem/term-distance && ./run.sh & sleep 1
 sleep 10 # wait until server is up
-python3 train_tem_metrics.py --tem_params "$1,$2"
+python3 train_tem_metrics.py --optimize_tem --preprocessed --tem_params "$1,$2"

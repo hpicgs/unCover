@@ -30,9 +30,9 @@ author_mapping = {
     'human7': 0
 }
 
-data_save = {
-    'initialized': False
-}
+# data_save = {
+#     'initialized': False
+# }
 
 
 def tmp_log_dir(params):
@@ -52,22 +52,22 @@ def run_tem(articles, tem_params, german, preprocessed):
 
 
 def prepare_train_data(database, training_data, label, portion, tem_params, german, preprocessed):
-    if data_save['initialized']:
-        for author in data_save[database]:
-            print(f"working on author: {author}...")
-            tmp = run_tem(data_save[author], tem_params, german, preprocessed)
-            training_data.extend(tmp)
-            label += [author_mapping[author]] * len(tmp)
-        return
-    data_save['portion'] = portion
+    # if data_save['initialized']:
+    #     for author in data_save[database]:
+    #         print(f"working on author: {author}...")
+    #         tmp = run_tem(data_save[author], tem_params, german, preprocessed)
+    #         training_data.extend(tmp)
+    #         label += [author_mapping[author]] * len(tmp)
+    #     return
+    # data_save['portion'] = portion
     authors = database.get_authors()
-    data_save[database] = authors
+    # data_save[database] = authors
 
     for author in authors:
         print(f"working on author: {author}...")
         tmp = [article['text'] for article in database.get_articles_by_author(author)]
         tmp = tmp[:int(len(tmp) * portion)]
-        data_save[author] = tmp
+        # data_save[author] = tmp
         tmp = run_tem(tmp, tem_params, german, preprocessed)
         training_data.extend(tmp)
         label += [author_mapping[author]] * len(tmp)
@@ -116,8 +116,8 @@ def tem_metric_training(portion=1.0, params=None, german=False, preprocessed=Fal
     else:
         prepare_train_data(DatabaseAuthorship, sample, truth, portion, params, german, preprocessed)
         prepare_train_data(DatabaseGenArticles, sample, truth, portion, params, german, preprocessed)
-    if not data_save['initialized']:
-        data_save['initialized'] = True
+    # if not data_save['initialized']:
+    #     data_save['initialized'] = True
     pickle.dump(sample, open(os.path.join(tmp_log_dir(params), 'features.pickle'), 'wb'))
     pickle.dump(truth, open(os.path.join(tmp_log_dir(params), 'labels.pickle'), 'wb'))
     return fit_model(params, sample, truth)
