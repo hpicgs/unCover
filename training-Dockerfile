@@ -1,6 +1,6 @@
 FROM continuumio/miniconda3
 
-RUN apt-get update -y && apt-get install make wget curl unzip build-essential -y
+RUN apt-get update -y && apt-get install make wget curl unzip build-essential libssl-dev -y
 
 # repo setup
 WORKDIR /app
@@ -19,7 +19,7 @@ RUN conda run -n unCover pip install cmake
 
 # TEM build & additional setup
 RUN mkdir tem/build/ && cd tem/build/ && conda run -n unCover cmake .. && make
-RUN conda run -n unCover python -m nltk.download punkt
+RUN conda run -n unCover python -m nltk.downloader punkt
 RUN conda run -n unCover python -m spacy download en_core_web_md
 RUN conda run -n unCover python -m spacy download de_core_news_md
 RUN --mount=type=cache,target=/root/gensim-data conda run -n unCover python tem/term-distance/model.py
