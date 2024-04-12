@@ -157,7 +157,7 @@ def preprocess_data(database):
         article['text'] = preprocess(article['text'])
         try:
             article['author'] = article['author'][0]
-        except IndexError:
+        except KeyError:
             article['source'] = article['source'][0]
 
     database.replace_data(articles)
