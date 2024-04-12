@@ -155,7 +155,11 @@ def preprocess_data(database):
     for i, article in enumerate(articles):
         printProgressBar(i, len(articles)-1, fill='█')
         article['text'] = preprocess(article['text'])
-        article['author'] = article['author'][0]
+        try:
+            article['author'] = article['author'][0]
+        except IndexError:
+            article['source'] = article['source'][0]
+
     database.replace_data(articles)
 
 
