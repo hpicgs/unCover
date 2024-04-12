@@ -16,16 +16,19 @@ def _params(params: npt.NDArray | None = None):
     return TEM_PARAMS if params is None else params
 
 
-def get_tecm(texts: list[str], tem_params: npt.NDArray | None = None, drop_invalids=True) \
+def get_tecm(texts: list[str], tem_params: npt.NDArray | None = None, drop_invalids=True, preprocess=True) \
         -> npt.NDArray[np.float64]:
-    corpus = list[str | None]()
-    for i, text in enumerate(texts):
-        if len(texts) > 1:
-            printProgressBar(i, len(texts)-1, fill='█')
-        try:
-            corpus.append(get_structured_corpus(text))
-        except ValueError:
-            corpus.append("")
+    if preprocess:
+        corpus = list[str | None]()
+        for i, text in enumerate(texts):
+            if len(texts) > 1:
+                printProgressBar(i, len(texts)-1, fill='█')
+            try:
+                corpus.append(get_structured_corpus(text))
+            except ValueError:
+                corpus.append("")
+    else:  # already preprocessed
+        corpus = texts
     model = TEM.from_param_list(_params(tem_params), metrics=True)
     metrics = model.get_metrics(corpus)
 
@@ -34,6 +37,10 @@ def get_tecm(texts: list[str], tem_params: npt.NDArray | None = None, drop_inval
         mask = np.all(np.isnan(metrics), axis=1)
         return metrics[~mask]
     return metrics
+
+
+def preprocess(text: str):
+    return get_structured_corpus(text)
 
 
 def get_te_graph(text: str, tem_params: npt.NDArray | None = None):

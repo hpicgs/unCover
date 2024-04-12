@@ -54,6 +54,10 @@ class DatabaseAuthorship:
             data.append({'source': source, 'text': text, 'author': author})
             DatabaseAuthorship.__db.write_data(data)
 
+    @staticmethod
+    def replace_data(data):
+        DatabaseAuthorship.__db.write_data(data)
+
 
 class DatabaseGenArticles:
     __db = MockDatabase(DATABASE_GEN_PATH)
@@ -78,6 +82,10 @@ class DatabaseGenArticles:
             data = []
         data.append({'source': source, 'text': text, 'method': method})
         DatabaseGenArticles.__db.write_data(data)
+
+    @staticmethod
+    def replace_data(data):
+        DatabaseAuthorship.__db.write_data(data)
 
 
 class TestDatabase:

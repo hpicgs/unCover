@@ -8,7 +8,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score, RepeatedStratifiedKFold
 from definitions import TEMMETRICS_DIR, TEM_PARAMS
 from misc.mock_database import DatabaseAuthorship, DatabaseGenArticles, GermanDatabase
-from misc.tem_helpers import get_tecm
+from misc.tem_helpers import get_tecm, preprocess
 from misc.nlp_helpers import handle_nltk_download
 
 author_mapping = {
@@ -36,19 +36,19 @@ def model_pickle(pre):
     return os.path.join(TEMMETRICS_DIR, f"{pre}model.pickle")
 
 
-def run_tem(articles, tem_params, german):
+def run_tem(articles, tem_params, german, preprocessed):
     try:  # check if nltk is installed and download if it is not
-        return get_tecm(articles, tem_params)
+        return get_tecm(articles, tem_params, preprocess=not preprocessed)
     except LookupError as e:
         handle_nltk_download(e)
-        return run_tem(articles, tem_params, german)  # recursive call to deal with multiple downloads
+        return run_tem(articles, tem_params, german, preprocessed)  # recursive call to deal with multiple downloads
 
 
-def prepare_train_data(database, training_data, label, portion, tem_params, german=False):
+def prepare_train_data(database, training_data, label, portion, tem_params, german, preprocessed):
     if data_save['initialized']:
         for author in data_save[database]:
             print(f"working on author: {author}...")
-            tmp = run_tem(data_save[author], tem_params, german)
+            tmp = run_tem(data_save[author], tem_params, german, preprocessed)
             training_data.extend(tmp)
             label += [author_mapping[author]] * len(tmp)
         return
@@ -60,7 +60,7 @@ def prepare_train_data(database, training_data, label, portion, tem_params, germ
         tmp = [article['text'] for article in database.get_articles_by_author(author)]
         tmp = tmp[:int(len(tmp) * portion)]
         data_save[author] = tmp
-        tmp = run_tem(tmp, tem_params, german)
+        tmp = run_tem(tmp, tem_params, german, preprocessed)
         training_data.extend(tmp)
         label += [author_mapping[author]] * len(tmp)
 
@@ -74,13 +74,13 @@ def fit_model(features, truth_table):
     return model.fit(df, truth_table), np.mean(n_scores), np.std(n_scores)
 
 
-def tem_metric_training(portion=1.0, params=None, german=False):
+def tem_metric_training(portion=1.0, params=None, german=False, preprocessed=False):
     sample, truth = [], []
     if german:
-        prepare_train_data(GermanDatabase, sample, truth, portion, params, True)
+        prepare_train_data(GermanDatabase, sample, truth, portion, params, german, preprocessed)
     else:
-        prepare_train_data(DatabaseAuthorship, sample, truth, portion, params)
-        prepare_train_data(DatabaseGenArticles, sample, truth, portion, params)
+        prepare_train_data(DatabaseAuthorship, sample, truth, portion, params, german, preprocessed)
+        prepare_train_data(DatabaseGenArticles, sample, truth, portion, params, german, preprocessed)
     if not data_save['initialized']:
         data_save['initialized'] = True
     pickle.dump(sample, open(feature_file, 'wb'))
@@ -115,6 +115,15 @@ def optimize_tem():
     return tem_metric_training(1.0, best_params)
 
 
+def preprocess_data(database):
+    authors = database.get_authors()
+    articles = []
+    for autor in authors:
+        articles.extend(database.get_articles_by_author(autor))
+    for article in articles:
+        article['text'] = preprocess(article['text'])
+    database.replace_data(articles)
+
 def predict_from_tecm(metrics: npt.NDArray[np.float64], model_prefix=''):
     df = pd.DataFrame(metrics.reshape(1, -1))
     with open(model_pickle(model_prefix), 'rb') as f:
@@ -136,8 +145,18 @@ if __name__ == '__main__':
                         help="use the german test database instead of the english one")
     parser.add_argument('--tem_params', type=str, required=False,
                         help='specify the parameters for the TEM model as a string of 8 floats separated by commas')
+    parser.add_argument('--preprocessed', action='store_true', required=False,
+                        help='specifies that the db holds already preprocessed data')
+    parser.add_argument('--preprocess', action='store_true', required=False,
+                        help='only run the preprocessing and save database again')
     args = parser.parse_args()
     os.makedirs(TEMMETRICS_DIR, exist_ok=True)
+    if args.preprocess:
+        print("Preprocessing the database...")
+        preprocess_data(DatabaseAuthorship)
+        preprocess_data(DatabaseGenArticles)
+        print("Preprocessing done!")
+        exit(0)
     prefix = 'german' if args.german else ''
     with open(model_pickle(prefix), 'wb') as f:
         feature_file = os.path.join(TEMMETRICS_DIR, f"{prefix}features.pickle")
@@ -156,7 +175,7 @@ if __name__ == '__main__':
         else:
             if args.tem_params:
                 params = np.array([float(x) for x in args.tem_params.split(',')])
-                model, score, deviation = tem_metric_training(1.0, params)
+                model, score, deviation = tem_metric_training(1.0, params, args.german, args.preprocessed)
             else:
                 model, score, deviation = tem_metric_training()
         print(f"Saving model with mean score: {score}")
