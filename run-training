@@ -6,6 +6,6 @@ if [ "$#" -ne 2 ]; then
     exit 1
 fi
 
-cd tem/term-distance && ./run.sh & sleep 1
+cd tem/term-distance && conda run -n unCover ./run.sh & sleep 1
 sleep 10 # wait until server is up
-python3 train_tem_metrics.py --optimize_tem --preprocessed --tem_params "$1,$2"
+conda run -n unCover python3 train_tem_metrics.py --optimize_tem --preprocessed --tem_params "$1,$2"
