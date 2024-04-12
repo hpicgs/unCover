@@ -26,7 +26,7 @@ def get_tecm(texts: list[str], tem_params: npt.NDArray | None = None, drop_inval
             try:
                 corpus.append(get_structured_corpus(text))
             except ValueError:
-                corpus.append("")
+                corpus.append('')
     else:  # already preprocessed
         corpus = texts
     model = TEM.from_param_list(_params(tem_params), metrics=True)
@@ -40,7 +40,10 @@ def get_tecm(texts: list[str], tem_params: npt.NDArray | None = None, drop_inval
 
 
 def preprocess(text: str):
-    return get_structured_corpus(text)
+    try:
+        return get_structured_corpus(text)
+    except ValueError:
+        return ''
 
 
 def get_te_graph(text: str, tem_params: npt.NDArray | None = None):
