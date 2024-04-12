@@ -4,12 +4,17 @@ import argparse
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
 from sklearn.model_selection import cross_val_score, RepeatedStratifiedKFold
-from definitions import TEMMETRICS_DIR, TEM_PARAMS
+from definitions import TEMMETRICS_DIR, TEM_PARAMS, ROOT_DIR
 from misc.mock_database import DatabaseAuthorship, DatabaseGenArticles, GermanDatabase
 from misc.tem_helpers import get_tecm, preprocess
 from misc.nlp_helpers import handle_nltk_download
+from misc.logger import printProgressBar
+
+tmp_log_dir = os.path.join(ROOT_DIR, "logs")
 
 author_mapping = {
     'gpt3': 1,
@@ -66,11 +71,32 @@ def prepare_train_data(database, training_data, label, portion, tem_params, germ
 
 
 def fit_model(features, truth_table):
-    df = pd.DataFrame(features)
-    model = LogisticRegression(multi_class='multinomial', solver='lbfgs', random_state=42)
-    cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=3, random_state=9732)
-    n_scores = cross_val_score(model, df, truth_table, scoring='accuracy', cv=cv, n_jobs=-1)
-    print('Mean Accuracy: %.3f (%.3f)' % (np.mean(n_scores), np.std(n_scores)))
+    with open(os.path.join(tmp_log_dir, 'results.log'), 'w') as f:
+        f.write("Fitting TEGM Classifier...\n")
+        # logistic regression
+        df = pd.DataFrame(features)
+        logreg = LogisticRegression(multi_class='multinomial', solver='lbfgs', random_state=42)
+        cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=3, random_state=9732)
+        logreg_n_scores = cross_val_score(logreg, df, truth_table, scoring='accuracy', cv=cv, n_jobs=-1)
+        f.write('Logistic Regression Mean Accuracy: %.3f (%.3f)' % (np.mean(logreg_n_scores), np.std(logreg_n_scores)))
+        with open(os.path.join(tmp_log_dir, 'logreg.pickle'), 'wb') as m:
+            pickle.dump(logreg.fit(df, truth_table), m)
+        # random forest
+        forest = RandomForestClassifier(random_state=42)
+        forest_n_scores = cross_val_score(forest, df, truth_table, scoring='accuracy', cv=cv, n_jobs=-1)
+        f.write('Random Forest Mean Accuracy: %.3f (%.3f)' % (np.mean(forest_n_scores), np.std(forest_n_scores)))
+        with open(os.path.join(tmp_log_dir, 'forest.pickle'), 'wb') as m:
+            pickle.dump(forest.fit(df, truth_table), m)
+        # SVM
+        svm = SVC(kernel='poly', degree=8, random_state=42)
+        svm_n_scores = cross_val_score(svm, df, truth_table, scoring='accuracy', cv=cv, n_jobs=-1)
+        f.write('SVM Mean Accuracy: %.3f (%.3f)' % (np.mean(svm_n_scores), np.std(svm_n_scores)))
+        with open(os.path.join(tmp_log_dir, 'svm.pickle'), 'wb') as m:
+            pickle.dump(svm.fit(df, truth_table), m)
+        # pick best model
+        n_scores = [logreg_n_scores, forest_n_scores, svm_n_scores]
+        model = logreg if np.mean(logreg_n_scores) > np.mean(forest_n_scores) else forest if \
+            np.mean(forest_n_scores) > np.mean(svm_n_scores) else svm
     return model.fit(df, truth_table), np.mean(n_scores), np.std(n_scores)
 
 
@@ -118,11 +144,14 @@ def optimize_tem():
 def preprocess_data(database):
     authors = database.get_authors()
     articles = []
-    for autor in authors:
-        articles.extend(database.get_articles_by_author(autor))
-    for article in articles:
+    for author in authors:
+        print(f"fetching author: {author}...")
+        articles.extend(database.get_articles_by_author(author))
+    for i, article in enumerate(articles):
+        printProgressBar(i, len(articles)-1, fill='█')
         article['text'] = preprocess(article['text'])
     database.replace_data(articles)
+
 
 def predict_from_tecm(metrics: npt.NDArray[np.float64], model_prefix=''):
     df = pd.DataFrame(metrics.reshape(1, -1))
