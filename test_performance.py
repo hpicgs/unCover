@@ -8,7 +8,7 @@ import numpy as np
 from misc.mock_database import TestDatabase, GermanTestDatabase
 from misc.tem_helpers import get_tecm
 from misc.logger import printProgressBar
-from stylometry.logistic_regression import predict_author, used_authors
+from stylometry.classifier import predict_author, used_authors
 from main import get_prediction
 from train_tem_metrics import predict_from_tecm
 from definitions import WINSTON_API_KEY, DATABASE_FILES_PATH

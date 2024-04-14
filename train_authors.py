@@ -8,7 +8,7 @@ from nltk.parse.corenlp import CoreNLPDependencyParser
 from definitions import STYLOMETRY_DIR
 from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams
-from stylometry.logistic_regression import trigram_distribution, logistic_regression, used_authors
+from stylometry.classifier import trigram_distribution, logistic_regression, used_authors, random_forest
 from misc.mock_database import DatabaseAuthorship, DatabaseGenArticles, GermanDatabase
 from misc.logger import printProgressBar
 
@@ -45,10 +45,13 @@ def get_training_samples(type, min_articles, database):
     return result
 
 
-def fit_model(name, features, truth_table, n):
+def fit_model(name, samples, labels, n, model_type='logistic'):
     print(f"Training {name}...")
     with open(os.path.join(STYLOMETRY_DIR, f"{name}{n}.pickle"), 'wb') as f:
-        model = logistic_regression(features, truth_table)
+        if model_type == 'logistic':
+            model = logistic_regression(samples, labels)
+        else:
+            model = random_forest(samples, labels)
         pickle.dump(model, f)
     return model
 
@@ -114,9 +117,9 @@ if __name__ == '__main__':
         model_results.append((char_results[i], sem_results[i]))
 
     features = pd.DataFrame([char for char, sem in model_results])
-    fit_model(f"char_final{file_appendix}", features.values, truth_table, n_features)
+    fit_model(f"char_final{file_appendix}", features.values, truth_table, n_features, 'forest')
     features = pd.DataFrame([sem for char, sem in model_results])
-    fit_model(f"sem_final{file_appendix}", features.values, truth_table, n_features)
+    fit_model(f"sem_final{file_appendix}", features.values, truth_table, n_features, 'forest')
     features = pd.DataFrame([char + sem for char, sem in model_results])
-    fit_model(f"style_final{file_appendix}", features.values, truth_table, n_features)
+    fit_model(f"style_final{file_appendix}", features.values, truth_table, n_features, 'forest')
     print("TRAINING DONE!")

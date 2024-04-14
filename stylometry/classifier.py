@@ -7,6 +7,7 @@ from definitions import STYLOMETRY_DIR, STYLE_MACHINE_CONFIDENCE, STYLE_HUMAN_CO
 from stylometry.char_trigrams import char_trigrams
 from stylometry.semantic_trigrams import sem_trigrams
 from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score, RepeatedStratifiedKFold
 from nltk.parse.corenlp import CoreNLPDependencyParser
 
@@ -54,16 +55,23 @@ def fixed_trigram_distribution(trigram_lists, features):
     return pd.DataFrame(values, columns=features)
 
 
-def logistic_regression(dataframe: pd.DataFrame, truth_labels: list[int]):
-    if len(dataframe) <= 1:
+def fit_model(model, df: pd.DataFrame, truth_labels: list[int]):
+    if len(df) <= 1:
         return
-    regression = LogisticRegression(solver='liblinear', max_iter=100, random_state=42, C=0.9)
     cv = RepeatedStratifiedKFold(n_splits=5, n_repeats=3, random_state=9732)
-    n_scores = cross_val_score(regression, dataframe, truth_labels, scoring='accuracy', cv=cv, n_jobs=-1)
+    n_scores = cross_val_score(model, df, truth_labels, scoring='accuracy', cv=cv, n_jobs=-1)
     print("Mean Accuracy: %.3f (%.3f)" % (np.mean(n_scores), np.std(n_scores)))
-    reg = regression.fit(dataframe, truth_labels)
-    print(f"final regression score: {reg.score(dataframe, truth_labels)}")
-    return reg
+    m = model.fit(df, truth_labels)
+    print(f"final regression score: {m.score(df, truth_labels)}")
+    return m
+
+
+def logistic_regression(df: pd.DataFrame, truth_labels: list[int]):
+    return fit_model(LogisticRegression(solver='liblinear', max_iter=100, random_state=42, C=0.9), df, truth_labels)
+
+
+def random_forest(dataframe: pd.DataFrame, truth_labels: list[int]):
+    return fit_model(RandomForestClassifier(random_state=42), dataframe, truth_labels)
 
 
 def predict_author(text: str, n_features: int = 100, file_appendix: str = '') -> list[int]:

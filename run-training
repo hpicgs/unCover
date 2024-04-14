@@ -8,4 +8,4 @@ fi
 
 cd tem/term-distance && conda run -n unCover ./run.sh & sleep 1
 sleep 10 # wait until server is up
-conda run -n unCover python3 train_tem_metrics.py --optimize_tem --preprocessed --tem_params "$1,$2"
+conda run --no-capture-output -n unCover python3 train_tem_metrics.py --optimize_tem --preprocessed --tem_params "$1,$2"
