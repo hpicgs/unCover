@@ -68,11 +68,11 @@ def fit_model(model, df: pd.DataFrame, truth_labels: list[int]):
 
 
 def logistic_regression(df: pd.DataFrame, truth_labels: list[int]):
-    return fit_model(LogisticRegression(solver='liblinear', max_iter=100, random_state=42, C=0.9), df, truth_labels)
+    return fit_model(LogisticRegression(solver='liblinear', max_iter=100, random_state=42), df, truth_labels)
 
 
-def random_forest(dataframe: pd.DataFrame, truth_labels: list[int]):
-    return fit_model(RandomForestClassifier(random_state=42), dataframe, truth_labels)
+def random_forest(df: pd.DataFrame, truth_labels: list[int]):
+    return fit_model(RandomForestClassifier(n_estimators=50, max_depth=10, random_state=42), df, truth_labels)
 
 
 def predict_author(text: str, n_features: int = 100, file_appendix: str = '') -> list[int]:
@@ -93,7 +93,7 @@ def predict_author(text: str, n_features: int = 100, file_appendix: str = '') ->
     char_grams = char_trigrams(text)
     char_distribution = fixed_trigram_distribution([char_grams], char_features)
     syn_distribution = fixed_trigram_distribution([syn_grams], syn_features)
-    word_grams = word_trigrams(text)
+    word_grams = word_trigrams(text, True if (file_appendix == '_german') else False)
     word_distribution = fixed_trigram_distribution([word_grams], word_features)
     char_confidence, syn_confidence, word_confidence = [], [], []
     authors = used_authors.keys()

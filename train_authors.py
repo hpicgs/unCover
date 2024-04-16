@@ -95,7 +95,7 @@ if __name__ == '__main__':
     word_grams = []
     for i, article_tuple in enumerate(training_data):
         printProgressBar(i, len(training_data) - 1, fill='█')
-        word_grams.append(word_trigrams(article_tuple[0]))
+        word_grams.append(word_trigrams(article_tuple[0], args.german))
     character_distribution = trigram_distribution(char_grams, n_features)
     syntactic_distribution = trigram_distribution(syn_grams, n_features)
     word_distribution = trigram_distribution(word_grams, n_features)
