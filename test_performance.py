@@ -113,6 +113,7 @@ if __name__ == '__main__':
         articles = data[source]
         char_style_predictions = {-1: 0, 0: 0, 1: 0}
         syn_style_predictions = {-1: 0, 0: 0, 1: 0}
+        word_style_predictions = {-1: 0, 0: 0, 1: 0}
         total_style_predictions = {-1: 0, 0: 0, 1: 0}
         te_predictions = {-1: 0, 0: 0, 1: 0}
         total_predictions = {-1: 0, 0: 0, 1: 0}
@@ -139,7 +140,8 @@ if __name__ == '__main__':
             author = get_prediction(style_prediction, te_prediction)
             char_style_predictions.update({style_prediction[0]: char_style_predictions.get(style_prediction[0]) + 1})
             syn_style_predictions.update({style_prediction[1]: syn_style_predictions.get(style_prediction[1]) + 1})
-            total_style_predictions.update({style_prediction[2]: char_style_predictions.get(style_prediction[2]) + 1})
+            word_style_predictions.update({style_prediction[2]: word_style_predictions.get(style_prediction[2]) + 1})
+            total_style_predictions.update({style_prediction[3]: char_style_predictions.get(style_prediction[3]) + 1})
             if te_prediction == 0:
                 te_prediction = -1
             else:

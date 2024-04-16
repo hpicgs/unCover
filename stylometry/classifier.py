@@ -6,6 +6,7 @@ import pandas as pd
 from definitions import STYLOMETRY_DIR, STYLE_MACHINE_CONFIDENCE, STYLE_HUMAN_CONFIDENCE
 from stylometry.char_trigrams import char_trigrams
 from stylometry.syntactic_trigrams import syn_trigrams
+from stylometry.word_trigrams import word_trigrams
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import cross_val_score, RepeatedStratifiedKFold
@@ -49,7 +50,7 @@ def fixed_trigram_distribution(trigram_lists, features):
     for trigrams in trigram_lists:
         count = sum(c for c in trigrams.values())
         values.append(np.transpose(np.array([
-            0 if feature not in trigrams else trigrams[feature] / count
+            0 if feature not in trigrams else 10 * trigrams[feature] / count
             for feature in features])))
 
     return pd.DataFrame(values, columns=features)
@@ -87,34 +88,47 @@ def predict_author(text: str, n_features: int = 100, file_appendix: str = '') ->
         pd.read_csv(os.path.join(STYLOMETRY_DIR, f"char_distribution{n_features}{file_appendix}.csv")).columns)[1:]
     syn_features = [eval(feature) for feature in list(
         pd.read_csv(os.path.join(STYLOMETRY_DIR, f"syn_distribution{n_features}{file_appendix}.csv")).columns)[1:]]
+    word_features = list(
+        pd.read_csv(os.path.join(STYLOMETRY_DIR, f"word_distribution{n_features}{file_appendix}.csv")).columns)[1:]
     char_grams = char_trigrams(text)
     char_distribution = fixed_trigram_distribution([char_grams], char_features)
     syn_distribution = fixed_trigram_distribution([syn_grams], syn_features)
-    char_confidence = []
-    syn_confidence = []
+    word_grams = word_trigrams(text)
+    word_distribution = fixed_trigram_distribution([word_grams], word_features)
+    char_confidence, syn_confidence, word_confidence = [], [], []
     authors = used_authors.keys()
     char_min, char_max = json.loads(
         open(os.path.join(STYLOMETRY_DIR, f"char{file_appendix}_normalization.json"), 'rb').read())
     syn_min, syn_max = json.loads(
         open(os.path.join(STYLOMETRY_DIR, f"syn{file_appendix}_normalization.json"), 'rb').read())
+    word_min, word_max = json.loads(
+        open(os.path.join(STYLOMETRY_DIR, f"word{file_appendix}_normalization.json"), 'rb').read())
     for i, author in enumerate(authors):
         with open(os.path.join(STYLOMETRY_DIR, author + f"_char{n_features}{file_appendix}.pickle"), 'rb') as fp:
             char_confidence.append(
                 (pickle.load(fp).predict_proba(char_distribution.values)[0][1] - char_min[i]) / (
-                            char_max[i] - char_min[i]))
+                        char_max[i] - char_min[i]))
         with open(os.path.join(STYLOMETRY_DIR, author + f"_syn{n_features}{file_appendix}.pickle"), 'rb') as fp:
             syn_confidence.append(
                 (pickle.load(fp).predict_proba(syn_distribution.values)[0][1] - syn_min[i]) / (syn_max[i] - syn_min[i]))
+        with open(os.path.join(STYLOMETRY_DIR, author + f"_word{n_features}{file_appendix}.pickle"), 'rb') as fp:
+            word_confidence.append(
+                (pickle.load(fp).predict_proba(word_distribution.values)[0][1] - word_min[i]) / (
+                        word_max[i] - word_min[i]))
 
     with open(os.path.join(STYLOMETRY_DIR, f"char_final{n_features}{file_appendix}.pickle"), 'rb') as fp:
         char = pickle.load(fp).predict_proba(np.array(char_confidence).reshape(1, -1))[0]
     with open(os.path.join(STYLOMETRY_DIR, f"syn_final{n_features}{file_appendix}.pickle"), 'rb') as fp:
         syn = pickle.load(fp).predict_proba(np.array(syn_confidence).reshape(1, -1))[0]
+    with open(os.path.join(STYLOMETRY_DIR, f"word_final{n_features}{file_appendix}.pickle"), 'rb') as fp:
+        word = pickle.load(fp).predict_proba(np.array(word_confidence).reshape(1, -1))[0]
     with open(os.path.join(STYLOMETRY_DIR, f"style_final{n_features}{file_appendix}.pickle"), 'rb') as fp:
-        style = pickle.load(fp).predict_proba(np.array((char_confidence + syn_confidence)).reshape(1, -1))[0]
+        style = pickle.load(fp).predict_proba(
+            np.array((char_confidence + syn_confidence + word_confidence)).reshape(1, -1))[0]
 
     char = 1 if char[1] > STYLE_MACHINE_CONFIDENCE else -1 if char[0] > STYLE_HUMAN_CONFIDENCE else 0
     syn = 1 if syn[1] > STYLE_MACHINE_CONFIDENCE else -1 if syn[0] > STYLE_HUMAN_CONFIDENCE else 0
+    word = 1 if word[1] > STYLE_MACHINE_CONFIDENCE else -1 if word[0] > STYLE_HUMAN_CONFIDENCE else 0
     style = 1 if style[1] > STYLE_MACHINE_CONFIDENCE else -1 if style[0] > STYLE_HUMAN_CONFIDENCE else 0
 
-    return [char, syn, style]
+    return [char, syn, word, style]

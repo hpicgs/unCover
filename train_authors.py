@@ -7,6 +7,7 @@ from nltk.parse.corenlp import CoreNLPDependencyParser
 from definitions import STYLOMETRY_DIR
 from stylometry.char_trigrams import char_trigrams
 from stylometry.syntactic_trigrams import syn_trigrams
+from stylometry.word_trigrams import word_trigrams
 from stylometry.classifier import trigram_distribution, logistic_regression, used_authors, random_forest
 from misc.mock_database import DatabaseAuthorship, DatabaseGenArticles, GermanDatabase
 from misc.logger import printProgressBar
@@ -77,27 +78,33 @@ if __name__ == '__main__':
     char_grams = []
     for i, article_tuple in enumerate(training_data):
         printProgressBar(i, len(training_data) - 1, fill='█')
-        char_grams += char_trigrams(article_tuple[0])
+        char_grams.append(char_trigrams(article_tuple[0]))
     syn_grams = []
     if args.german:
         parser = CoreNLPDependencyParser(url="http://localhost:9001")
         for i, article_tuple in enumerate(training_data):
             printProgressBar(i, len(training_data) - 1, fill='█')
-            syn_grams += syn_trigrams(article_tuple[0], parser, 'german')
+            syn_grams.append(syn_trigrams(article_tuple[0], parser, 'german'))
         file_appendix = '_german'
     else:
         parser = CoreNLPDependencyParser(url="http://localhost:9000")
         for i, article_tuple in enumerate(training_data):
             printProgressBar(i, len(training_data) - 1, fill='█')
-            syn_grams += syn_trigrams(article_tuple[0], parser)
+            syn_grams.append(syn_trigrams(article_tuple[0], parser))
         file_appendix = ''
+    word_grams = []
+    for i, article_tuple in enumerate(training_data):
+        printProgressBar(i, len(training_data) - 1, fill='█')
+        word_grams.append(word_trigrams(article_tuple[0]))
     character_distribution = trigram_distribution(char_grams, n_features)
     syntactic_distribution = trigram_distribution(syn_grams, n_features)
+    word_distribution = trigram_distribution(word_grams, n_features)
     character_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"char_distribution{n_features}{file_appendix}.csv"))
     syntactic_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"syn_distribution{n_features}{file_appendix}.csv"))
+    word_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"word_distribution{n_features}{file_appendix}.csv"))
     print("Distributions Done\n\n")
 
-    char, syn = [], []
+    char, syn, word = [], [], []
     for i, author in enumerate(used_authors.keys()):
         if args.german and author in ['gtp2', 'gtp3', 'gpt3-phrase', 'grover']:
             continue  # not supported in german
@@ -109,24 +116,32 @@ if __name__ == '__main__':
         syn.append(
             fit_model(f"{author.replace('/', '_')}_syn{file_appendix}", syntactic_distribution.values, truth_table,
                       n_features))
+        word.append(
+            fit_model(f"{author.replace('/', '_')}_word{file_appendix}", word_distribution.values, truth_table,
+                      n_features))
     truth_table = [1 if used_authors[article_tuple[1]] == 'ai' else 0 for article_tuple in
                    training_data]
-    char_results, syn_results = [], []
+    char_results, syn_results, word_results = [], [], []
     for iterrow in character_distribution.iterrows():
         char_results.append([c.predict_proba(iterrow[1].values.reshape(1, -1))[0][1] for c in char])
     for iterrow in syntactic_distribution.iterrows():
         syn_results.append([s.predict_proba(iterrow[1].values.reshape(1, -1))[0][1] for s in syn])
+    for iterrow in word_distribution.iterrows():
+        word_results.append([w.predict_proba(iterrow[1].values.reshape(1, -1))[0][1] for w in word])
 
     char_results = normalize(f"char{file_appendix}", char_results)
     syn_results = normalize(f"syn{file_appendix}", syn_results)
+    word_results = normalize(f"word{file_appendix}", word_results)
     model_results = []
     for i in range(len(training_data)):
-        model_results.append((char_results[i], syn_results[i]))
+        model_results.append((char_results[i], syn_results[i], word_results[i]))
 
-    features = pd.DataFrame([char for char, syn in model_results])
+    features = pd.DataFrame([char for char, _, _ in model_results])
     fit_model(f"char_final{file_appendix}", features.values, truth_table, n_features, 'forest')
-    features = pd.DataFrame([syn for char, syn in model_results])
+    features = pd.DataFrame([syn for _, syn, _ in model_results])
     fit_model(f"syn_final{file_appendix}", features.values, truth_table, n_features, 'forest')
-    features = pd.DataFrame([char + syn for char, syn in model_results])
+    features = pd.DataFrame([word for _, _, word in model_results])
+    fit_model(f"word_final{file_appendix}", features.values, truth_table, n_features, 'forest')
+    features = pd.DataFrame([char + syn + word for char, syn, word in model_results])
     fit_model(f"style_final{file_appendix}", features.values, truth_table, n_features, 'forest')
     print("TRAINING DONE!")
