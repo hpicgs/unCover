@@ -77,7 +77,7 @@ def predict_sota(text, german):
 def _initial_metrics(keys=None):
     if keys is None:
         keys = [-1, 0, 1]
-    predictions = ['char_style', 'sem_style', 'total_style', 'te', 'total', 'sota']
+    predictions = ['char_style', 'syn_style', 'total_style', 'te', 'total', 'sota']
     return {key: {pred: 0 for pred in predictions} for key in keys}
 
 
@@ -112,7 +112,7 @@ if __name__ == '__main__':
         source_count = 0
         articles = data[source]
         char_style_predictions = {-1: 0, 0: 0, 1: 0}
-        sem_style_predictions = {-1: 0, 0: 0, 1: 0}
+        syn_style_predictions = {-1: 0, 0: 0, 1: 0}
         total_style_predictions = {-1: 0, 0: 0, 1: 0}
         te_predictions = {-1: 0, 0: 0, 1: 0}
         total_predictions = {-1: 0, 0: 0, 1: 0}
@@ -138,7 +138,7 @@ if __name__ == '__main__':
             source_count += 1
             author = get_prediction(style_prediction, te_prediction)
             char_style_predictions.update({style_prediction[0]: char_style_predictions.get(style_prediction[0]) + 1})
-            sem_style_predictions.update({style_prediction[1]: sem_style_predictions.get(style_prediction[1]) + 1})
+            syn_style_predictions.update({style_prediction[1]: syn_style_predictions.get(style_prediction[1]) + 1})
             total_style_predictions.update({style_prediction[2]: char_style_predictions.get(style_prediction[2]) + 1})
             if te_prediction == 0:
                 te_prediction = -1
@@ -149,7 +149,7 @@ if __name__ == '__main__':
 
         predictions_per_author.update({source: {'count': source_count,
                                                 'char_style': char_style_predictions,
-                                                'sem_style': sem_style_predictions,
+                                                'syn_style': syn_style_predictions,
                                                 'total_style': total_style_predictions,
                                                 'te': te_predictions,
                                                 'total': total_predictions}})

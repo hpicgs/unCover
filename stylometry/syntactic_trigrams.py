@@ -33,7 +33,7 @@ def _depth_search(tree: Tree, fun, is_root: bool = True):
         _depth_search(subtree, fun, False)
 
 
-def _add_sem_trigrams(tree: Tree, trigrams: dict[tuple, int]):
+def _add_syn_trigrams(tree: Tree, trigrams: dict[tuple, int]):
     def _add_or_increment(tree: tuple):
         if tree in trigrams:
             trigrams[tree] += 1
@@ -61,7 +61,7 @@ def _add_sem_trigrams(tree: Tree, trigrams: dict[tuple, int]):
     _depth_search(tree, _process_node)
 
 
-def sem_trigrams(text: str, parser: CoreNLPDependencyParser, language: str = 'english') -> dict[tuple, int]:
+def syn_trigrams(text: str, parser: CoreNLPDependencyParser, language: str = 'english') -> dict[tuple, int]:
     try:  # check if nltk is installed and download if it is not
         sentences = [lower_alnum(sent) for sent in sent_tokenize(text, language)]
     except LookupError as e:
@@ -75,6 +75,6 @@ def sem_trigrams(text: str, parser: CoreNLPDependencyParser, language: str = 'en
         graph: DependencyGraph = next(sentence)
         tree = _dep_tree(graph)
         if tree:
-            _add_sem_trigrams(tree, trigrams)
+            _add_syn_trigrams(tree, trigrams)
 
     return trigrams

@@ -4,10 +4,9 @@ import argparse
 import json
 import pandas as pd
 from nltk.parse.corenlp import CoreNLPDependencyParser
-
 from definitions import STYLOMETRY_DIR
 from stylometry.char_trigrams import char_trigrams
-from stylometry.semantic_trigrams import sem_trigrams
+from stylometry.syntactic_trigrams import syn_trigrams
 from stylometry.classifier import trigram_distribution, logistic_regression, used_authors, random_forest
 from misc.mock_database import DatabaseAuthorship, DatabaseGenArticles, GermanDatabase
 from misc.logger import printProgressBar
@@ -59,7 +58,7 @@ def fit_model(name, samples, labels, n, model_type='logistic'):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--nfeatures', action='store', required=False, type=int, default=100,
-                        help="number of char trigram & semantic trigram features used in the distribution")
+                        help="number of char trigram & syntactic trigram features used in the distribution")
     parser.add_argument('--minarticles', action='store', required=False, type=int, default=50,
                         help="minimum number of articles required for training on a specific author/model")
     parser.add_argument('--german', action='store_true', required=False,
@@ -75,22 +74,30 @@ if __name__ == '__main__':
         training_data.extend(get_training_samples('Machine', args.minarticles, DatabaseGenArticles))
     print(f"number of training articles:{len(training_data)}")
 
-    char_grams = [char_trigrams(article_tuple[0]) for article_tuple in training_data]
+    char_grams = []
+    for i, article_tuple in enumerate(training_data):
+        printProgressBar(i, len(training_data) - 1, fill='█')
+        char_grams += char_trigrams(article_tuple[0])
+    syn_grams = []
     if args.german:
         parser = CoreNLPDependencyParser(url="http://localhost:9001")
-        sem_grams = [sem_trigrams(article_tuple[0], parser, 'german') for article_tuple in training_data]
+        for i, article_tuple in enumerate(training_data):
+            printProgressBar(i, len(training_data) - 1, fill='█')
+            syn_grams += syn_trigrams(article_tuple[0], parser, 'german')
         file_appendix = '_german'
     else:
         parser = CoreNLPDependencyParser(url="http://localhost:9000")
-        sem_grams = [sem_trigrams(article_tuple[0], parser) for article_tuple in training_data]
+        for i, article_tuple in enumerate(training_data):
+            printProgressBar(i, len(training_data) - 1, fill='█')
+            syn_grams += syn_trigrams(article_tuple[0], parser)
         file_appendix = ''
     character_distribution = trigram_distribution(char_grams, n_features)
-    semantic_distribution = trigram_distribution(sem_grams, n_features)
+    syntactic_distribution = trigram_distribution(syn_grams, n_features)
     character_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"char_distribution{n_features}{file_appendix}.csv"))
-    semantic_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"sem_distribution{n_features}{file_appendix}.csv"))
+    syntactic_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"syn_distribution{n_features}{file_appendix}.csv"))
     print("Distributions Done\n\n")
 
-    char, sem = [], []
+    char, syn = [], []
     for i, author in enumerate(used_authors.keys()):
         if args.german and author in ['gtp2', 'gtp3', 'gpt3-phrase', 'grover']:
             continue  # not supported in german
@@ -99,27 +106,27 @@ if __name__ == '__main__':
         char.append(
             fit_model(f"{author.replace('/', '_')}_char{file_appendix}", character_distribution.values, truth_table,
                       n_features))
-        sem.append(
-            fit_model(f"{author.replace('/', '_')}_sem{file_appendix}", semantic_distribution.values, truth_table,
+        syn.append(
+            fit_model(f"{author.replace('/', '_')}_syn{file_appendix}", syntactic_distribution.values, truth_table,
                       n_features))
     truth_table = [1 if used_authors[article_tuple[1]] == 'ai' else 0 for article_tuple in
                    training_data]
-    char_results, sem_results = [], []
+    char_results, syn_results = [], []
     for iterrow in character_distribution.iterrows():
         char_results.append([c.predict_proba(iterrow[1].values.reshape(1, -1))[0][1] for c in char])
-    for iterrow in semantic_distribution.iterrows():
-        sem_results.append([s.predict_proba(iterrow[1].values.reshape(1, -1))[0][1] for s in sem])
+    for iterrow in syntactic_distribution.iterrows():
+        syn_results.append([s.predict_proba(iterrow[1].values.reshape(1, -1))[0][1] for s in syn])
 
     char_results = normalize(f"char{file_appendix}", char_results)
-    sem_results = normalize(f"sem{file_appendix}", sem_results)
+    syn_results = normalize(f"syn{file_appendix}", syn_results)
     model_results = []
     for i in range(len(training_data)):
-        model_results.append((char_results[i], sem_results[i]))
+        model_results.append((char_results[i], syn_results[i]))
 
-    features = pd.DataFrame([char for char, sem in model_results])
+    features = pd.DataFrame([char for char, syn in model_results])
     fit_model(f"char_final{file_appendix}", features.values, truth_table, n_features, 'forest')
-    features = pd.DataFrame([sem for char, sem in model_results])
-    fit_model(f"sem_final{file_appendix}", features.values, truth_table, n_features, 'forest')
-    features = pd.DataFrame([char + sem for char, sem in model_results])
+    features = pd.DataFrame([syn for char, syn in model_results])
+    fit_model(f"syn_final{file_appendix}", features.values, truth_table, n_features, 'forest')
+    features = pd.DataFrame([char + syn for char, syn in model_results])
     fit_model(f"style_final{file_appendix}", features.values, truth_table, n_features, 'forest')
     print("TRAINING DONE!")
