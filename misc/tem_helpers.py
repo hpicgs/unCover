@@ -2,6 +2,7 @@ import os
 import sys
 import numpy as np
 import numpy.typing as npt
+from typing import Optional
 from definitions import ROOT_DIR, TEM_PARAMS
 from misc.logger import printProgressBar
 
@@ -12,11 +13,11 @@ from tem.script.process import TEM
 from tem.script.visualization import graph
 
 
-def _params(params: npt.NDArray | None = None):
+def _params(params: Optional[npt.NDArray] = None):
     return TEM_PARAMS if params is None else params
 
 
-def get_tecm(texts: list[str], tem_params: npt.NDArray | None = None, drop_invalids=True, preprocess=True) \
+def get_tecm(texts: list[str], tem_params: Optional[npt.NDArray] = None, drop_invalids=True, preprocess=True) \
         -> npt.NDArray[np.float64]:
     if preprocess:
         corpus = list[str | None]()
@@ -46,7 +47,7 @@ def preprocess(text: str):
         return ''
 
 
-def get_te_graph(text: str, tem_params: npt.NDArray | None = None):
+def get_te_graph(text: str, tem_params: Optional[npt.NDArray] = None):
     corpus = get_structured_corpus(text)
     model = TEM.from_param_list(_params(tem_params))
     return graph(TopicEvolution(model.get_outputs([corpus])[0]))

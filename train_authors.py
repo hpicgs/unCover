@@ -64,6 +64,8 @@ if __name__ == '__main__':
                         help="minimum number of articles required for training on a specific author/model")
     parser.add_argument('--german', action='store_true', required=False,
                         help="use the german test database instead of the english one")
+    parser.add_argument('--stored', action='store', required=False,
+                        help="use previously created trigram distributions")
     args = parser.parse_args()
     n_features = args.nfeatures
 
@@ -75,38 +77,53 @@ if __name__ == '__main__':
         training_data.extend(get_training_samples('Machine', args.minarticles, DatabaseGenArticles))
     print(f"number of training articles:{len(training_data)}")
 
-    char_grams = []
-    for i, article_tuple in enumerate(training_data):
-        printProgressBar(i, len(training_data) - 1, fill='█')
-        char_grams.append(char_trigrams(article_tuple[0]))
-    syn_grams = []
-    if args.german:
-        parser = CoreNLPDependencyParser(url="http://localhost:9001")
-        for i, article_tuple in enumerate(training_data):
-            printProgressBar(i, len(training_data) - 1, fill='█')
-            syn_grams.append(syn_trigrams(article_tuple[0], parser, 'german'))
-        file_appendix = '_german'
+    if args.stored:
+        if args.german:
+            file_appendix = '_german'
+        else:
+            file_appendix = ''
+        character_distribution = pd.read_csv(
+            os.path.join(STYLOMETRY_DIR, f"char_distribution{n_features}{file_appendix}.csv"),
+            index_col=0)
+        syntactic_distribution = pd.read_csv(
+            os.path.join(STYLOMETRY_DIR, f"syn_distribution{n_features}{file_appendix}.csv"),
+            index_col=0)
+        word_distribution = pd.read_csv(
+            os.path.join(STYLOMETRY_DIR, f"word_distribution{n_features}{file_appendix}.csv"),
+            index_col=0)
     else:
-        parser = CoreNLPDependencyParser(url="http://localhost:9000")
+        char_grams = []
         for i, article_tuple in enumerate(training_data):
             printProgressBar(i, len(training_data) - 1, fill='█')
-            syn_grams.append(syn_trigrams(article_tuple[0], parser))
-        file_appendix = ''
-    word_grams = []
-    for i, article_tuple in enumerate(training_data):
-        printProgressBar(i, len(training_data) - 1, fill='█')
-        word_grams.append(word_trigrams(article_tuple[0], args.german))
-    character_distribution = trigram_distribution(char_grams, n_features)
-    syntactic_distribution = trigram_distribution(syn_grams, n_features)
-    word_distribution = trigram_distribution(word_grams, n_features)
-    character_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"char_distribution{n_features}{file_appendix}.csv"))
-    syntactic_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"syn_distribution{n_features}{file_appendix}.csv"))
-    word_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"word_distribution{n_features}{file_appendix}.csv"))
+            char_grams.append(char_trigrams(article_tuple[0]))
+        syn_grams = []
+        if args.german:
+            parser = CoreNLPDependencyParser(url="http://localhost:9001")
+            for i, article_tuple in enumerate(training_data):
+                printProgressBar(i, len(training_data) - 1, fill='█')
+                syn_grams.append(syn_trigrams(article_tuple[0], parser, 'german'))
+            file_appendix = '_german'
+        else:
+            parser = CoreNLPDependencyParser(url="http://localhost:9000")
+            for i, article_tuple in enumerate(training_data):
+                printProgressBar(i, len(training_data) - 1, fill='█')
+                syn_grams.append(syn_trigrams(article_tuple[0], parser))
+            file_appendix = ''
+        word_grams = []
+        for i, article_tuple in enumerate(training_data):
+            printProgressBar(i, len(training_data) - 1, fill='█')
+            word_grams.append(word_trigrams(article_tuple[0], args.german))
+        character_distribution = trigram_distribution(char_grams, n_features)
+        syntactic_distribution = trigram_distribution(syn_grams, n_features)
+        word_distribution = trigram_distribution(word_grams, n_features)
+        character_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"char_distribution{n_features}{file_appendix}.csv"))
+        syntactic_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"syn_distribution{n_features}{file_appendix}.csv"))
+        word_distribution.to_csv(os.path.join(STYLOMETRY_DIR, f"word_distribution{n_features}{file_appendix}.csv"))
     print("Distributions Done\n\n")
 
     char, syn, word = [], [], []
     for i, author in enumerate(used_authors.keys()):
-        if args.german and author in ['gtp2', 'gtp3', 'gpt3-phrase', 'grover']:
+        if args.german and author in ['gpt2', 'gpt3', 'gpt3-phrase', 'grover', 'human6', 'human7']:
             continue  # not supported in german
         printProgressBar(i, len(used_authors.keys()) - 1)
         truth_table = [1 if author == article_tuple[1] else 0 for article_tuple in training_data]
