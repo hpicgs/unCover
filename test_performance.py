@@ -77,7 +77,7 @@ def predict_sota(text, german):
 def _initial_metrics(keys=None):
     if keys is None:
         keys = [-1, 0, 1]
-    predictions = ['char_style', 'syn_style', 'total_style', 'te', 'total', 'sota']
+    predictions = ['char_style', 'syn_style', 'word_style', 'total_style', 'te', 'total', 'sota']
     return {key: {pred: 0 for pred in predictions} for key in keys}
 
 
@@ -142,16 +142,13 @@ if __name__ == '__main__':
             syn_style_predictions.update({style_prediction[1]: syn_style_predictions.get(style_prediction[1]) + 1})
             word_style_predictions.update({style_prediction[2]: word_style_predictions.get(style_prediction[2]) + 1})
             total_style_predictions.update({style_prediction[3]: char_style_predictions.get(style_prediction[3]) + 1})
-            if te_prediction == 0:
-                te_prediction = -1
-            else:
-                te_prediction = 1
-            te_predictions.update({te_prediction: te_predictions.get(te_prediction) + 1})
+            te_predictions.update({te_prediction[0]: te_predictions.get(te_prediction[0]) + 1})
             total_predictions.update({author: total_predictions.get(author) + 1})
 
         predictions_per_author.update({source: {'count': source_count,
                                                 'char_style': char_style_predictions,
                                                 'syn_style': syn_style_predictions,
+                                                'word_style': word_style_predictions,
                                                 'total_style': total_style_predictions,
                                                 'te': te_predictions,
                                                 'total': total_predictions}})

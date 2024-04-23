@@ -72,7 +72,7 @@ def logistic_regression(df: pd.DataFrame, truth_labels: list[int]):
 
 
 def random_forest(df: pd.DataFrame, truth_labels: list[int]):
-    return fit_model(RandomForestClassifier(n_estimators=50, max_depth=10, random_state=42), df, truth_labels)
+    return fit_model(RandomForestClassifier(max_depth=5, random_state=42), df, truth_labels)
 
 
 def predict_author(text: str, n_features: int = 100, file_appendix: str = '') -> list[int]:
@@ -103,26 +103,31 @@ def predict_author(text: str, n_features: int = 100, file_appendix: str = '') ->
         open(os.path.join(STYLOMETRY_DIR, f"syn{file_appendix}_normalization.json"), 'rb').read())
     word_min, word_max = json.loads(
         open(os.path.join(STYLOMETRY_DIR, f"word{file_appendix}_normalization.json"), 'rb').read())
+    j = 0
     for i, author in enumerate(authors):
-        with open(os.path.join(STYLOMETRY_DIR, author + f"_char{n_features}{file_appendix}.pickle"), 'rb') as fp:
-            char_confidence.append(
-                (pickle.load(fp).predict_proba(char_distribution.values)[0][1] - char_min[i]) / (
-                        char_max[i] - char_min[i]))
-        with open(os.path.join(STYLOMETRY_DIR, author + f"_syn{n_features}{file_appendix}.pickle"), 'rb') as fp:
-            syn_confidence.append(
-                (pickle.load(fp).predict_proba(syn_distribution.values)[0][1] - syn_min[i]) / (syn_max[i] - syn_min[i]))
-        with open(os.path.join(STYLOMETRY_DIR, author + f"_word{n_features}{file_appendix}.pickle"), 'rb') as fp:
-            word_confidence.append(
-                (pickle.load(fp).predict_proba(word_distribution.values)[0][1] - word_min[i]) / (
-                        word_max[i] - word_min[i]))
+        if file_appendix == '_german' and author in ['gpt2', 'gpt3', 'gpt3-phrase', 'grover', 'human6', 'human7']:
+            j += 1
+            continue  # not included in german dataset
 
-    with open(os.path.join(STYLOMETRY_DIR, f"char_final{n_features}{file_appendix}.pickle"), 'rb') as fp:
+        with open(os.path.join(STYLOMETRY_DIR, author + f"_char{file_appendix}{n_features}.pickle"), 'rb') as fp:
+            char_confidence.append(
+                (pickle.load(fp).predict_proba(char_distribution.values)[0][1] - char_min[i-j]) / (
+                        char_max[i-j] - char_min[i-j]))
+        with open(os.path.join(STYLOMETRY_DIR, author + f"_syn{file_appendix}{n_features}.pickle"), 'rb') as fp:
+            syn_confidence.append(
+                (pickle.load(fp).predict_proba(syn_distribution.values)[0][1] - syn_min[i-j]) / (syn_max[i-j] - syn_min[i-j]))
+        with open(os.path.join(STYLOMETRY_DIR, author + f"_word{file_appendix}{n_features}.pickle"), 'rb') as fp:
+            word_confidence.append(
+                (pickle.load(fp).predict_proba(word_distribution.values)[0][1] - word_min[i-j]) / (
+                        word_max[i-j] - word_min[i-j]))
+
+    with open(os.path.join(STYLOMETRY_DIR, f"char_final{file_appendix}{n_features}.pickle"), 'rb') as fp:
         char = pickle.load(fp).predict_proba(np.array(char_confidence).reshape(1, -1))[0]
-    with open(os.path.join(STYLOMETRY_DIR, f"syn_final{n_features}{file_appendix}.pickle"), 'rb') as fp:
+    with open(os.path.join(STYLOMETRY_DIR, f"syn_final{file_appendix}{n_features}.pickle"), 'rb') as fp:
         syn = pickle.load(fp).predict_proba(np.array(syn_confidence).reshape(1, -1))[0]
-    with open(os.path.join(STYLOMETRY_DIR, f"word_final{n_features}{file_appendix}.pickle"), 'rb') as fp:
+    with open(os.path.join(STYLOMETRY_DIR, f"word_final{file_appendix}{n_features}.pickle"), 'rb') as fp:
         word = pickle.load(fp).predict_proba(np.array(word_confidence).reshape(1, -1))[0]
-    with open(os.path.join(STYLOMETRY_DIR, f"style_final{n_features}{file_appendix}.pickle"), 'rb') as fp:
+    with open(os.path.join(STYLOMETRY_DIR, f"style_final{file_appendix}{n_features}.pickle"), 'rb') as fp:
         style = pickle.load(fp).predict_proba(
             np.array((char_confidence + syn_confidence + word_confidence)).reshape(1, -1))[0]
 
