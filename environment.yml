@@ -16,6 +16,7 @@ dependencies:
     - dominate==2.7.0
     - graphviz==0.20.1
     - keras==2.11.0
+    - matplotlib==3.5.1 # should be moved to tem script requirements!
     - markdown==3.4.1
     - nltk==3.6.7
     - numpy==1.23.5
