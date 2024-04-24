@@ -10,9 +10,9 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 from misc.entity_coreferences import coref_annotation, coref_diagram
-from scraper.page_processor import PageProcessor
+from data_creation.page_processor import PageProcessor
 from stylometry.corenlp import connect_corenlp
-from stylometry.logistic_regression import predict_author
+from stylometry.classifier import predict_author
 from misc.tem_helpers import get_te_graph, get_tecm
 from train_tem_metrics import predict_from_tecm
 from definitions import ROOT_DIR
@@ -95,15 +95,16 @@ def entity_occurrence_diagram(text):
 def get_prediction(style_prediction, te_prediction):
     te_confidence = te_prediction[1]
     te_prediction = te_prediction[0]
-    if te_prediction == 0:
-        te_prediction = -1
-    style = sum(style_prediction)
+    individual_styles = sum(style_prediction[:-1])
+    style = style_prediction[3]
+    if individual_styles * style < 0:
+        return 0
     if style * te_prediction > 0:
         return te_prediction
     if style == 0 or te_confidence > 0.8:
         return te_prediction
     elif style < 0:
-        if te_prediction < 0 or te_confidence < 0.6:
+        if te_prediction <= 0 or te_confidence < 0.6:
             return -1
         else:
             return 0

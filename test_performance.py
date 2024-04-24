@@ -1,13 +1,17 @@
 import argparse
 import json
+import csv
+import os.path
+
 import requests
-from misc.mock_database import TestDatabase
+import numpy as np
+from misc.mock_database import TestDatabase, GermanTestDatabase
 from misc.tem_helpers import get_tecm
 from misc.logger import printProgressBar
-from stylometry.logistic_regression import predict_author, used_authors
+from stylometry.classifier import predict_author, used_authors
 from main import get_prediction
 from train_tem_metrics import predict_from_tecm
-from definitions import WINSTON_API_KEY
+from definitions import WINSTON_API_KEY, DATABASE_FILES_PATH
 
 source_mapping = {
     'human-verified': -1,
@@ -19,9 +23,34 @@ source_mapping = {
     'grover': 1
 }
 
-def predict_sota(text):
+
+def eval_argugpt():
+    with open(os.path.join(DATABASE_FILES_PATH, 'argugpt-test.csv'), 'r') as file:
+        #structure: id,prompt_id,prompt,text,model,temperature,exam_type,score,score_level
+        reader = csv.reader(file)
+        data = list(reader)
+    total = 0
+    correct = 0
+    for row in data:
+        if row[0] == 'id':
+            continue
+        total += 1
+        style = predict_author(row[3])
+        tecm = get_tecm([row[3]], drop_invalids=False)[0]
+        if np.all(np.isnan(tecm)):
+            print("\nTEM processing error, skipping...")
+            total -= 1
+            continue
+        te = predict_from_tecm(tecm)
+        prediction = get_prediction(style, te)
+        if prediction == int(row[4]):
+            correct += 1
+    print(f"Accuracy: {round(correct / total * 100, 2)}%")
+
+
+def predict_sota(text, german):
     payload = {
-        'language': 'en',
+        'language': 'de' if german else 'en',
         'sentences': False,
         'text': text,
         'version': 'latest'
@@ -48,7 +77,7 @@ def predict_sota(text):
 def _initial_metrics(keys=None):
     if keys is None:
         keys = [-1, 0, 1]
-    predictions = ['char_style', 'sem_style', 'total_style', 'te', 'total', 'sota']
+    predictions = ['char_style', 'syn_style', 'word_style', 'total_style', 'te', 'total', 'sota']
     return {key: {pred: 0 for pred in predictions} for key in keys}
 
 
@@ -66,8 +95,15 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--compareSOTA', action='store_true', required=False,
                         help="If true, generate the performance on winston.ai as SOTA")
+    parser.add_argument('--german', action='store_true', required=False,
+                        help="use the german test database instead of the english one")
+    parser.add_argument('--evalArguGPT' , action='store_true', required=False,
+                        help="Íf true, evaluate the performance on ArguGPT data")
     args = parser.parse_args()
-    data = TestDatabase.get_all_articles_sorted_by_methods()
+    if args.german:
+        data = GermanTestDatabase.get_all_articles_sorted_by_methods()
+    else:
+        data = TestDatabase.get_all_articles_sorted_by_methods()
     predictions_per_author = {}
     total_count = 0
     num_articles = len(data) * 200
@@ -76,7 +112,8 @@ if __name__ == '__main__':
         source_count = 0
         articles = data[source]
         char_style_predictions = {-1: 0, 0: 0, 1: 0}
-        sem_style_predictions = {-1: 0, 0: 0, 1: 0}
+        syn_style_predictions = {-1: 0, 0: 0, 1: 0}
+        word_style_predictions = {-1: 0, 0: 0, 1: 0}
         total_style_predictions = {-1: 0, 0: 0, 1: 0}
         te_predictions = {-1: 0, 0: 0, 1: 0}
         total_predictions = {-1: 0, 0: 0, 1: 0}
@@ -87,34 +124,31 @@ if __name__ == '__main__':
             if args.compareSOTA:
                 if len(article) > 100000:
                     article = article[:100000]
-                sota = predict_sota(article)
+                sota = predict_sota(article, args.german)
                 sota_predictions.update({sota: sota_predictions.get(sota) + 1})
             if len(article) > 120000:
                 article = article[:120000]
-            try:
-                style_prediction = predict_author(article)
-                tecm = get_tecm([article])
-                te_prediction = predict_from_tecm(tecm)
-            except Exception as e:  # some sources contain too short samples for tem
-                print("\nte error: ", e)
+            style_prediction = predict_author(article, file_appendix='_german' if args.german else '')
+            tecm = get_tecm([article], drop_invalids=False)[0]
+            if np.all(np.isnan(tecm)):
+                print("\nTEM processing error, skipping...")
                 total_count -= 1
                 num_articles -= 1
                 continue
+            te_prediction = predict_from_tecm(tecm, model_prefix='german' if args.german else '')
             source_count += 1
             author = get_prediction(style_prediction, te_prediction)
             char_style_predictions.update({style_prediction[0]: char_style_predictions.get(style_prediction[0]) + 1})
-            sem_style_predictions.update({style_prediction[1]: sem_style_predictions.get(style_prediction[1]) + 1})
-            total_style_predictions.update({style_prediction[2]: char_style_predictions.get(style_prediction[2]) + 1})
-            if te_prediction == 0:
-                te_prediction = -1
-            else:
-                te_prediction = 1
-            te_predictions.update({te_prediction: te_predictions.get(te_prediction) + 1})
+            syn_style_predictions.update({style_prediction[1]: syn_style_predictions.get(style_prediction[1]) + 1})
+            word_style_predictions.update({style_prediction[2]: word_style_predictions.get(style_prediction[2]) + 1})
+            total_style_predictions.update({style_prediction[3]: char_style_predictions.get(style_prediction[3]) + 1})
+            te_predictions.update({te_prediction[0]: te_predictions.get(te_prediction[0]) + 1})
             total_predictions.update({author: total_predictions.get(author) + 1})
 
         predictions_per_author.update({source: {'count': source_count,
                                                 'char_style': char_style_predictions,
-                                                'sem_style': sem_style_predictions,
+                                                'syn_style': syn_style_predictions,
+                                                'word_style': word_style_predictions,
                                                 'total_style': total_style_predictions,
                                                 'te': te_predictions,
                                                 'total': total_predictions}})
