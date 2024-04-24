@@ -26,9 +26,12 @@ class Database:
 
     def get_labels(self):
         articles = self.__db.get_data()
-        return {
-            label for article in articles
-            for label in article['label'].split(',') if article['text'] is not None}
+        return {label for article in articles
+                for label in article['label'].split(',') if article['text'] is not None}
+
+    def get_all_articles(self):
+        articles = self.__db.get_data()
+        return [article for article in articles if article['text'] is not None]
 
     def get_articles_by_label(self, label):
         articles = self.__db.get_data()
@@ -39,8 +42,7 @@ class Database:
         articles = self.__db.get_data()
         return {label: [article['text'] for article in articles if
                         label in article['label'].split(',') and article['text'] is not None]
-                for label in [l for a in articles for l in a['label'].split(',')]
-                }
+                for label in [l for a in articles for l in a['label'].split(',')]}
 
     def get_all_sources(self):
         articles = self.__db.get_data()
