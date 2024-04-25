@@ -29,7 +29,7 @@ def save_distributions(appendix: str, char_grams: list, syn_grams: list, word_gr
     return tuple(distributions)
 
 
-def preprocess_stylometry(data: dict, appendix: str, args: argparse.Namespace) -> dict:
+def process_stylometry(data: dict, appendix: str, args: argparse.Namespace) -> dict:
     if args.use_stored:
         character_distribution, syntactic_distribution, word_distribution = load_distributions(appendix)
     else:

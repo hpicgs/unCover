@@ -23,7 +23,7 @@ def get_tecm(texts: list[str], tem_params: Optional[npt.NDArray] = None, drop_in
         corpus = list[str | None]()
         for i, text in enumerate(texts):
             if len(texts) > 1:
-                printProgressBar(i, len(texts)-1, fill='█')
+                printProgressBar(i, len(texts) - 1, fill='█')
             try:
                 corpus.append(get_structured_corpus(text))
             except ValueError:
@@ -40,14 +40,19 @@ def get_tecm(texts: list[str], tem_params: Optional[npt.NDArray] = None, drop_in
     return metrics
 
 
-def preprocess(text: str):
-    try:
-        return get_structured_corpus(text)
-    except ValueError:
-        return ''
-
-
 def get_te_graph(text: str, tem_params: Optional[npt.NDArray] = None):
     corpus = get_structured_corpus(text)
     model = TEM.from_param_list(_params(tem_params))
     return graph(TopicEvolution(model.get_outputs([corpus])[0]))
+
+
+def preprocess_database(database):
+    articles = database.get_all_articles()
+    for i, article in enumerate(articles):
+        printProgressBar(i, len(articles) - 1, fill='█')
+        try:
+            article['text'] = get_structured_corpus(article['text'])
+        except ValueError:
+            article['text'] = ''
+        article['label'] = article['label'][0]
+    database.replace_data(articles)
