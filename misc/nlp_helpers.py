@@ -1,10 +1,8 @@
 import re
-
 from nltk import download
 from nltk.corpus import stopwords
 from nltk.stem import PorterStemmer
 from nltk.tokenize import word_tokenize
-
 from definitions import NLTK_DATA
 
 
@@ -21,6 +19,11 @@ def lower_alnum(doc: str) -> str:
         char.lower() for char in doc if char.isalnum() or char.isspace()
     ]
     return ''.join(characters)
+
+
+def preprocess_article(doc):
+    paragraph = re.sub("[ \t\r\f]+", ' ', doc)  # \s without \n
+    return paragraph
 
 
 # https://stackoverflow.com/a/62723088
