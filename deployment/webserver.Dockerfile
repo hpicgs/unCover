@@ -1,15 +1,13 @@
 # Builder image
-FROM continuumio/miniconda3 as builder
+FROM lucasliebe/uncover-training as builder
 
-RUN apt-get update -y && apt-get install default-jre make wget curl unzip build-essential -y
-COPY .. /app/unCover
+# prepare term-distance server
+RUN conda create -n tem-term-distance python=3.8.19
+RUN conda run -n tem-term-distance pip install -r tem/term-distance/requirements.txt
+RUN --mount=type=cache,target=/root/gensim-data conda run -n tem-term-distance python tem/term-distance/model.py
 
-WORKDIR /app/unCover
-RUN conda update conda --yes
-RUN conda env create -f environment.yml
-RUN cp -n .env.example .env
-RUN make -C tem/topic-evolution-model/
-RUN conda run -n unCover ./deployment/corenlp --no-run && conda run -n unCover ./deployment/prepare_models
+# download pre-trained models
+RUN conda run -n unCover ./deployment/prepare_models
 
 # Final image
 FROM continuumio/miniconda3
@@ -19,4 +17,4 @@ COPY --from=builder /app /app
 COPY --from=builder /opt/conda /opt/conda
 
 WORKDIR /app/unCover
-CMD conda run -n unCover streamlit run main.py
+CMD conda run -n tem-term-distance ./tem/term-distance/run.sh && conda run -n unCover streamlit run main.py

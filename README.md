@@ -46,6 +46,9 @@ used models will greatly benefit performance and is required to achieve good res
 
 When modifying the code, you can use the Dockerfiles in /deployment to re-build the containers.
 
+Alternatively if you are only interested in running the web interface you can use the dedicated 
+docker container from Docker Hub: `docker pull lucasliebe/uncover:latest`.
+
 ## Usage
 
 There are multiple ways to use unCover, depending on your use case.

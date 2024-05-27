@@ -1,10 +1,11 @@
 FROM continuumio/miniconda3
+LABEL authors="lucasliebe"
 
 RUN apt-get update -y && apt-get install default-jre make wget curl unzip build-essential libssl-dev -y
-COPY .. /app/unCover
+COPY . /app/unCover
 WORKDIR /app/unCover
 
-# conda envs
+# conda env
 RUN conda update conda --yes
 RUN conda env create -f environment.yml
 RUN conda run -n unCover pip install -r tem/script/requirements.txt
@@ -19,4 +20,4 @@ RUN conda run -n unCover python -m spacy download de_core_news_md
 
 # final container setup
 RUN cp /opt/conda/lib/libstdc++.so.6.0.29 /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.28
-RUN conda run -n unCover ./corenlp --no-run
+RUN conda run -n unCover ./deployment/corenlp --no-run
