@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+    unCover:
+        image: lucasliebe/uncover-training
+        ports:
+            - "8501:8501"
+        networks:
+            - uncover-net
+        depends_on:
+            -   term-distance
+    term-distance:
+        image: lucasliebe/uncover-termdistance
+        networks:
+            - uncover-net

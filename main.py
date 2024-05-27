@@ -13,9 +13,10 @@ from misc.entity_coreferences import coref_annotation, coref_diagram
 from data_creation.page_processor import PageProcessor
 from stylometry.corenlp import connect_corenlp
 from stylometry.classifier import predict_author
-from misc.tem_helpers import get_te_graph, get_tecm
-from train_tem_metrics import predict_from_tecm
+from misc.tem_helpers import get_te_graph, get_tegm
+from misc.tegm_training import predict_from_tegm
 from definitions import ROOT_DIR
+
 
 def __models_thread():
     proc = subprocess.run([os.path.join(ROOT_DIR, 'prepare_models')], capture_output=True)
@@ -46,8 +47,8 @@ def run_analysis(input_type, user_input):
         style_prediction = predict_author(content)
 
         try:
-            tecm = get_tecm([content])
-            te_prediction = predict_from_tecm(tecm)
+            tegm = get_tegm([content])
+            te_prediction = predict_from_tegm(tegm)
         except AttributeError:  # some texts are not working for tem
             st.error("The input text is too short for the Topic Evolution Model to work. Please enter a different "
                      "text. If you are using a URL, please try to copy the text manually since some websites can block "
@@ -123,7 +124,7 @@ if __name__ == '__main__':
 
     col1, col2 = st.columns([3, 1])
     col1.title("Welcome at unCover")
-    col2.image(Image.open('unCover.png'), width=100)
+    col2.image(Image.open('./.database/unCover.png'), width=100)
     st.write(
         " \nHere you can analyze a news article on topics and writing style to get further insights on whether this "
         "text might have been written by an AI. This system was developed at Hasso-Plattner-Institute. For more "

@@ -17,7 +17,7 @@ def _params(params: Optional[npt.NDArray] = None):
     return TEM_PARAMS if params is None else params
 
 
-def get_tecm(texts: list[str], tem_params: Optional[npt.NDArray] = None, drop_invalids=True, preprocess=True) \
+def get_tegm(texts: list[str], tem_params: Optional[npt.NDArray] = None, drop_invalids=True, preprocess=True) \
         -> npt.NDArray[np.float64]:
     if preprocess:
         corpus = list[str | None]()

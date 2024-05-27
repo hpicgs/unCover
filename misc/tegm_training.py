@@ -10,7 +10,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score, RepeatedStratifiedKFold
 from definitions import TEGMETRICS_DIR, TEM_PARAMS
-from misc.tem_helpers import get_tecm
+from misc.tem_helpers import get_tegm
 from misc.nlp_helpers import handle_nltk_download
 
 class_mapping = {'human': 0, 'ai': 1}
@@ -29,7 +29,7 @@ def save_tegm(model: LogisticRegression | RandomForestClassifier, appendix: str)
 def run_tem(articles: List[str], tem_params: npt.NDArray, preprocessed: bool) -> npt.NDArray[np.float64]:
     while True:
         try:  # handle potentially missing nltk downloads
-            return get_tecm(articles, tem_params, preprocess=not preprocessed)
+            return get_tegm(articles, tem_params, preprocess=not preprocessed)
         except LookupError as e:
             handle_nltk_download(e)
 

@@ -104,7 +104,7 @@ if __name__ == '__main__':
                         help="type of dataset that should be created")
     parser.add_argument('--narticles', action='store', type=int, default=1, required=False,
                         help="maximum number of articles to scrape per query/ phrase")
-    parser.add_argument('--max-amount', action='store', type=int, required=False,
+    parser.add_argument('--max-amount', action='store', type=int, default=100, required=False,
                         help="maximum number of texts to process")
     parser.add_argument('--german', action='store_true', required=False,
                         help="use german dataset instead of english")
