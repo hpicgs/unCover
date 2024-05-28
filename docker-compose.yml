@@ -1,14 +1,22 @@
 version: "3.8"
 services:
-    unCover:
-        image: lucasliebe/uncover-training
-        ports:
-            - "8501:8501"
-        networks:
-            - uncover-net
-        depends_on:
-            -   term-distance
-    term-distance:
-        image: lucasliebe/uncover-termdistance
-        networks:
-            - uncover-net
+  unCover:
+    image: lucasliebe/uncover-training
+    ports:
+      - "8501:8501"
+    networks:
+      - internal
+    depends_on:
+      - term-distance
+    extra_hosts:
+      - "term-distance:127.0.0.1"
+    stdin_open: true
+    tty: true
+  term-distance:
+    image: lucasliebe/uncover-termdistance
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge

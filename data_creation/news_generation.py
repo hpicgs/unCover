@@ -5,7 +5,6 @@ import sys
 import json
 from typing import Optional
 import openai
-from enum import Enum
 import google.generativeai as genai
 from misc.mock_database import Database
 from transformers import pipeline, set_seed
@@ -89,7 +88,10 @@ def generate_gpt2_news_from(doc, size=1000) -> Optional[str]:
     doc += f". {doc_prompt}"
     result = generator(doc, max_length=size, num_return_sequences=1)[0]['generated_text']
     print("GPT2 Finished")
-    return (result.rsplit('.', 1)[0] + '.').split(doc_prompt, 1)[1]
+    try:
+        return (result.rsplit('.', 1)[0] + '.').split(doc_prompt, 1)[1]
+    except IndexError:
+        return None
 
 
 def single_query_generation(article: str, m: str, url: str) -> Optional[str]:
@@ -128,7 +130,9 @@ def phrase_generation(database: Database, args: argparse.Namespace) -> None:
     for phrase in args.phrases.split(','):
         print(f"Working on: '{phrase}'...")
         if args.gpt2:
-            database.insert_article(generate_gpt2_news_from(phrase), phrase, 'gpt2-phrase')
+            tmp = generate_gpt2_news_from(phrase)
+            if tmp is not None:
+                database.insert_article(tmp, phrase, 'gpt2-phrase')
         if args.gpt3:
             tmp = generate_gpt3_news_from(phrase)
             if tmp is not None:

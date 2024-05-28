@@ -55,7 +55,7 @@ def process_tegm(training_data: dict, appendix: str, args: argparse.Namespace, d
     return features
 
 
-def train_tegm(features: List[float], labels: List[str], appendix: str,
+def train_tegm(features: list[npt.NDArray[np.float64]], labels: List[str], appendix: str,
                params: Optional[npt.NDArray[np.float64]] = TEM_PARAMS) -> Tuple[Any, float, float]:
     scaler = StandardScaler()
     scaler.fit(features)

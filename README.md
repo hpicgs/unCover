@@ -79,7 +79,7 @@ collects hundreds of articles for a single person.
 Query mode is very simple and will fetch news from Google News depending on the query:
 
 ```sh
-python3 generate_dataset.py --dataset human --queries <query1,query2>
+python3 generate_dataset.py --mode human --queries <query1,query2>
 ```
 
 #### Dataset mode
@@ -92,7 +92,7 @@ publication. At the moment, dataset mode only works for TheGuardian and N-tv.
 Here is a practical example for dataset mode:
 
 ```sh
-python3 generate_dataset.py --dataset human \
+python3 generate_dataset.py --mode human \
     --publication <theguardian|n-tv> \
     --author <author name> \
 ```
@@ -108,7 +108,7 @@ we use the query as context for a generative language model. The model will
 then generate a new article based on this context. The following could is an example command:
 
 ```sh
-python3 generate_dataset.py --dataset ai --queries <query1,query2> --models <gpt4,gemini,...>
+python3 generate_dataset.py --mode ai --queries <query1,query2> --models <gpt4,gemini,...>
 ```
 
 ### Training the models
@@ -122,7 +122,7 @@ in a different location, please modify `definitions.py` accordingly.
 
 Including both generation methods, 
 ```sh
-python3 generate_dataset.py --dataset test --queries <query1,query2> --models <gpt4,gemini,...>
+python3 generate_dataset.py --mode test --queries <query1,query2> --models <gpt4,gemini,...>
 ```
 has been used to create
 the test dataset including both human authors and AI models as text sources.

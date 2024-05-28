@@ -35,9 +35,11 @@ def scrape_google_news(query: str, n: int, database: Optional[Database] = None) 
             print(f"error fetching page: {e}")
             continue
         processed_page = preprocess_article(processor.get_fulltext(separator="\n"))
+        if len(processed_page) < 100:
+            continue
         author = processor.get_author()
         if database:
-            database.insert_article(processed_page, author, url)
+            database.insert_article(processed_page, url, author if author else 'unknown')
         else:
             results.append((processed_page, url))
     if not database:
@@ -46,9 +48,9 @@ def scrape_google_news(query: str, n: int, database: Optional[Database] = None) 
 
 def process_human_authors(args: argparse.Namespace) -> None:
     database = Database(DATABASE_GERMAN_PATH if args.german else DATABASE_AUTHORS_PATH)
-    if args.dataset:
+    if not args.queries:
         if (not args.publication) or (not args.author):
-            print("--dataset requires that both --author and --publication are set")
+            print("not using queries requires that both --author and --publication are set")
             exit(1)
         scrape_publication(database, args.publication, args.author, args.narticles, args.max_amount)
         exit(0)
@@ -78,7 +80,7 @@ def generate_test_dataset(args: argparse.Namespace) -> None:
     i = 0
     for query in args.queries.split(','):
         printProgressBar(i, args.max_amount, fill='█')
-        for article in scrape_google_news(query, args.narticles, database):
+        for article in scrape_google_news(query, args.narticles):
             skip = False
             if i == args.max_amount:
                 return
@@ -100,7 +102,7 @@ def generate_test_dataset(args: argparse.Namespace) -> None:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     # general arguments
-    parser.add_argument('--dataset', action='store', required=True, choices=['human', 'ai', 'test'],
+    parser.add_argument('--mode', action='store', required=True, choices=['human', 'ai', 'test'],
                         help="type of dataset that should be created")
     parser.add_argument('--narticles', action='store', type=int, default=1, required=False,
                         help="maximum number of articles to scrape per query/ phrase")
@@ -127,7 +129,8 @@ if __name__ == '__main__':
 
     # available models
     parser.add_argument('--models', action='store', type=str, required=False,
-                        help="models uses for generation separated by comma [gpt2, gpt3, gpt4, gemini, grover-[base, large, mega]")
+                        help="models uses for generation separated by comma [gpt2, gpt3, gpt4, gemini, grover-[base, "
+                             "large, mega]")
     args = parser.parse_args()
     # ensure only one of queries, phrases or publication is set
     if not sum([1 for arg in [args.queries, args.phrases, args.publication] if arg]) == 1:

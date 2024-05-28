@@ -22,7 +22,7 @@ def get_listed_articles(url, source):
                     'article' in article_link.get('href') and 'mediathek' not in article_link.get('href')])
 
 
-def find_authors_articles(n: int, source: str, author: str) -> set[str]:
+def find_authors_articles(n: int, source: str, author: str) -> list[any]:
     if source == 'theguardian':
         pagenum = 1
         result = set()
@@ -31,14 +31,14 @@ def find_authors_articles(n: int, source: str, author: str) -> set[str]:
             time.sleep(0.2)
             urls = get_listed_articles(f"https://theguardian.com/profile/{author}?page={pagenum}", source)
             if urls and not any(link in result for link in urls):
-                result += urls
+                result.update(urls)
             else:
                 break
             pagenum += 1
-        return result
+        return list(result)
     elif source == 'ntv':
-        return get_listed_articles(f"https://www.n-tv.de/autoren/{author}.html", source)
-    return set()
+        return list(get_listed_articles(f"https://www.n-tv.de/autoren/{author}.html", source))
+    return list()
 
 
 def scrape_publication(database: Database, publication:str, author: str, narticles: int=10, max: int=0) -> None:

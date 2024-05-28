@@ -53,7 +53,7 @@ class Database:
         if data == [] or data is None:
             data = [{'source': source, 'text': text, 'label': label}]
             self.__db.write_data(data)
-        elif not any([source == article['source'] for article in data]):
+        elif not any([source == article['source'] and label == article['label'] for article in data]):
             data.append({'source': source, 'text': text, 'label': label})
             self.__db.write_data(data)
 

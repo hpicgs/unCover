@@ -94,6 +94,7 @@ if __name__ == '__main__':
         else:
             print("Training TEGM...")
             samples = process_tegm(training_data, file_appendix, args)
+            print(samples)
             m, _, _ = train_tegm(samples, labels, file_appendix)
             save_tegm(m, file_appendix)
     if args.mode == 'stylometry' or args.mode == 'both':
