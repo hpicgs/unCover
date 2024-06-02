@@ -1,10 +1,8 @@
 import os
 import argparse
 from typing import Tuple
-
 import numpy as np
-from pandas._typing import npt
-
+import numpy.typing as npt
 from definitions import DATABASE_AUTHORS_PATH, DATABASE_GEN_PATH, DATABASE_GERMAN_PATH, STYLOMETRY_DIR, TEGMETRICS_DIR
 from misc.mock_database import Database
 from misc.tem_helpers import preprocess_database
@@ -31,7 +29,8 @@ def optimize_tegm(data: dict, labels: list, appendix: str, args: argparse.Namesp
         for i, params in enumerate(all_params):
             print(f"Training with parameter combination {i}/{param_len}: {params}")
             samples = process_tegm(data, appendix, args, 0.5, params)
-            _ ,s, d = train_tegm(samples, labels, appendix, params)
+            samples, tegm_labels = handle_invalids(samples, labels)
+            _ ,s, d = train_tegm(samples, tegm_labels, appendix, params)
             f.write(f"{params}/{s}/{d}\n")
             if s - d > adj_score:
                 print(f"Better performance with score: {s}({d})")
@@ -42,7 +41,8 @@ def optimize_tegm(data: dict, labels: list, appendix: str, args: argparse.Namesp
 
     print(f"Best parameters: {best_params}")
     samples = process_tegm(data, appendix, args, params=best_params)
-    m, s, d = train_tegm(samples, labels, appendix, best_params)
+    samples, tegm_labels = handle_invalids(samples, labels)
+    m, s, d = train_tegm(samples, tegm_labels, appendix, best_params)
     print(f"Best score: {s}({d})")
     save_tegm(m, appendix)
 
