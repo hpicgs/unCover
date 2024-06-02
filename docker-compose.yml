@@ -8,12 +8,12 @@ services:
       - internal
     depends_on:
       - term-distance
-    extra_hosts:
-      - "term-distance:127.0.0.1"
     stdin_open: true
     tty: true
   term-distance:
     image: lucasliebe/uncover-termdistance
+    expose:
+      - 8000
     networks:
       - internal
 
