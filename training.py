@@ -1,6 +1,10 @@
 import os
 import argparse
+from typing import Tuple
+
 import numpy as np
+from pandas._typing import npt
+
 from definitions import DATABASE_AUTHORS_PATH, DATABASE_GEN_PATH, DATABASE_GERMAN_PATH, STYLOMETRY_DIR, TEGMETRICS_DIR
 from misc.mock_database import Database
 from misc.tem_helpers import preprocess_database
@@ -41,6 +45,14 @@ def optimize_tegm(data: dict, labels: list, appendix: str, args: argparse.Namesp
     m, s, d = train_tegm(samples, labels, appendix, best_params)
     print(f"Best score: {s}({d})")
     save_tegm(m, appendix)
+
+
+def handle_invalids(s: list[npt.NDArray[np.float64]], l: list[str]) -> Tuple[list[npt.NDArray[np.float64]], list[str]]:
+    invalid_indices = [i for i, sample in enumerate(s) if np.all(np.isnan(s))]
+    for i in reversed(invalid_indices):
+        del s[i]
+        del l[i]
+    return s, l
 
 
 if __name__ == '__main__':
@@ -94,8 +106,8 @@ if __name__ == '__main__':
         else:
             print("Training TEGM...")
             samples = process_tegm(training_data, file_appendix, args)
-            print(samples)
-            m, _, _ = train_tegm(samples, labels, file_appendix)
+            samples, tegm_labels = handle_invalids(samples, labels)
+            m, _, _ = train_tegm(samples, tegm_labels, file_appendix)
             save_tegm(m, file_appendix)
     if args.mode == 'stylometry' or args.mode == 'both':
         print("Training Stylometry...")

@@ -26,10 +26,10 @@ def save_tegm(model: LogisticRegression | RandomForestClassifier, appendix: str)
         pickle.dump(model, f)
 
 
-def run_tem(articles: List[str], tem_params: npt.NDArray, preprocessed: bool) -> npt.NDArray[np.float64]:
+def run_tem(articles: List[str], tem_params: npt.NDArray, preprocessed: bool, drop_invalids: bool = True) -> npt.NDArray[np.float64]:
     while True:
         try:  # handle potentially missing nltk downloads
-            return get_tegm(articles, tem_params, preprocess=not preprocessed)
+            return get_tegm(articles, tem_params, drop_invalids, not preprocessed)
         except LookupError as e:
             handle_nltk_download(e)
 
@@ -48,7 +48,7 @@ def process_tegm(training_data: dict, appendix: str, args: argparse.Namespace, d
     for label, articles in training_data.items():
         print(f"working on label: {label}...")
         articles = articles[:int(len(articles) * dataset_fraction)]
-        features.extend(run_tem(articles, params, args.tegm_preprocessed))
+        features.extend(run_tem(articles, params, args.tegm_preprocessed, False))
 
     with open(features_file_path, 'wb') as f:
         pickle.dump(features, f)
