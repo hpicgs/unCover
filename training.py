@@ -30,7 +30,7 @@ def optimize_tegm(data: dict, labels: list, appendix: str, args: argparse.Namesp
             print(f"Training with parameter combination {i}/{param_len}: {params}")
             samples = process_tegm(data, appendix, args, 0.5, params)
             samples, tegm_labels = handle_invalids(samples, labels)
-            _ ,s, d = train_tegm(samples, tegm_labels, appendix, params)
+            _ , _, s, d = train_tegm(samples, tegm_labels, appendix, params)
             f.write(f"{params}/{s}/{d}\n")
             if s - d > adj_score:
                 print(f"Better performance with score: {s}({d})")
@@ -42,9 +42,9 @@ def optimize_tegm(data: dict, labels: list, appendix: str, args: argparse.Namesp
     print(f"Best parameters: {best_params}")
     samples = process_tegm(data, appendix, args, params=best_params)
     samples, tegm_labels = handle_invalids(samples, labels)
-    m, s, d = train_tegm(samples, tegm_labels, appendix, best_params)
+    m, scaler, s, d = train_tegm(samples, tegm_labels, appendix, best_params)
     print(f"Best score: {s}({d})")
-    save_tegm(m, appendix)
+    save_tegm(m, scaler, appendix)
 
 
 def handle_invalids(s: list[npt.NDArray[np.float64]], l: list[str]) -> Tuple[list[npt.NDArray[np.float64]], list[str]]:
@@ -61,7 +61,7 @@ if __name__ == '__main__':
                         default='both', help="choose the mode of training")
     parser.add_argument('--german', action='store_true', required=False,
                         help="use the german test database instead of the english one")
-    parser.add_argument('--use-stored', action='store', required=False,
+    parser.add_argument('--use-stored', action='store_true', required=False,
                         help="use previously created train data instead of generating again")
     parser.add_argument('--n-trigram-features', action='store', required=False, type=int, default=100,
                         help="number of trigram features used in the distribution for stylometry")
@@ -107,8 +107,8 @@ if __name__ == '__main__':
             print("Training TEGM...")
             samples = process_tegm(training_data, file_appendix, args)
             samples, tegm_labels = handle_invalids(samples, labels)
-            m, _, _ = train_tegm(samples, tegm_labels, file_appendix)
-            save_tegm(m, file_appendix)
+            m, scaler, _, _ = train_tegm(samples, tegm_labels, file_appendix)
+            save_tegm(m, scaler, file_appendix)
     if args.mode == 'stylometry' or args.mode == 'both':
         print("Training Stylometry...")
         os.makedirs(STYLOMETRY_DIR, exist_ok=True)

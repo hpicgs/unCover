@@ -21,7 +21,7 @@ def log_dir(p: npt.NDArray, appendix: str) -> str:
                         f"tem_metrics_{p[0]}_{p[1]}_{p[2]}_{p[3]}_{p[4]}_{p[5]}_{p[6]}_{p[7]}")
 
 
-def save_tegm(model: LogisticRegression | RandomForestClassifier, appendix: str) -> None:
+def save_tegm(model: LogisticRegression | RandomForestClassifier, scaler: StandardScaler, appendix: str) -> None:
     with open(os.path.join(TEGMETRICS_DIR, f"model{appendix}.pickle"), 'wb') as f:
         pickle.dump(model, f)
 
@@ -56,7 +56,7 @@ def process_tegm(training_data: dict, appendix: str, args: argparse.Namespace, d
 
 
 def train_tegm(features: list[npt.NDArray[np.float64]], labels: List[str], appendix: str,
-               params: Optional[npt.NDArray[np.float64]] = TEM_PARAMS) -> Tuple[Any, float, float]:
+               params: Optional[npt.NDArray[np.float64]] = TEM_PARAMS) -> Tuple[Any, StandardScaler, float, float]:
     scaler = StandardScaler()
     scaler.fit(features)
     with open(os.path.join(log_dir(params, appendix), f"scalar{appendix}.pickle"), 'wb') as f:
@@ -86,7 +86,7 @@ def train_tegm(features: list[npt.NDArray[np.float64]], labels: List[str], appen
         # pick better model
         return (logreg.fit(df, labels), np.mean(logreg_n_scores), np.std(logreg_n_scores)) if np.mean(
             logreg_n_scores) > np.mean(forest_n_scores) else (
-            forest.fit(df, labels), np.mean(forest_n_scores), np.std(forest_n_scores))
+            forest.fit(df, labels), scaler, np.mean(forest_n_scores), np.std(forest_n_scores))
 
 
 def predict_from_tegm(metrics: npt.NDArray[np.float64], appendix: str = '') -> Tuple[int, float]:

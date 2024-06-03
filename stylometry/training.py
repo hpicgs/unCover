@@ -15,7 +15,7 @@ from misc.logger import printProgressBar
 
 
 def load_distributions(appendix: str) -> tuple:
-    file_path = os.path.join(STYLOMETRY_DIR, f"{appendix}.csv")
+    file_path = os.path.join(STYLOMETRY_DIR, "{}" + f"_distribution{appendix}.csv")
     character_distribution = pd.read_csv(file_path.format('char'), index_col=0)
     syntactic_distribution = pd.read_csv(file_path.format('syn'), index_col=0)
     word_distribution = pd.read_csv(file_path.format('word'), index_col=0)
@@ -92,10 +92,12 @@ def train_individual_model(author: str, feature: str, appendix: str, samples: di
 def train_intermediate_models(samples: dict, labels: list[str], appendix: str) -> dict:
     interm_results = {'char': [], 'syn': [], 'word': []}
     for feature in ['char', 'syn', 'word']:
+        feature_names = samples[feature].columns.tolist()
         models = [train_individual_model(author, feature, appendix, samples, labels) for author in set(labels)]
         for iterrow in samples[feature].iterrows():
             interm_results[feature].append(
-                [model.predict_proba(iterrow[1].values.reshape(1, -1))[0][1] for model in models])
+                [model.predict_proba(pd.DataFrame(
+                    [iterrow[1].values], columns=feature_names))[0][1] for model in models])
         interm_results[feature] = fit_normalize_interm_results(f"{feature}{appendix}", interm_results[feature])
     return interm_results
 
@@ -111,6 +113,6 @@ def train_stylometry(samples: dict, labels: list[str], appendix: str) -> None:
     interm_results = train_intermediate_models(samples, labels, appendix)
     for feature, results in interm_results.items():
         train_final_model(feature, appendix, results, labels)
-    combined_features = [char + syn + word for char, syn, word in interm_results.values()]
+    combined_features = [char + syn + word for char, syn, word in zip(*interm_results.values())]
     train_final_model("style", appendix, combined_features, labels)
     print("TRAINING DONE!")
