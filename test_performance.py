@@ -6,7 +6,7 @@ import os.path
 import requests
 import numpy as np
 from misc.mock_database import TestDatabase, GermanTestDatabase
-from misc.tem_helpers import get_tecm
+from misc.tem_helpers import get_tegm
 from misc.logger import printProgressBar
 from stylometry.classifier import predict_author, used_authors
 from main import get_prediction
@@ -36,7 +36,7 @@ def eval_argugpt():
             continue
         total += 1
         style = predict_author(row[3])
-        tecm = get_tecm([row[3]], drop_invalids=False)[0]
+        tecm = get_tegm([row[3]], drop_invalids=False)[0]
         if np.all(np.isnan(tecm)):
             print("\nTEM processing error, skipping...")
             total -= 1
@@ -129,7 +129,7 @@ if __name__ == '__main__':
             if len(article) > 120000:
                 article = article[:120000]
             style_prediction = predict_author(article, file_appendix='_german' if args.german else '')
-            tecm = get_tecm([article], drop_invalids=False)[0]
+            tecm = get_tegm([article], drop_invalids=False)[0]
             if np.all(np.isnan(tecm)):
                 print("\nTEM processing error, skipping...")
                 total_count -= 1

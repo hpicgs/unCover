@@ -1,5 +1,6 @@
-from definitions import DATABASE_AUTHORS_PATH, DATABASE_FILES_PATH, DATABASE_GEN_PATH, DATABASE_TEST_PATH, DATABASE_GERMAN_PATH, DATABASE_GERMAN_TEST_PATH
-import yaml, os
+from definitions import DATABASE_FILES_PATH
+import yaml
+import os
 
 
 class MockDatabase:
@@ -15,157 +16,46 @@ class MockDatabase:
         try:
             with open(self.path, 'r') as mock_db:
                 return yaml.safe_load(mock_db.read())
-        except:
+        except FileNotFoundError:
             return list()
 
 
-class DatabaseAuthorship:
-    __db = MockDatabase(DATABASE_AUTHORS_PATH)
+class Database:
+    def __init__(self, path):
+        self.__db = MockDatabase(path)
 
-    @staticmethod
-    def get_authors():
-        articles = DatabaseAuthorship.__db.get_data()
-        authors = list()
-        for article in articles:
-            for author in article['author'].split(','):
-                if author not in authors and article['text'] is not None:
-                    authors.append(author)
-        return authors
+    def get_labels(self):
+        articles = self.__db.get_data()
+        return {label for article in articles
+                for label in article['label'].split(',') if article['text'] is not None}
 
-    @staticmethod
-    def get_articles_by_author(author):
-        articles = DatabaseAuthorship.__db.get_data()
-        return [
-            {
-                'author': article['author'].split(','),
-                'source': article['source'],
-                'text': article['text']
-            }
-            for article in articles if author in article['author'].split(',') and article['text'] is not None
-            ]
+    def get_all_articles(self):
+        articles = self.__db.get_data()
+        return [article for article in articles if article['text'] is not None]
 
-    @staticmethod
-    def insert_article(text, source, author):
-        data = DatabaseAuthorship.__db.get_data()
-        if data == [] or data is None:
-            data = [{'source': source, 'text': text, 'author': author}]
-            DatabaseAuthorship.__db.write_data(data)
-        elif not any([source == article['source'] for article in data]):
-            data.append({'source': source, 'text': text, 'author': author})
-            DatabaseAuthorship.__db.write_data(data)
-
-    @staticmethod
-    def replace_data(data):
-        DatabaseAuthorship.__db.write_data(data)
-
-
-class DatabaseGenArticles:
-    __db = MockDatabase(DATABASE_GEN_PATH)
-
-    @staticmethod
-    def get_authors():
-        articles = DatabaseGenArticles.__db.get_data()
-        return {
-            method for article in articles
-            for method in article['method'].split(',') if article['text'] is not None}
-
-    @staticmethod
-    def get_articles_by_author(method):
-        articles = DatabaseGenArticles.__db.get_data()
-        return [article for article in articles if
-                method in article['method'].split(',') and article['text'] is not None]
-
-    @staticmethod
-    def insert_article(text, source, method):
-        data = DatabaseGenArticles.__db.get_data()
-        if data == [] or data is None:
-            data = []
-        data.append({'source': source, 'text': text, 'method': method})
-        DatabaseGenArticles.__db.write_data(data)
-
-    @staticmethod
-    def replace_data(data):
-        DatabaseGenArticles.__db.write_data(data)
-
-
-class TestDatabase:
-    __db = MockDatabase(DATABASE_TEST_PATH)
-
-    @staticmethod
-    def get_all_articles_sorted_by_methods():
-        articles = TestDatabase.__db.get_data()
-        return {label: [article['text'] for article in articles if
-                        label in article['label'].split(',') and article['text'] is not None]
-                for label in [l for a in articles for l in a['label'].split(',')]
-                }
-
-    @staticmethod
-    def get_all_sources_sorted_by_methods():
-        articles = TestDatabase.__db.get_data()
-        return {label: [article['source'] for article in articles if
-                        label in article['label'].split(',') and article['source'] is not None]
-                for label in [l for a in articles for l in a['label'].split(',')]
-                }
-
-    @staticmethod
-    def insert_article(text, source, label):
-        data = TestDatabase.__db.get_data()
-        if data == [] or data is None:
-            data = []
-        data.append({'source': source, 'text': text, 'label': label})
-        TestDatabase.__db.write_data(data)
-
-
-class GermanDatabase:
-    __db = MockDatabase(DATABASE_GERMAN_PATH)
-
-    @staticmethod
-    def get_authors():
-        articles = GermanDatabase.__db.get_data()
-        return {
-            label for article in articles
-            for label in article['label'].split(',') if article['text'] is not None}
-
-    @staticmethod
-    def get_articles_by_author(label):
-        articles = GermanDatabase.__db.get_data()
+    def get_articles_by_label(self, label):
+        articles = self.__db.get_data()
         return [article for article in articles if
                 label in article['label'].split(',') and article['text'] is not None]
 
-    @staticmethod
-    def insert_article(text, source, label):
-        data = GermanDatabase.__db.get_data()
-        if data == [] or data is None:
-            data = [{'source': source, 'text': text, 'label': label}]
-            GermanDatabase.__db.write_data(data)
-        elif not any([source == article['source'] for article in data]):
-            data.append({'source': source, 'text': text, 'label': label})
-            GermanDatabase.__db.write_data(data)
-
-
-class GermanTestDatabase:
-    __db = MockDatabase(DATABASE_GERMAN_TEST_PATH)
-
-    @staticmethod
-    def get_all_articles_sorted_by_methods():
-        articles = GermanTestDatabase.__db.get_data()
+    def get_all_articles_sorted_by_labels(self):
+        articles = self.__db.get_data()
         return {label: [article['text'] for article in articles if
                         label in article['label'].split(',') and article['text'] is not None]
-                for label in [l for a in articles for l in a['label'].split(',')]
-                }
+                for label in [l for a in articles for l in a['label'].split(',')]}
 
-    @staticmethod
-    def get_all_sources_sorted_by_methods():
-        articles = GermanTestDatabase.__db.get_data()
-        return {label: [article['source'] for article in articles if
-                        label in article['label'].split(',') and article['source'] is not None]
-                for label in [l for a in articles for l in a['label'].split(',')]
-                }
+    def get_all_sources(self):
+        articles = self.__db.get_data()
+        return {article['source'] for article in articles if article['source'] is not None}
 
-    @staticmethod
-    def insert_article(text, source, label):
-        data = GermanTestDatabase.__db.get_data()
+    def insert_article(self, text, source, label):
+        data = self.__db.get_data()
         if data == [] or data is None:
-            data = []
-        data.append({'source': source, 'text': text, 'label': label})
-        GermanTestDatabase.__db.write_data(data)
+            data = [{'source': source, 'text': text, 'label': label}]
+            self.__db.write_data(data)
+        elif not any([source == article['source'] and label == article['label'] for article in data]):
+            data.append({'source': source, 'text': text, 'label': label})
+            self.__db.write_data(data)
+
+    def replace_data(self, data):
+        self.__db.write_data(data)
