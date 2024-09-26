@@ -10,8 +10,10 @@ Detailed information about unCover can be found in the following publication:
 
 ![Teaser](https://drive.google.com/uc?export=download&id=1DU9HwazIUGxoFdI5cJ-liW3Q_-a-QV6G)
 
-Our datasets and pre-trained models can be found in 
-[Google Drive](https://drive.google.com/drive/folders/1fMZgGC2Bnp5K-ZoANXB_S0AI02akye_c?usp=drive_link).
+[![DOI:](https://zenodo.org/badge/DOI/10.5281/zenodo.11393299.svg)](https://doi.org/10.5281/zenodo.11393299) 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11393019.svg)](https://doi.org/10.5281/zenodo.11393019)
+
+Our datasets and pre-trained models can be found on Zenodo through the batches above.
 Please note that for copyright reasons we removed the plain text of the scraped 
 news articles and only left the metadata and the generated texts in the dataset files.
 
