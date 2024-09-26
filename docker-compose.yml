@@ -5,18 +5,18 @@ services:
     ports:
       - "8501:8501"
     networks:
-      - internal
+      - uncover-internal
     depends_on:
       - term-distance
     stdin_open: true
     tty: true
+
   term-distance:
     image: lucasliebe/uncover-termdistance
-    expose:
-      - 8000
+    ports:
+      - "8000:8000"
     networks:
-      - internal
+      - uncover-internal
 
 networks:
-  internal:
-    driver: bridge
+  uncover-internal:

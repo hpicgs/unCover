@@ -1,5 +1,6 @@
 # Builder image
-FROM lucasliebe/uncover-training as builder
+FROM lucasliebe/uncover-training AS builder
+COPY .env /app/unCover/.env
 
 # prepare term-distance server
 RUN conda create -n tem-term-distance python=3.8.19
@@ -16,8 +17,8 @@ FROM continuumio/miniconda3
 LABEL authors="lucasliebe"
 
 COPY --from=builder /app /app
-COPY --from=builder /opt/conda /opt/conda
 COPY --from=builder /root/gensim-data /root/gensim-data
+COPY --from=builder /opt/conda/envs /opt/conda/envs
 
 WORKDIR /app/unCover
-CMD cd tem/term-distance && conda run -n tem-term-distance ./run.sh & sleep 1; cd /app/unCover && sleep 10 && conda run -n unCover streamlit run main.py
+CMD ["sh", "-c", "cd tem/term-distance && conda run -n tem-term-distance ./run.sh & sleep 1; cd /app/unCover && sleep 10 && conda run --no-capture-output -n unCover streamlit run main.py"]

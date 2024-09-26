@@ -24,14 +24,16 @@ fi
 STYLOMETRY_DIR=`ls | grep 'stylometry'`
 if [ -z "$STYLOMETRY_DIR" ]; then
     echo "Downloading Stylometry models"
+    mkdir 'stylometry'
     curl -o $DOWNLOAD_FILE -L "https://drive.google.com/uc?export=download&id=101zoikmBJ0EFdVD0spNCGrt7puv_1YQQ"
-    unzip $DOWNLOAD_FILE
+    unzip $DOWNLOAD_FILE -d 'stylometry/'
     rm $DOWNLOAD_FILE
 fi
 TEM_DIR=`ls | grep 'teg_metrics'`
 if [ -z "$TEM_DIR" ]; then
     echo "Downloading TEG metrics models"
+    mkdir 'teg_metrics'
     curl -o $DOWNLOAD_FILE -L "https://drive.google.com/uc?export=download&id=15NpVneM9u58YeGm6rV7IfmQsvbSsM9tk"
-    unzip $DOWNLOAD_FILE
+    unzip $DOWNLOAD_FILE -d 'teg_metrics/'
     rm $DOWNLOAD_FILE
 fi

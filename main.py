@@ -19,7 +19,7 @@ from definitions import ROOT_DIR
 
 
 def __models_thread():
-    proc = subprocess.run([os.path.join(ROOT_DIR, 'prepare_models')], capture_output=True)
+    proc = subprocess.run([os.path.join(ROOT_DIR, 'deployment', 'prepare_models')], capture_output=True)
     if proc.returncode != 0:
         print(proc.stdout.decode())
     # we ignore exit code 2 because we might be waiting for another process to
@@ -124,7 +124,7 @@ if __name__ == '__main__':
 
     col1, col2 = st.columns([3, 1])
     col1.title("Welcome at unCover")
-    col2.image(Image.open('./.database/unCover.png'), width=100)
+    col2.image(Image.open('./.streamlit/unCover.png'), width=100)
     st.write(
         " \nHere you can analyze a news article on topics and writing style to get further insights on whether this "
         "text might have been written by an AI. This system was developed at Hasso-Plattner-Institute. For more "
