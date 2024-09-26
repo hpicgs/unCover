@@ -48,7 +48,7 @@ def optimize_tegm(data: dict, labels: list, appendix: str, args: argparse.Namesp
 
 
 def handle_invalids(s: list[npt.NDArray[np.float64]], l: list[str]) -> Tuple[list[npt.NDArray[np.float64]], list[str]]:
-    invalid_indices = [i for i, sample in enumerate(s) if np.all(np.isnan(s))]
+    invalid_indices = [i for i, sample in enumerate(s) if np.all(np.isnan(sample))]
     for i in reversed(invalid_indices):
         del s[i]
         del l[i]
