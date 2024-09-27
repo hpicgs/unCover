@@ -20,7 +20,7 @@ news articles and only left the metadata and the generated texts in the dataset 
 ## Prerequisites
 
 
-If you want to run uncover locally without docker, please make sure
+If you want to run unCover locally without Docker, please make sure
 you have the following packages installed and working on your machine:
 - Anaconda or Miniconda
 - Java (Runtime Environment is sufficient)
@@ -28,10 +28,10 @@ you have the following packages installed and working on your machine:
 
 ## Setup
 
-To set up this project with docker-compose, run the following command
+To set up this project with docker compose, run the following command
 
 ```sh
-docker-compose up
+docker compose up
 ```
 
 Inside the training container, whenever you want to run any of the following scripts, 
@@ -49,7 +49,7 @@ used models will greatly benefit performance and is required to achieve good res
 When modifying the code, you can use the Dockerfiles in /deployment to re-build the containers.
 
 Alternatively if you are only interested in running the web interface you can use the dedicated 
-docker container from Docker Hub: `docker pull lucasliebe/uncover:latest`.
+Docker container from Docker Hub: `docker pull lucasliebe/uncover:latest`.
 
 ## Usage
 
