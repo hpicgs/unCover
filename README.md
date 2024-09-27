@@ -10,16 +10,17 @@ Detailed information about unCover can be found in the following publication:
 
 ![Teaser](https://drive.google.com/uc?export=download&id=1DU9HwazIUGxoFdI5cJ-liW3Q_-a-QV6G)
 
-An interactive example deployment of unCover can be found at 
-[uncover.lucasliebe.de](https://uncover.lucasliebe.de).
-Our datasets and pre-trained models can be found in 
-[Google Drive](https://drive.google.com/drive/folders/1fMZgGC2Bnp5K-ZoANXB_S0AI02akye_c?usp=drive_link).
+Dataset: [![DOI:](https://zenodo.org/badge/DOI/10.5281/zenodo.11393299.svg)](https://doi.org/10.5281/zenodo.11393299) 
+Pre-trained Models: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11393019.svg)](https://doi.org/10.5281/zenodo.11393019)
+
+Our datasets and pre-trained models can be found on Zenodo through the batches above.
 Please note that for copyright reasons we removed the plain text of the scraped 
 news articles and only left the metadata and the generated texts in the dataset files.
 
 ## Prerequisites
 
-Before you can use the installation script as described below, please make sure
+
+If you want to run unCover locally without Docker, please make sure
 you have the following packages installed and working on your machine:
 - Anaconda or Miniconda
 - Java (Runtime Environment is sufficient)
@@ -27,30 +28,28 @@ you have the following packages installed and working on your machine:
 
 ## Setup
 
-To set up this project to run on your own machine, run the following command
+To set up this project with docker compose, run the following command
 
 ```sh
-sh <(curl -s https://raw.githubusercontent.com/hpicgs/unCover/main/install.sh)
+docker compose up
 ```
 
-This will download and install all requirements to an
-[Anaconda](https://www.anaconda.com) environment.
-
-Then, whenever you want to run any of the following scripts, make sure you first
-activate the environment with
+Inside the training container, whenever you want to run any of the following scripts, 
+make sure you first activate the environment with.
 
 ```sh
 conda activate unCover
 ```
 
 To take full advantage of all capabilities in this repository you should fill out 
-all the information in `.env.example` and save it as `.env`. OpenAI-credentials are
+all the information in `.env.example` and save it as `.env`. The credentials are
 only required for generation, however, fine-tuning the confidence thresholds to the 
 used models will greatly benefit performance and is required to achieve good results.
 
-Alternatively if you are only interested as running the web interface you can use
-the provided docker container for a quick deployment. It can be built yourself using 
-the Dockerfile or pulled from Docker Hub: `docker pull lucasliebe/uncover:latest`.
+When modifying the code, you can use the Dockerfiles in /deployment to re-build the containers.
+
+Alternatively if you are only interested in running the web interface you can use the dedicated 
+Docker container from Docker Hub: `docker pull lucasliebe/uncover:latest`.
 
 ## Usage
 
@@ -63,7 +62,7 @@ Third, you can use the datasets to re-train and/ or test the unCover models.
 
 To run and try out unCover in its base configuration follow the setup guide and run
 
-```
+```sh
 streamlit run main.py
 ```
 
@@ -81,8 +80,8 @@ collects hundreds of articles for a single person.
 
 Query mode is very simple and will fetch news from Google News depending on the query:
 
-```shell
-python3 generate_authorized_articles_dataset.py --query <your_query>
+```sh
+python3 generate_dataset.py --mode human --queries <query1,query2>
 ```
 
 #### Dataset mode
@@ -90,22 +89,19 @@ python3 generate_authorized_articles_dataset.py --query <your_query>
 Dataset mode is quicker and has higher output but takes a bit more work to set up. 
 For one, every news publication has their own way of listing articles by
 author, therefore a helper functions is required for every single
-publication. At the moment, dataset mode only works for TheGuardian.
+publication. At the moment, dataset mode only works for TheGuardian and N-tv.
 
 Here is a practical example for dataset mode:
 
-```shell
-python3 generate_authorized_articles_dataset.py \
-    --dataset \
-    --publication theguardian.com \
-    --author https://www.theguardian.com/profile/<author name> \
-    --narticles 300
+```sh
+python3 generate_dataset.py --mode human \
+    --publication <theguardian|n-tv> \
+    --author <author name> \
 ```
 
-The publication argument will activate dataset creation for TheGuardian, you
-should provide the URL of theguardian.com here. The author argument is the most
-important one - you need to provide the (full) URL of your specific author's
-personal page on theguardian.com, where all their articles are listed.
+The publication argument will set the website to collect articles from. The author argument 
+is the most important one - you need to provide the URL appendix (only the last part of the url) 
+of your specific author's personal page, where all their articles are listed.
 
 ### Generating news articles
 
@@ -113,20 +109,24 @@ To generate news articles, we also scrape news from Google News, but this time
 we use the query as context for a generative language model. The model will
 then generate a new article based on this context. The following could is an example command:
 
-```shell
-python3 generate_news_articles.py --queries <your queries> --grover base --gpt3
+```sh
+python3 generate_dataset.py --mode ai --queries <query1,query2> --models <gpt4,gemini,...>
 ```
 
 ### Training the models
 
-New models can be trained using `train_authors.py` for stylometry models and 
-`train_tem_metrics.py` for the TEM based prediction model. The commandline options
+New models can be trained using `training.py` for stylometry models and 
+for the TEGM based prediction model. The commandline options
 for these scripts are documented in the scripts themselves. If your dataset is stored
 in a different location, please modify `definitions.py` accordingly.
 
 ### Recreating the test performance
 
-Including both former methods, `generate_test_dataset.py` has been used to create
+Including both generation methods, 
+```sh
+python3 generate_dataset.py --mode test --queries <query1,query2> --models <gpt4,gemini,...>
+```
+has been used to create
 the test dataset including both human authors and AI models as text sources.
 
 After creating this test dataset or using the provided dataset, 

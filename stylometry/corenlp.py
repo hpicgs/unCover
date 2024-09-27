@@ -9,7 +9,7 @@ import urllib.error
 from definitions import ROOT_DIR
 
 def __corenlp_thread():
-    proc = subprocess.run([os.path.join(ROOT_DIR, 'corenlp')], capture_output=True)
+    proc = subprocess.run([os.path.join(ROOT_DIR, 'deployment', 'corenlp')], capture_output=True)
     if proc.returncode != 0:
         print(proc.stdout.decode())
     # we ignore exit code 2 because we might be waiting for another process to
