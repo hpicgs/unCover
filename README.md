@@ -1,4 +1,4 @@
-# unCover
+# unCover [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.13845956.svg)](https://doi.org/10.5281/zenodo.13845956)
 
 Detailed information about unCover can be found in the following publication:
 
